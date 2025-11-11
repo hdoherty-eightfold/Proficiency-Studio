@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills Proficiency Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/dark-mode-overrides.css">
+    <script>
+        // Enable dark mode support in Tailwind
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        /* Custom dark mode styles */
+        .dark .bg-pattern {
+            background-image: linear-gradient(45deg, #1f2937 25%, transparent 25%),
+                            linear-gradient(-45deg, #1f2937 25%, transparent 25%),
+                            linear-gradient(45deg, transparent 75%, #1f2937 75%),
+                            linear-gradient(-45deg, transparent 75%, #1f2937 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 transition-colors duration-200">
+            <div class="max-w-7xl mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        <i class="fas fa-graduation-cap text-blue-600 dark:text-blue-400 mr-2"></i>
+                        Skills Proficiency Generator
+                    </h1>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="toggleDarkMode()" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            <i id="dark-mode-icon" class="fas fa-moon mr-1"></i>
+                            <span id="dark-mode-text">Dark</span>
+                        </button>
+                        <button onclick="showSystemInfo()" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            <i class="fas fa-info-circle mr-1"></i>System Info
+                        </button>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">LangChain Pipeline for Skills Proficiency Assessment</p>
+            </div>
+        </header>
+
+        <!-- Tabs -->
+        <div class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 transition-colors duration-200">
+            <div class="max-w-7xl mx-auto px-4">
+                <nav class="flex space-x-8">
+                    <button onclick="switchTab('workflow')" id="tab-workflow" class="tab-button py-4 px-1 border-b-2 border-blue-500 dark:border-blue-400 font-medium text-sm text-blue-600 dark:text-blue-400">
+                        <i class="fas fa-chart-bar mr-2"></i>Skills Proficiency Workflow
+                    </button>
+                    <button onclick="switchTab('api-explorer')" id="tab-api-explorer" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600">
+                        <i class="fas fa-flask mr-2"></i>API Explorer
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            
+            <!-- Skills Proficiency Workflow Tab -->
+            <div id="tab-content-workflow" class="tab-content">
+            
+            <!-- Step 1: Authentication -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 transition-colors duration-200">
+                <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                    <span class="bg-blue-600 text-white px-3 py-1 rounded-full mr-2">Step 1</span>
+                    Authenticate with Eightfold API
+                </h2>
+                
+                <!-- Sandbox Environment Selector -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-server mr-1"></i>Select Sandbox Environment
+                    </label>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <select id="sandbox-selector" onchange="loadSandboxCredentials(); syncStep6EnvironmentWithStep1();" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Select a Sandbox --</option>
+                            <option value="tm-sandbox">TM Sandbox (USAA)</option>
+                            <option value="adoherty-demo">ADoherty Demo</option>
+                            <option value="custom">Custom Configuration</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <button onclick="openConfigManager()" class="flex-1 bg-gray-600 text-white px-3 py-2 rounded-lg hover:bg-gray-700 text-sm">
+                                <i class="fas fa-cog mr-1"></i>Manage Configs
+                            </button>
+                            <button onclick="addNewSandbox()" class="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 text-sm">
+                                <i class="fas fa-plus mr-1"></i>Add Config
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Credentials Input -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="api-eightfold-username" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="username@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="api-eightfold-password" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="password">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="testEightfoldAuth()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-key mr-2"></i>Authenticate
+                        </button>
+                    </div>
+                </div>
+                <!-- Status Display -->
+                <div id="auth-status-display" class="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i id="auth-status-icon" class="fas fa-circle text-gray-400 mr-2"></i>
+                            <span id="auth-status-text" class="text-sm text-gray-700 dark:text-gray-300">Not authenticated</span>
+                        </div>
+                        <!-- Auth Response JSON Display -->
+                        <div id="auth-response-container" class="hidden">
+                            <button onclick="toggleAuthResponse()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-sm">
+                                <i class="fas fa-microscope mr-2"></i>View Auth Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Fetch JIE Roles and Extract Skills -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 transition-colors duration-200">
+                <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                    <span class="bg-green-600 text-white px-3 py-1 rounded-full mr-2">Step 2</span>
+                    Fetch JIE Roles from Eightfold API
+                </h2>
+                <div class="text-sm text-gray-600 mb-4">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    This calls <code class="bg-gray-100 px-2 py-1 rounded">GET https://apiv2.eightfold.ai/api/v2/JIE/roles</code> to fetch job roles, then automatically extracts skills from the <code>skillProficiencies</code> field.
+                </div>
+                <!-- Skills Count Summary -->
+                <div class="mb-3 p-2 bg-blue-50 rounded">
+                    <span class="text-sm font-semibold">Total Skills Extracted: </span>
+                    <span id="total-skills-count" class="text-blue-600 font-bold text-lg">0</span>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Controls -->
+                    <div>
+                        <!-- Primary Actions -->
+                        <div class="mb-3">
+                            <button onclick="extractSkillsForAssessment()" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 mb-2">
+                                <i class="fas fa-cloud-download-alt mr-2"></i>Fetch JIE Roles
+                            </button>
+                        </div>
+                        
+                        <!-- Secondary Actions -->
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <button onclick="showAllSkillsPopup()" class="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700">
+                                <i class="fas fa-list mr-1"></i>View Skills
+                            </button>
+                            <button onclick="toggleSkillsDebug()" class="bg-indigo-600 text-white px-3 py-2 rounded text-sm hover:bg-indigo-700">
+                                <i class="fas fa-flask mr-1"></i>API Debug
+                            </button>
+                        </div>
+                        
+                        <!-- Status Display -->
+                        <div id="skills-count-display" class="text-sm text-gray-600 bg-gray-50 rounded p-2">
+                            No skills loaded
+                        </div>
+                        <!-- Hidden debug container -->
+                        <div id="skills-debug-json" class="hidden"></div>
+                    </div>
+                    <!-- Skills List Preview -->
+                    <div>
+                        <div class="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto">
+                            <div id="extracted-skills-preview" class="text-sm text-gray-700">
+                                Skills will appear here after loading...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Step 3: Configure Proficiency Levels -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 transition-colors duration-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                        <span class="bg-purple-600 text-white px-3 py-1 rounded-full mr-2">Step 3</span>
+                        Configure Proficiency Assessment
+                    </h2>
+                    <button onclick="toggleProficiencySection()" class="text-gray-600 hover:text-gray-800">
+                        <i id="proficiency-toggle-icon" class="fas fa-chevron-up text-xl"></i>
+                    </button>
+                </div>
+                <div id="proficiency-section-content">
+                    <!-- Proficiency Levels, Levels, and Skills Assessment Limit -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <!-- Proficiencies -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700">Proficiencies</label>
+                                <span class="text-xs text-green-600" id="proficiency-auto-status">
+                                    <i class="fas fa-check-circle mr-1"></i>Auto-loaded
+                                </span>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div id="proficiency-levels-container" class="space-y-2">
+                                    <div class="proficiency-level-item flex items-center">
+                                        <span class="w-4 h-4 bg-gray-400 rounded-full mr-2 flex items-center justify-center text-xs font-bold text-white">1</span>
+                                        <input type="text" class="proficiency-input flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" value="1" onchange="onProficiencyChange()">
+                                        <button onclick="removeProficiencyLevel(this)" class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="proficiency-level-item flex items-center">
+                                        <span class="w-4 h-4 bg-blue-400 rounded-full mr-2 flex items-center justify-center text-xs font-bold text-white">2</span>
+                                        <input type="text" class="proficiency-input flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" value="2" onchange="onProficiencyChange()">
+                                        <button onclick="removeProficiencyLevel(this)" class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="proficiency-level-item flex items-center">
+                                        <span class="w-4 h-4 bg-yellow-400 rounded-full mr-2 flex items-center justify-center text-xs font-bold text-white">3</span>
+                                        <input type="text" class="proficiency-input flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" value="3" onchange="onProficiencyChange()">
+                                        <button onclick="removeProficiencyLevel(this)" class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="proficiency-level-item flex items-center">
+                                        <span class="w-4 h-4 bg-green-400 rounded-full mr-2 flex items-center justify-center text-xs font-bold text-white">4</span>
+                                        <input type="text" class="proficiency-input flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" value="4" onchange="onProficiencyChange()">
+                                        <button onclick="removeProficiencyLevel(this)" class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="proficiency-level-item flex items-center">
+                                        <span class="w-4 h-4 bg-purple-400 rounded-full mr-2 flex items-center justify-center text-xs font-bold text-white">5</span>
+                                        <input type="text" class="proficiency-input flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" value="5" onchange="onProficiencyChange()">
+                                        <button onclick="removeProficiencyLevel(this)" class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button onclick="addProficiencyLevel()" class="mt-3 text-sm text-blue-600 hover:text-blue-700">
+                                    <i class="fas fa-plus-circle mr-1"></i>Add Level
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Levels -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Levels</label>
+                                <span class="text-xs text-green-600" id="levels-auto-status">
+                                    <i class="fas fa-check-circle mr-1"></i>Auto-loaded
+                                </span>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div id="levels-container" class="space-y-2">
+                                    <div class="level-item flex items-center">
+                                        <span class="w-4 h-4 bg-gray-400 rounded-full mr-2"></span>
+                                        <input type="text" class="level-input flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" value="Beginner" onchange="onLevelChange()">
+                                        <button onclick="removeLevel(this)" class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="level-item flex items-center">
+                                        <span class="w-4 h-4 bg-blue-400 rounded-full mr-2"></span>
+                                        <input type="text" class="level-input flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" value="Foundational" onchange="onLevelChange()">
+                                        <button onclick="removeLevel(this)" class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="level-item flex items-center">
+                                        <span class="w-4 h-4 bg-yellow-400 rounded-full mr-2"></span>
+                                        <input type="text" class="level-input flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" value="Intermediate" onchange="onLevelChange()">
+                                        <button onclick="removeLevel(this)" class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="level-item flex items-center">
+                                        <span class="w-4 h-4 bg-green-400 rounded-full mr-2"></span>
+                                        <input type="text" class="level-input flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" value="Advanced" onchange="onLevelChange()">
+                                        <button onclick="removeLevel(this)" class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="level-item flex items-center">
+                                        <span class="w-4 h-4 bg-purple-400 rounded-full mr-2"></span>
+                                        <input type="text" class="level-input flex-1 px-2 py-1 text-sm border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" value="Expert" onchange="onLevelChange()">
+                                        <button onclick="removeLevel(this)" class="ml-2 text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button onclick="addLevel()" class="mt-3 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
+                                    <i class="fas fa-plus-circle mr-1"></i>Add Level
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Skill Assessment Limit (Third Column) -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Skill Assessment Limit</label>
+                                <span class="text-xs text-blue-600 dark:text-blue-400" id="skill-limit-display">
+                                    <i class="fas fa-list mr-1"></i>50 skills
+                                </span>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                <div class="mb-3">
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Maximum Skills to Assess</label>
+                                    <input type="range" id="skill-limit-slider" min="10" max="500" step="10" value="50" 
+                                           class="w-full" 
+                                           oninput="updateSkillLimitDisplay(this.value)" 
+                                           onchange="onSkillLimitChange(this.value)">
+                                    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        <span>10</span>
+                                        <span id="skill-limit-value">50</span>
+                                        <span id="skill-limit-max">500</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-xs text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-info-circle text-blue-500 mr-1"></i>
+                                    Limiting skills improves processing speed and reduces API costs. Large skill sets are automatically batched.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- LangChain Prompt Template (Below Tables) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">LangChain Prompt Template</label>
+                        <div class="flex gap-2 mb-2">
+                            <button onclick="insertSkillsIntoPrompt()" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                <i class="fas fa-plus-circle mr-1"></i>Insert Skills
+                            </button>
+                            <button onclick="insertProficiencyLevelsIntoPrompt()" class="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+                                <i class="fas fa-plus-circle mr-1"></i>Insert Proficiencies
+                            </button>
+                            <button onclick="insertLevelsIntoPrompt()" class="text-sm bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700">
+                                <i class="fas fa-plus-circle mr-1"></i>Insert Levels
+                            </button>
+                            <button onclick="insertBothIntoPrompt()" class="text-sm bg-orange-600 text-white px-3 py-1 rounded hover:bg-orange-700">
+                                <i class="fas fa-layer-group mr-1"></i>Insert Both
+                            </button>
+                            <button onclick="savePromptTemplate()" class="text-sm bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">
+                                <i class="fas fa-save mr-1"></i>Save Prompt
+                            </button>
+                            <button onclick="resetPromptTemplate()" class="text-sm bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700">
+                                <i class="fas fa-undo mr-1"></i>Reset
+                            </button>
+                            <button onclick="copyPromptToClipboard()" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                <i class="fas fa-copy mr-1"></i>Copy
+                            </button>
+                        </div>
+                        <textarea id="assessment-prompt" class="w-full h-64 p-3 text-xs font-mono bg-gray-50 border rounded-lg focus:ring-2 focus:ring-purple-500" 
+                            placeholder="Prompt template will be loaded here..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: LLM Configuration & LangChain Pipeline -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 transition-colors duration-200">
+                <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                    <span class="bg-indigo-600 text-white px-3 py-1 rounded-full mr-2">Step 4</span>
+                    Configure LLM & LangChain Pipeline
+                </h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- LLM Provider Configuration -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                            <i class="fas fa-robot text-indigo-500 mr-2"></i>LLM Provider Configuration
+                        </h3>
+                        
+                        <!-- Provider Selection -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Provider</label>
+                            <select id="llm-provider" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" onchange="onProviderChange()">
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Anthropic (Claude)</option>
+                                <option value="google">Google (Gemini)</option>
+                                <option value="grok">Grok</option>
+                                <option value="kimi">Kimi (Moonshot)</option>
+                                <option value="deepseek">DeepSeek</option>
+                            </select>
+                        </div>
+                        
+                        <!-- API Key Method -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">API Key Method</label>
+                            <select id="key-method" class="w-full px-3 py-2 border rounded-lg" onchange="toggleKeyMethod()">
+                                <option value="preset">Use Preset Key</option>
+                                <option value="custom">Enter Custom Key</option>
+                            </select>
+                            
+                            <!-- Preset Keys -->
+                            <div id="preset-keys-section">
+                                <div class="grid grid-cols-4 gap-2 mt-2">
+                                    <button onclick="loadPresetKey('openai')" class="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700">
+                                        <i class="fas fa-robot mr-1"></i>OpenAI
+                                    </button>
+                                    <button onclick="loadPresetKey('google')" class="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700">
+                                        <i class="fas fa-brain mr-1"></i>Gemini
+                                    </button>
+                                    <button onclick="loadPresetKey('kimi')" class="bg-purple-600 text-white px-3 py-2 rounded text-sm hover:bg-purple-700">
+                                        <i class="fas fa-moon mr-1"></i>Kimi
+                                    </button>
+                                    <button onclick="loadPresetKey('deepseek')" class="bg-indigo-600 text-white px-3 py-2 rounded text-sm hover:bg-indigo-700">
+                                        <i class="fas fa-search mr-1"></i>DeepSeek
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Custom Key Input -->
+                            <div id="custom-key-section" class="hidden mt-2">
+                                <div class="flex gap-2">
+                                    <input type="password" id="llm-api-key" class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Enter API key">
+                                    <button onclick="toggleKeyVisibility()" class="px-3 py-2 border rounded-lg hover:bg-gray-50">
+                                        <i id="key-visibility-icon" class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Test Key and Save Config Buttons -->
+                        <div class="mb-4">
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="testLLMKey()" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700">
+                                    <i class="fas fa-download mr-1"></i>Pull available LLM models
+                                </button>
+                                <button onclick="saveCurrentKey()" class="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700">
+                                    <i class="fas fa-save mr-1"></i>Save Config
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Model Selection -->
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                            <select id="llm-model-select" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                <option value="">Test API key first...</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Test Results -->
+                        <div id="llm-test-results" class="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <div class="text-gray-500 dark:text-gray-400 text-sm">
+                                <i class="fas fa-arrow-up mr-1"></i>Click "Test Key" above to validate your API key
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- LangChain Pipeline Configuration -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                            <i class="fas fa-link text-purple-500 mr-2"></i>LangChain Pipeline
+                        </h3>
+                        
+                        <!-- Advanced Configuration Button -->
+                        <div class="mb-4">
+                            <button onclick="showLangChainConfigPopup()" class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                                <i class="fas fa-cog mr-2"></i>Configure LangChain Pipeline
+                            </button>
+                        </div>
+                        
+                        <!-- Pipeline Status -->
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <div class="text-sm font-medium text-purple-900 mb-1">Pipeline Status</div>
+                            <div id="pipeline-status" class="text-xs text-purple-700">
+                                <i class="fas fa-check-circle text-green-600 mr-1"></i>Ready to configure
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">
+                                Temperature: <span class="font-semibold">1.0</span> (Optimal for assessment)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: LangChain Execute -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 transition-colors duration-200">
+                <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                    <span class="bg-red-600 text-white px-3 py-1 rounded-full mr-2">Step 5</span>
+                    LangChain Execute for Proficiency and Levels Population
+                </h2>
+                
+                <!-- Run Assessment Button -->
+                <div class="mb-6">
+                    <button onclick="runLangChainAssessment()" class="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 text-lg font-semibold">
+                        <i class="fas fa-play-circle mr-2"></i>Run Skills Assessment
+                    </button>
+                    <div id="assessment-status" class="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">
+                        <span class="text-yellow-600"><i class="fas fa-info-circle mr-1"></i>Step 1: Please authenticate with Eightfold API first</span>
+                    </div>
+                </div>
+                
+                <!-- Comprehensive Progress Tracking -->
+                <div id="assessment-progress-section" class="space-y-6">
+                    
+                    <!-- Overall Progress Bar -->
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-md font-semibold text-gray-800 dark:text-white">
+                                <i class="fas fa-chart-line text-blue-600 mr-2"></i>Overall Assessment Progress
+                            </h4>
+                            <span id="overall-progress-percent" class="text-sm font-bold text-blue-600">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3 mb-2">
+                            <div id="overall-progress-bar" class="bg-blue-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div id="overall-progress-details" class="text-sm text-gray-600 dark:text-gray-400">
+                            Waiting for assessment to start - Configure steps 1-4 first
+                        </div>
+                    </div>
+                    
+                    <!-- Batch Processing Status -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Batch Progress -->
+                        <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                            <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-3">
+                                <i class="fas fa-layer-group text-purple-600 mr-2"></i>Batch Processing
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-300">Current Batch:</span>
+                                    <span id="current-batch-display" class="text-sm font-semibold text-gray-500">Ready</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-300">Batch Completion:</span>
+                                    <span id="batch-completion-rate" class="text-sm font-semibold text-gray-500">Pending</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-300">Skills per Batch:</span>
+                                    <span id="skills-per-batch-display" class="text-sm font-semibold">50</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                    <div id="batch-progress-bar" class="bg-purple-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Skills Processing Status -->
+                        <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                            <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-3">
+                                <i class="fas fa-cogs text-orange-600 mr-2"></i>Skills Processing
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-300">Processed Skills:</span>
+                                    <span id="processed-skills-count" class="text-sm font-semibold text-gray-500">Ready</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-300">Success Rate:</span>
+                                    <span id="skills-success-rate" class="text-sm font-semibold text-gray-500">Pending</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-300">Failed Skills:</span>
+                                    <span id="failed-skills-count" class="text-sm font-semibold text-gray-500">None</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                    <div id="skills-progress-bar" class="bg-orange-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Performance Metrics -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-gray-500 mb-1" id="processing-speed">Ready</div>
+                            <div class="text-sm text-green-800 dark:text-green-400">Skills/min</div>
+                        </div>
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-gray-500 mb-1" id="elapsed-time">Waiting</div>
+                            <div class="text-sm text-blue-800 dark:text-blue-400">Elapsed Time</div>
+                        </div>
+                        <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-gray-500 mb-1" id="estimated-time-remaining">Pending</div>
+                            <div class="text-sm text-purple-800 dark:text-purple-400">ETA</div>
+                        </div>
+                    </div>
+                    
+                    <!-- JSON Request/Response Viewers -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- LangChain Request -->
+                        <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                            <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-3">
+                                <i class="fas fa-upload text-blue-600 mr-2"></i>LangChain Request JSON
+                            </h4>
+                            <div id="langchain-request-viewer" class="bg-gray-50 dark:bg-gray-800 border rounded-lg p-3 min-h-[200px] max-h-[400px] overflow-auto font-mono text-sm">
+                                <div class="text-gray-500 dark:text-gray-400">Request will appear here after execution</div>
+                            </div>
+                        </div>
+                        
+                        <!-- LangChain Response -->
+                        <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                            <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-3">
+                                <i class="fas fa-download text-green-600 mr-2"></i>LangChain Response JSON
+                            </h4>
+                            <div id="langchain-response-viewer" class="bg-gray-50 dark:bg-gray-800 border rounded-lg p-3 min-h-[200px] max-h-[400px] overflow-auto font-mono text-sm">
+                                <div class="text-gray-500 dark:text-gray-400">Response will appear here after execution</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Real-time Status Log -->
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-3">
+                            <i class="fas fa-list-alt text-gray-600 mr-2"></i>Processing Log
+                        </h4>
+                        <div id="processing-log" class="bg-white dark:bg-gray-800 border rounded-lg p-3 h-32 overflow-y-auto text-sm font-mono">
+                            <div class="text-gray-500 dark:text-gray-400">Assessment not started...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Assessment Results Summary -->
+                    <div id="assessment-results-summary" class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 hidden">
+                        <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                            <i class="fas fa-chart-bar text-green-600 mr-2"></i>Assessment Complete
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <div class="text-2xl font-bold text-green-600" id="total-assessed-skills">0</div>
+                                <div class="text-sm text-green-800 dark:text-green-400">Skills Assessed</div>
+                            </div>
+                            <div class="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <div class="text-2xl font-bold text-blue-600" id="total-processing-time">0:00</div>
+                                <div class="text-sm text-blue-800 dark:text-blue-400">Total Time</div>
+                            </div>
+                            <div class="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                                <div class="text-2xl font-bold text-purple-600" id="average-confidence">0.0</div>
+                                <div class="text-sm text-purple-800 dark:text-purple-400">Avg Confidence</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <button onclick="proceedToResults()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                                <i class="fas fa-arrow-right mr-2"></i>View Detailed Results
+                            </button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Step 6: Role & Skills Management -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 transition-colors duration-200">
+                <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                    <span class="bg-indigo-600 text-white px-3 py-1 rounded-full mr-2">Step 6</span>
+                    Update Roles with Proficiency Levels in Target Environment
+                </h2>
+                
+                <!-- Environment & Authentication Section -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-globe text-blue-600 mr-2"></i>Target Environment Configuration
+                    </h3>
+                    
+                    <!-- Use Same Environment Selector as Step 1 -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Target Environment:</label>
+                        <select id="step6-environment" onchange="checkStep6Authentication(); populateStep6Credentials();" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                            <!-- Options will be populated from sandbox configs -->
+                        </select>
+                    </div>
+                    
+                    <!-- Authentication Status -->
+                    <div id="step6-auth-status" class="mt-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-600">
+                        <div id="step6-auth-message" class="text-sm">
+                            <i class="fas fa-info-circle mr-1"></i>Checking authentication status...
+                        </div>
+                    </div>
+                    
+                    <!-- Re-authenticate Section (Hidden by default) -->
+                    <div id="step6-reauth-section" class="hidden mt-4">
+                        <div class="border-t pt-4">
+                            <h4 class="text-md font-semibold text-gray-700 dark:text-gray-200 mb-3">Need Different Credentials?</h4>
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username:</label>
+                                    <input type="text" id="step6-username" placeholder="Enter username" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password:</label>
+                                    <input type="password" id="step6-password" placeholder="Enter password" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white" />
+                                </div>
+                                <div class="flex items-end">
+                                    <button onclick="authenticateStep6()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                        <i class="fas fa-sign-in-alt mr-2"></i>Re-authenticate
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Primary Role Operations -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-database text-blue-600 mr-2"></i>Role Update Operations
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                        <button onclick="updateRolesToSource()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 text-lg font-semibold disabled:opacity-50" id="update-source-btn">
+                            <i class="fas fa-sync-alt mr-2"></i>Update to Source
+                        </button>
+                        <button onclick="createRolesToTarget()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50" id="create-target-btn">
+                            <i class="fas fa-plus-circle mr-2"></i>Create to New Environment
+                        </button>
+                        <button onclick="wipeProficiencies()" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 disabled:opacity-50" id="wipe-btn">
+                            <i class="fas fa-eraser mr-2"></i>Wipe Proficiencies
+                        </button>
+                    </div>
+                    
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        <p class="mb-2"><strong>Update to Source:</strong> Updates existing roles in the same environment with new proficiencies</p>
+                        <p class="mb-2"><strong>Create to New:</strong> Creates new roles with proficiencies in a different environment</p>
+                        <p><strong>Wipe Proficiencies:</strong> Removes all proficiency levels and skills from selected roles</p>
+                    </div>
+                </div>
+                
+                <!-- JSON Request/Response Display -->
+                <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                        <i class="fas fa-code text-purple-600 mr-2"></i>API Request/Response Monitor
+                    </h3>
+                    
+                    <!-- Request JSON -->
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Request JSON:</label>
+                            <div class="space-x-2">
+                                <button onclick="copyRequestJson()" class="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">
+                                    <i class="fas fa-copy mr-1"></i>Copy
+                                </button>
+                                <button onclick="downloadRequestJson()" class="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">
+                                    <i class="fas fa-download mr-1"></i>Download
+                                </button>
+                            </div>
+                        </div>
+                        <pre id="step6-request-json" class="bg-gray-900 text-green-400 p-3 rounded-lg text-xs overflow-auto max-h-64 font-mono">// No request sent yet</pre>
+                    </div>
+                    
+                    <!-- Response JSON -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Response JSON:</label>
+                            <div class="space-x-2">
+                                <button onclick="copyResponseJson()" class="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">
+                                    <i class="fas fa-copy mr-1"></i>Copy
+                                </button>
+                                <button onclick="downloadResponseJson()" class="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">
+                                    <i class="fas fa-download mr-1"></i>Download
+                                </button>
+                            </div>
+                        </div>
+                        <pre id="step6-response-json" class="bg-gray-900 text-blue-400 p-3 rounded-lg text-xs overflow-auto max-h-64 font-mono">// No response received yet</pre>
+                    </div>
+                </div>
+                
+                <!-- Operation Status & Logs -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-3">
+                        <i class="fas fa-list-alt text-gray-600 mr-2"></i>Operation Status
+                    </h3>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mb-3">
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm">Operation Progress</span>
+                            <span id="step6-progress-percent" class="text-sm font-bold">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                            <div id="step6-progress-bar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Operation Log -->
+                    <div id="step6-operation-log" class="bg-white dark:bg-gray-800 border rounded-lg p-3 h-32 overflow-y-auto text-sm font-mono">
+                        <div class="text-gray-500 dark:text-gray-400">No operations performed yet...</div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        <i class="fas fa-shield-alt text-blue-600 mr-2"></i>Authentication Details
+                    </h2>
+                    <button onclick="closeAuthModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Request Details -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-paper-plane text-blue-500 mr-1"></i>Request Details
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div><span class="font-medium">Endpoint:</span> <span id="modal-auth-endpoint" class="text-gray-600">/api/test/auth</span></div>
+                            <div><span class="font-medium">Method:</span> <span class="text-green-600">POST</span></div>
+                            <div><span class="font-medium">Username:</span> <span id="modal-auth-username" class="text-gray-600"></span></div>
+                            <div><span class="font-medium">Status Code:</span> <span id="modal-auth-status-code" class="font-bold"></span></div>
+                            <div><span class="font-medium">Status:</span> <span id="modal-auth-status" class="text-gray-600"></span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bearer Token Section -->
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-key text-green-500 mr-1"></i>Bearer Token
+                        </h3>
+                        <div class="break-all text-xs font-mono bg-white p-2 rounded border border-green-200">
+                            <span id="modal-auth-token">Loading...</span>
+                            <button onclick="copyToken()" class="ml-2 text-blue-600 hover:text-blue-700" title="Copy token">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Request JSON Section -->
+                <div class="mt-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-upload text-indigo-500 mr-1"></i>Request JSON
+                    </h3>
+                    <div id="auth-request-json-viewer"></div>
+                </div>
+                
+                <!-- Response JSON Section -->
+                <div class="mt-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-download text-purple-500 mr-1"></i>Response JSON
+                    </h3>
+                    <div id="auth-response-json-viewer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- API Test Modal -->
+    <div id="api-test-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        <i class="fas fa-vial text-purple-600 mr-2"></i>API Key Test Results
+                    </h2>
+                    <button onclick="closeApiTestModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Test Results -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <!-- Provider Info -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-server text-blue-500 mr-1"></i>Provider Information
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div><span class="font-medium">Provider:</span> <span id="test-provider" class="text-gray-600"></span></div>
+                            <div><span class="font-medium">Endpoint:</span> <span id="test-endpoint" class="text-gray-600"></span></div>
+                            <div><span class="font-medium">Status:</span> <span id="test-status" class="font-bold"></span></div>
+                            <div><span class="font-medium">Response Time:</span> <span id="test-response-time" class="text-gray-600"></span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Available Models -->
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-robot text-green-500 mr-1"></i>Available Models
+                        </h3>
+                        <div id="test-models-list" class="space-y-1 text-sm max-h-32 overflow-y-auto">
+                            <!-- Models will be listed here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- API Response -->
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-code text-indigo-500 mr-1"></i>API Response
+                    </h3>
+                    <div id="api-test-response-viewer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LangChain Config Modal -->
+    <div id="langchain-config-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        <i class="fas fa-link text-yellow-600 mr-2"></i>Advanced LangChain Configuration
+                    </h2>
+                    <button onclick="closeLangChainConfigModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="border-b mb-4">
+                    <div class="flex space-x-4">
+                        <button onclick="switchLangChainTab('config')" class="langchain-tab px-4 py-2 text-sm font-medium border-b-2 border-yellow-500 text-yellow-600" data-tab="config">
+                            Configuration
+                        </button>
+                        <button onclick="switchLangChainTab('chain')" class="langchain-tab px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800" data-tab="chain">
+                            Chain Types
+                        </button>
+                        <button onclick="switchLangChainTab('memory')" class="langchain-tab px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800" data-tab="memory">
+                            Memory Management
+                        </button>
+                        <button onclick="switchLangChainTab('docs')" class="langchain-tab px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800" data-tab="docs">
+                            Documentation
+                        </button>
+                        <button onclick="switchLangChainTab('json')" class="langchain-tab px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800" data-tab="json">
+                            JSON Config
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Configuration Tab -->
+                <div id="langchain-tab-config" class="langchain-tab-content">
+                    <div class="grid grid-cols-2 gap-6">
+                        <!-- Model Parameters -->
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-700 mb-3">
+                                <i class="fas fa-sliders-h text-blue-500 mr-2"></i>Model Parameters
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Temperature</label>
+                                    <input type="range" id="config-temperature" min="0" max="2" step="0.1" value="0.7" class="w-full">
+                                    <div class="flex justify-between text-xs text-gray-500">
+                                        <span>Deterministic (0)</span>
+                                        <span id="config-temp-value">0.7</span>
+                                        <span>Creative (2)</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Top P</label>
+                                    <input type="range" id="config-top-p" min="0" max="1" step="0.05" value="1" class="w-full">
+                                    <span class="text-xs text-gray-500">Nucleus sampling: <span id="config-top-p-value">1.0</span></span>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Frequency Penalty</label>
+                                    <input type="range" id="config-freq-penalty" min="-2" max="2" step="0.1" value="0" class="w-full">
+                                    <span class="text-xs text-gray-500">Reduce repetition: <span id="config-freq-value">0</span></span>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Presence Penalty</label>
+                                    <input type="range" id="config-pres-penalty" min="-2" max="2" step="0.1" value="0" class="w-full">
+                                    <span class="text-xs text-gray-500">Encourage new topics: <span id="config-pres-value">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Output Configuration -->
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-700 mb-3">
+                                <i class="fas fa-file-export text-green-500 mr-2"></i>Output Configuration
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Max Tokens</label>
+                                    <input type="number" id="config-max-tokens" value="2000" min="50" max="8000" class="w-full px-2 py-1 border rounded">
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Stop Sequences</label>
+                                    <input type="text" id="config-stop-seq" placeholder='["\\n\\n", "END"]' class="w-full px-2 py-1 border rounded">
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Output Format</label>
+                                    <select id="config-output-format" class="w-full px-2 py-1 border rounded">
+                                        <option value="json">JSON</option>
+                                        <option value="markdown">Markdown</option>
+                                        <option value="plain">Plain Text</option>
+                                        <option value="structured">Structured Data</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Response Validation</label>
+                                    <select id="config-validation" class="w-full px-2 py-1 border rounded">
+                                        <option value="none">None</option>
+                                        <option value="json-schema">JSON Schema</option>
+                                        <option value="pydantic">Pydantic Model</option>
+                                        <option value="custom">Custom Validator</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Settings -->
+                    <div class="mt-4 bg-blue-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-700 mb-3">
+                            <i class="fas fa-cogs text-purple-500 mr-2"></i>Advanced Settings
+                        </h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="text-sm font-medium text-gray-600">Retry Strategy</label>
+                                <select id="config-retry" class="w-full px-2 py-1 border rounded text-sm">
+                                    <option value="exponential">Exponential Backoff</option>
+                                    <option value="linear">Linear Retry</option>
+                                    <option value="none">No Retry</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-600">Cache TTL (seconds)</label>
+                                <input type="number" id="config-cache-ttl" value="3600" class="w-full px-2 py-1 border rounded text-sm">
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-600">Request Timeout (ms)</label>
+                                <input type="number" id="config-timeout" value="30000" class="w-full px-2 py-1 border rounded text-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chain Types Tab -->
+                <div id="langchain-tab-chain" class="langchain-tab-content hidden">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-yellow-50 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-link text-yellow-600 mr-2"></i>Available Chain Types
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="p-3 bg-white rounded border cursor-pointer hover:border-yellow-500" onclick="selectChainType('llm')">
+                                    <h4 class="font-medium">LLM Chain</h4>
+                                    <p class="text-sm text-gray-600">Simple prompt → LLM → output chain</p>
+                                </div>
+                                <div class="p-3 bg-white rounded border cursor-pointer hover:border-yellow-500" onclick="selectChainType('sequential')">
+                                    <h4 class="font-medium">Sequential Chain</h4>
+                                    <p class="text-sm text-gray-600">Multiple chains executed in sequence</p>
+                                </div>
+                                <div class="p-3 bg-white rounded border cursor-pointer hover:border-yellow-500" onclick="selectChainType('map_reduce')">
+                                    <h4 class="font-medium">Map-Reduce Chain</h4>
+                                    <p class="text-sm text-gray-600">Process items individually then combine</p>
+                                </div>
+                                <div class="p-3 bg-white rounded border cursor-pointer hover:border-yellow-500" onclick="selectChainType('router')">
+                                    <h4 class="font-medium">Router Chain</h4>
+                                    <p class="text-sm text-gray-600">Route to different chains based on input</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-info-circle text-blue-500 mr-2"></i>Chain Configuration
+                            </h3>
+                            <div id="chain-config-details" class="text-sm text-gray-600">
+                                Select a chain type to see configuration options
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Memory Tab -->
+                <div id="langchain-tab-memory" class="langchain-tab-content hidden">
+                    <div class="space-y-4">
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-700 mb-3">
+                                <i class="fas fa-memory text-green-600 mr-2"></i>Memory Configuration
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Memory Type</label>
+                                    <select id="config-memory-type" class="w-full px-2 py-1 border rounded">
+                                        <option value="none">No Memory</option>
+                                        <option value="buffer">Conversation Buffer</option>
+                                        <option value="summary">Conversation Summary</option>
+                                        <option value="buffer_window">Buffer Window</option>
+                                        <option value="entity">Entity Memory</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Max Memory Tokens</label>
+                                    <input type="number" id="config-memory-tokens" value="1000" class="w-full px-2 py-1 border rounded">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-700 mb-2">Memory Features</h3>
+                            <div class="space-y-2 text-sm">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="memory-persist" class="mr-2">
+                                    <span>Persist memory across sessions</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="memory-compress" class="mr-2">
+                                    <span>Auto-compress old conversations</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="memory-context" class="mr-2">
+                                    <span>Include context in memory</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Documentation Tab -->
+                <div id="langchain-tab-docs" class="langchain-tab-content hidden">
+                    <div class="prose max-w-none">
+                        <h3 class="text-lg font-semibold mb-3">LangChain Pipeline Documentation</h3>
+                        
+                        <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                            <h4 class="font-medium mb-2">Quick Start</h4>
+                            <p class="text-sm text-gray-700">
+                                LangChain is a framework for developing applications powered by language models. 
+                                This configuration panel allows you to customize how the LangChain pipeline processes 
+                                your skills assessment requests.
+                            </p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="border-l-4 border-yellow-500 pl-4">
+                                <h4 class="font-medium">Temperature</h4>
+                                <p class="text-sm text-gray-600">
+                                    Controls randomness in responses. Lower values (0-0.5) make output more focused and deterministic. 
+                                    Higher values (0.5-2.0) make output more creative and varied.
+                                </p>
+                            </div>
+                            
+                            <div class="border-l-4 border-green-500 pl-4">
+                                <h4 class="font-medium">Chain Types</h4>
+                                <p class="text-sm text-gray-600">
+                                    Different chain types are optimized for different tasks. Use LLM Chain for simple prompts, 
+                                    Sequential for multi-step processing, and Map-Reduce for batch operations.
+                                </p>
+                            </div>
+                            
+                            <div class="border-l-4 border-purple-500 pl-4">
+                                <h4 class="font-medium">Memory Management</h4>
+                                <p class="text-sm text-gray-600">
+                                    Memory allows the model to maintain context across interactions. Buffer memory stores raw history, 
+                                    while summary memory condenses it to save tokens.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 bg-gray-100 rounded-lg p-4">
+                            <h4 class="font-medium mb-2">Best Practices</h4>
+                            <ul class="text-sm text-gray-700 space-y-1">
+                                <li>• Use temperature 0.7 for balanced creativity and consistency</li>
+                                <li>• Enable caching for repeated queries to reduce API costs</li>
+                                <li>• Use JSON output format for structured data extraction</li>
+                                <li>• Implement retry strategies for production deployments</li>
+                                <li>• Monitor token usage to optimize costs</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- JSON Configuration Tab -->
+                <div id="langchain-tab-json" class="langchain-tab-content hidden">
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold mb-3">Current LangChain Configuration (JSON)</h3>
+                        
+                        <div class="bg-gray-900 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Live Configuration</span>
+                                <button onclick="refreshJsonConfig()" class="text-xs text-blue-400 hover:text-blue-300">
+                                    <i class="fas fa-sync mr-1"></i>Refresh
+                                </button>
+                            </div>
+                            <div id="langchain-json-viewer" class="text-sm text-green-400 font-mono h-64 overflow-auto">
+                                <pre id="langchain-json-content">Loading configuration...</pre>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <h4 class="font-medium mb-2 text-blue-800">
+                                <i class="fas fa-info-circle mr-1"></i>Configuration Explanation
+                            </h4>
+                            <div class="text-sm text-blue-700 space-y-1">
+                                <p><strong>provider:</strong> The LLM service being used (openai, anthropic, etc.)</p>
+                                <p><strong>model:</strong> Specific model selected for the provider</p>
+                                <p><strong>temperature:</strong> Randomness in responses (0.0 = deterministic, 1.0+ = creative)</p>
+                                <p><strong>max_tokens:</strong> Maximum length of response</p>
+                                <p><strong>response_format:</strong> Output format (only supported by some models)</p>
+                                <p><strong>proficiency_levels:</strong> Available skill levels for assessment</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 rounded-lg p-4">
+                            <h4 class="font-medium mb-2 text-yellow-800">
+                                <i class="fas fa-lightbulb mr-1"></i>How LangChain Works
+                            </h4>
+                            <div class="text-sm text-yellow-700">
+                                <ol class="list-decimal list-inside space-y-1">
+                                    <li>Configuration is applied to create LangChain provider instance</li>
+                                    <li>Prompt template is formatted with your skills and proficiency levels</li>
+                                    <li>LLM chain processes the prompt using your configuration</li>
+                                    <li>Response is parsed and returned as structured assessment data</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Apply Button -->
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button onclick="resetLangChainConfig()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                        Reset to Defaults
+                    </button>
+                    <button onclick="applyLangChainConfig()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
+                        Apply Configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills Debug Modal -->
+    <div id="skills-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" onclick="if(event.target === this) closeSkillsModal()">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        <i class="fas fa-database text-green-600 mr-2"></i>JIE Roles API Debug
+                    </h2>
+                    <button id="skills-modal-close-btn" onclick="closeSkillsModal()" class="text-gray-500 hover:text-gray-700 p-2 cursor-pointer" title="Close">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Request Details -->
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-upload text-blue-500 mr-1"></i>API Request
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="font-medium">Endpoint:</span> 
+                            <span id="modal-skills-endpoint" class="text-gray-600">/api/skills/extract</span>
+                        </div>
+                        <div>
+                            <span class="font-medium">Source:</span> 
+                            <span id="modal-skills-source" class="text-gray-600">Eightfold API</span>
+                        </div>
+                        <div>
+                            <span class="font-medium">Count:</span> 
+                            <span id="modal-skills-count" class="text-gray-600">0</span>
+                        </div>
+                        <div>
+                            <span class="font-medium">Status:</span> 
+                            <span id="modal-skills-status" class="text-gray-600">Pending</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Request JSON -->
+                <div class="mb-4">
+                    <h3 class="font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-code text-indigo-500 mr-1"></i>Request JSON
+                    </h3>
+                    <div id="skills-request-json-viewer"></div>
+                </div>
+                
+                <!-- Response JSON -->
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-download text-green-500 mr-1"></i>Response JSON
+                    </h3>
+                    <div id="skills-response-json-viewer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration Manager Modal -->
+    <div id="config-manager-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        <i class="fas fa-cogs text-blue-600 mr-2"></i>Manage Sandbox Configurations
+                    </h2>
+                    <button onclick="closeConfigManager()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border p-2 text-left">Name</th>
+                                <th class="border p-2 text-left">API URL</th>
+                                <th class="border p-2 text-left">Username</th>
+                                <th class="border p-2 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="config-table-body">
+                            <!-- Configurations will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button onclick="addNewSandbox()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-plus mr-2"></i>Add New Configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Configuration Modal -->
+    <div id="config-edit-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">
+                        <i class="fas fa-edit text-green-600 mr-2"></i>
+                        <span id="config-modal-title">Add New Configuration</span>
+                    </h2>
+                    <button onclick="closeConfigEditModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="config-edit-form" onsubmit="saveConfiguration(event); return false;">
+                    <input type="hidden" id="config-id" value="">
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Configuration Name</label>
+                        <input type="text" id="config-name" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="e.g., Production Sandbox">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">API URL</label>
+                        <input type="url" id="config-api-url" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="https://apiv2.eightfold.ai">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="config-username" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="username@example.com">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="config-password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="password">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+                        <textarea id="config-description" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Additional notes about this configuration"></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end gap-2">
+                        <button type="button" onclick="closeConfigEditModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-save mr-2"></i>Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- LangChain Config Popup Modal -->
+    <div id="langchain-config-popup" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" onclick="if(event.target === this) closeLangChainConfigPopup()">
+        <div class="bg-white rounded-lg shadow-xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        <i class="fas fa-link text-yellow-600 mr-2"></i>LangChain Configuration
+                    </h2>
+                    <button onclick="closeLangChainConfigPopup()" class="text-gray-500 hover:text-gray-700 p-2" title="Close">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Current Configuration Display -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Live JSON Config -->
+                    <div class="bg-gray-900 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-300">
+                                <i class="fas fa-code text-green-400 mr-1"></i>Current Configuration (JSON)
+                            </span>
+                            <button onclick="refreshConfigPopupJson()" class="text-xs text-blue-400 hover:text-blue-300">
+                                <i class="fas fa-sync mr-1"></i>Refresh
+                            </button>
+                        </div>
+                        <div id="config-popup-json-viewer" class="text-sm text-green-400 font-mono max-h-96 overflow-auto">
+                            <pre id="config-popup-json-content" class="whitespace-pre-wrap">Loading...</pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Pipeline Settings -->
+                    <div class="space-y-4">
+                        <h3 class="font-semibold text-gray-700 mb-3">
+                            <i class="fas fa-sliders-h text-blue-500 mr-2"></i>Pipeline Configuration
+                        </h3>
+                        
+                        <!-- Provider & Model -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-blue-50 rounded-lg p-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Provider</label>
+                                <select id="popup-provider" class="w-full px-2 py-1 border rounded text-sm" onchange="onPopupProviderChange()">
+                                    <option value="openai">OpenAI</option>
+                                    <option value="anthropic">Anthropic</option>
+                                    <option value="google">Google</option>
+                                    <option value="grok">Grok</option>
+                                </select>
+                            </div>
+                            
+                            <div class="bg-blue-50 rounded-lg p-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Model</label>
+                                <select id="popup-model" class="w-full px-2 py-1 border rounded text-sm" onchange="onPopupModelChange()">
+                                    <option value="">Select model...</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Temperature & Max Tokens -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">
+                                    Temperature
+                                    <i class="fas fa-question-circle text-gray-400 ml-1" title="Controls randomness in responses. Lower values (0-0.5) make output more focused and deterministic. Higher values (0.5-2.0) make output more creative and varied."></i>
+                                </label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="range" id="popup-temperature" min="0" max="2" step="0.1" value="1.0" 
+                                           class="flex-1" onchange="onPopupSettingChange()" oninput="document.getElementById('popup-temp-value').textContent = this.value">
+                                    <span id="popup-temp-value" class="text-xs font-mono">1.0</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>Precise</span>
+                                    <span>Creative</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">
+                                    Max Tokens
+                                    <i class="fas fa-question-circle text-gray-400 ml-1" title="Maximum number of tokens (words/subwords) the model can generate in its response. Higher values allow longer responses but cost more."></i>
+                                </label>
+                                <input type="number" id="popup-max-tokens" value="2000" min="50" max="8000" 
+                                       class="w-full px-2 py-1 border rounded text-sm" onchange="onPopupSettingChange()">
+                            </div>
+                        </div>
+                        
+                        <!-- Top P & Chain Type -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">
+                                    Top P
+                                    <i class="fas fa-question-circle text-gray-400 ml-1" title="Nucleus sampling parameter. Controls diversity by considering only tokens with cumulative probability up to this value. 1.0 considers all tokens, lower values increase focus."></i>
+                                </label>
+                                <input type="number" id="popup-top-p" value="1.0" min="0" max="1" step="0.1" 
+                                       class="w-full px-2 py-1 border rounded text-sm" onchange="onPopupSettingChange()">
+                                <div class="text-xs text-gray-500 mt-1">Nucleus sampling</div>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">
+                                    Chain Type
+                                    <i class="fas fa-question-circle text-gray-400 ml-1" title="Determines how LangChain processes your request. Simple LLM: Direct prompt-response. Sequential: Multi-step processing. Map-Reduce: Parallel processing for large datasets."></i>
+                                </label>
+                                <select id="popup-chain-type" class="w-full px-2 py-1 border rounded text-sm" onchange="onPopupSettingChange()">
+                                    <option value="llm">Simple LLM</option>
+                                    <option value="sequential">Sequential</option>
+                                    <option value="map_reduce">Map-Reduce</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Output Parser & Memory -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">
+                                    Output Parser
+                                    <i class="fas fa-question-circle text-gray-400 ml-1" title="Defines how the model's response is parsed. JSON: Structured JSON output. Pydantic: Validated data models. Structured: Custom structured format."></i>
+                                </label>
+                                <select id="popup-output-parser" class="w-full px-2 py-1 border rounded text-sm" onchange="onPopupSettingChange()">
+                                    <option value="json">JSON</option>
+                                    <option value="pydantic">Pydantic</option>
+                                    <option value="structured">Structured</option>
+                                </select>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">
+                                    Memory
+                                    <i class="fas fa-question-circle text-gray-400 ml-1" title="Manages conversation context. None: No context retention. Buffer: Stores full conversation history. Summary: Condenses history to save tokens."></i>
+                                </label>
+                                <select id="popup-memory" class="w-full px-2 py-1 border rounded text-sm" onchange="onPopupSettingChange()">
+                                    <option value="none">None</option>
+                                    <option value="buffer">Buffer</option>
+                                    <option value="summary">Summary</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- JSON Format Support Info -->
+                        <div class="bg-yellow-50 rounded-lg p-3">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-info-circle text-yellow-600 mr-1"></i>
+                                <span class="text-sm font-medium text-yellow-800">Model Capabilities</span>
+                            </div>
+                            <div id="popup-json-support" class="text-xs text-yellow-700">
+                                Select a model to check capabilities...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex justify-between items-center">
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-clock mr-1"></i>Last updated: <span id="config-last-updated">Never</span>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="resetConfigPopup()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                            <i class="fas fa-undo mr-2"></i>Reset
+                        </button>
+                        <button onclick="applyConfigPopup()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-save mr-2"></i>Apply & Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Skills Popup Modal -->
+    <div id="all-skills-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" onclick="if(event.target === this) closeAllSkillsModal()">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        <i class="fas fa-list text-blue-600 mr-2"></i>All Extracted Skills
+                    </h2>
+                    <button onclick="closeAllSkillsModal()" class="text-gray-500 hover:text-gray-700 p-2" title="Close">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Skills Statistics -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <div class="text-sm font-medium text-blue-800">Total Skills</div>
+                        <div id="modal-total-skills" class="text-2xl font-bold text-blue-900">0</div>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-3">
+                        <div class="text-sm font-medium text-green-800">Unique Skills</div>
+                        <div id="modal-unique-skills" class="text-2xl font-bold text-green-900">0</div>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-3">
+                        <div class="text-sm font-medium text-purple-800">Data Source</div>
+                        <div id="modal-data-source" class="text-sm font-bold text-purple-900">Unknown</div>
+                    </div>
+                </div>
+                
+                <!-- Skills JSON Viewer -->
+                <div class="bg-gray-900 rounded-lg p-4 mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-300">
+                            <i class="fas fa-code text-green-400 mr-1"></i>Skills Data (JSON)
+                        </span>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadSkillsJSON()" class="text-xs text-blue-400 hover:text-blue-300">
+                                <i class="fas fa-download mr-1"></i>Download
+                            </button>
+                            <button onclick="copySkillsToClipboard()" class="text-xs text-green-400 hover:text-green-300">
+                                <i class="fas fa-copy mr-1"></i>Copy
+                            </button>
+                            <button onclick="refreshSkillsModal()" class="text-xs text-yellow-400 hover:text-yellow-300">
+                                <i class="fas fa-sync mr-1"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div id="skills-json-viewer" class="text-sm text-green-400 font-mono h-64 overflow-auto">
+                        <pre id="skills-json-content">No skills loaded</pre>
+                    </div>
+                </div>
+                
+                <!-- Skills Table View -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-700 mb-3">
+                        <i class="fas fa-table text-gray-500 mr-2"></i>Skills Table
+                    </h3>
+                    <div class="max-h-64 overflow-y-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-200 sticky top-0">
+                                <tr>
+                                    <th class="px-3 py-2 text-left">#</th>
+                                    <th class="px-3 py-2 text-left">Skill Name</th>
+                                    <th class="px-3 py-2 text-left">Proficiency</th>
+                                    <th class="px-3 py-2 text-left">Source</th>
+                                </tr>
+                            </thead>
+                            <tbody id="skills-table-body">
+                                <tr>
+                                    <td colspan="4" class="px-3 py-4 text-center text-gray-500">No skills to display</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex justify-between items-center mt-6">
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-clock mr-1"></i>Last updated: <span id="skills-last-updated">Never</span>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="clearAllSkills()" class="px-4 py-2 bg-red-200 text-red-700 rounded-lg hover:bg-red-300">
+                            <i class="fas fa-trash mr-2"></i>Clear All
+                        </button>
+                        <button onclick="reloadSkills()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            <i class="fas fa-sync mr-2"></i>Reload from API
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            </div> <!-- End of Skills Proficiency Workflow Tab -->
+            
+            <!-- API Explorer Tab -->
+            <div id="tab-content-api-explorer" class="tab-content hidden">
+                
+                <!-- Authentication Status Bar -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900 p-4 mb-6 transition-colors duration-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-key text-blue-600 dark:text-blue-400 mr-2"></i>
+                            <span class="font-medium dark:text-white">Authentication Status:</span>
+                            <span id="explorer-auth-status" class="ml-2 text-sm">
+                                <span class="text-red-600">Not authenticated</span>
+                            </span>
+                        </div>
+                        <button onclick="useWorkflowAuth()" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                            <i class="fas fa-link mr-1"></i>Use Workflow Auth
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- API Explorer Main Content -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Left Panel: Endpoint Selection -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-lg shadow-md p-4">
+                            <h3 class="font-bold text-lg mb-4">
+                                <i class="fas fa-list text-gray-600 mr-2"></i>API Endpoints
+                            </h3>
+                            
+                            <!-- Search -->
+                            <div class="mb-4">
+                                <input type="text" id="endpoint-search" placeholder="Search endpoints..." 
+                                    class="w-full px-3 py-2 border rounded-lg text-sm"
+                                    onkeyup="filterEndpoints(this.value)">
+                            </div>
+                            
+                            <!-- Endpoint Categories -->
+                            <div id="endpoint-categories" class="space-y-2 max-h-96 overflow-y-auto">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Middle Panel: Request Builder -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                            <h3 class="font-bold text-lg mb-4">
+                                <i class="fas fa-hammer text-gray-600 mr-2"></i>Request Builder
+                            </h3>
+                            
+                            <!-- Selected Endpoint -->
+                            <div class="mb-4 p-3 bg-gray-50 rounded">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span id="selected-method" class="px-2 py-1 text-xs font-bold text-white bg-gray-500 rounded">METHOD</span>
+                                        <span id="selected-endpoint" class="ml-2 font-mono text-sm">/api/endpoint</span>
+                                    </div>
+                                    <button onclick="copyAsCurl()" class="text-sm text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-copy mr-1"></i>Copy as cURL
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Parameters -->
+                            <div id="parameters-section" class="space-y-4">
+                                <!-- Path Parameters -->
+                                <div id="path-params" class="hidden">
+                                    <h4 class="font-medium text-sm mb-2">Path Parameters</h4>
+                                    <div id="path-params-inputs" class="space-y-2">
+                                        <!-- Dynamic inputs -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Query Parameters -->
+                                <div id="query-params" class="hidden">
+                                    <h4 class="font-medium text-sm mb-2">Query Parameters</h4>
+                                    <div id="query-params-inputs" class="space-y-2">
+                                        <!-- Dynamic inputs -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Request Body -->
+                                <div id="request-body" class="hidden">
+                                    <h4 class="font-medium text-sm mb-2">Request Body</h4>
+                                    <textarea id="request-body-input" rows="10" 
+                                        class="w-full px-3 py-2 border rounded-lg font-mono text-sm"
+                                        placeholder='{"key": "value"}'></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Execute Button -->
+                            <div class="mt-6">
+                                <button onclick="executeRequest()" id="execute-btn" 
+                                    class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-medium">
+                                    <i class="fas fa-play mr-2"></i>Execute Request
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Response Viewer -->
+                        <div class="bg-white rounded-lg shadow-md p-4">
+                            <h3 class="font-bold text-lg mb-4">
+                                <i class="fas fa-reply text-gray-600 mr-2"></i>Response
+                            </h3>
+                            
+                            <!-- Response Status -->
+                            <div id="response-status" class="mb-4 p-3 bg-gray-50 rounded hidden">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span id="response-status-code" class="font-bold">200 OK</span>
+                                        <span id="response-time" class="ml-3 text-sm text-gray-600">0ms</span>
+                                    </div>
+                                    <div class="space-x-2">
+                                        <button onclick="viewResponseHeaders()" class="text-sm text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-info-circle mr-1"></i>Headers
+                                        </button>
+                                        <button onclick="downloadResponse()" class="text-sm text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-download mr-1"></i>Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Response Body -->
+                            <div id="response-viewer-container">
+                                <!-- JSON Viewer will be initialized here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- LangChain API Documentation Query -->
+                <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                    <h3 class="font-bold text-lg mb-4">
+                        <i class="fas fa-robot text-purple-600 mr-2"></i>API Documentation Assistant
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                        <!-- LangChain Config -->
+                        <div class="lg:col-span-1">
+                            <button onclick="openApiDocConfig()" class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                                <i class="fas fa-cog mr-2"></i>Configure LangChain
+                            </button>
+                        </div>
+                        
+                        <!-- Query Input -->
+                        <div class="lg:col-span-2">
+                            <div class="flex gap-2">
+                                <input type="text" id="api-doc-query" 
+                                    placeholder="Ask about API endpoints, parameters, or how to use them..."
+                                    class="flex-1 px-3 py-2 border rounded-lg"
+                                    onkeypress="if(event.key === 'Enter') queryApiDocs()">
+                                <button onclick="queryApiDocs()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700">
+                                    <i class="fas fa-search mr-2"></i>Ask
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Query Response -->
+                    <div id="api-doc-response" class="hidden">
+                        <div class="border-t pt-4">
+                            <h4 class="font-medium mb-2">Response:</h4>
+                            <div id="api-doc-answer" class="bg-gray-50 rounded-lg p-4 text-sm">
+                                <!-- Response will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div> <!-- End of API Explorer Tab -->
+            
+        </div>
+    </div>
+
+    <script src="/static/js/dark-mode.js"></script>
+    <script src="/static/js/json-viewer.js"></script>
+    <script src="/static/js/assessment-history.js?v=1.0"></script>
+    <script src="/static/js/progress-monitor.js?v=1.1"></script>
+    <script src="/static/js/workflow.js?v=2.3"></script>
+    <script src="/static/js/step6-workflow.js?v=2.1"></script>
+    <script src="/static/js/step6-operations.js?v=1.0"></script>
+    <script src="/static/js/api-explorer.js"></script>
+    
+    <!-- Ensure Step 6 credentials are populated -->
+    <script>
+        // Simple function to ensure Step 6 fields are populated
+        function ensureStep6Populated() {
+            const dropdown = document.getElementById('step6-environment');
+            const username = document.getElementById('step6-username');
+            const password = document.getElementById('step6-password');
+            
+            if (dropdown && dropdown.value && window.sandboxConfigs) {
+                const config = window.sandboxConfigs[dropdown.value];
+                if (config && username && password) {
+                    if (!username.value) {
+                        username.value = config.username || '';
+                    }
+                    if (!password.value) {
+                        password.value = config.password || '';
+                    }
+                }
+            }
+        }
+        
+        // Run when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Run immediately and after delays
+            ensureStep6Populated();
+            setTimeout(ensureStep6Populated, 500);
+            setTimeout(ensureStep6Populated, 1000);
+            setTimeout(ensureStep6Populated, 2000);
+            
+            // Run whenever Step 6 becomes visible
+            const observer = new MutationObserver(function() {
+                const step6 = document.querySelector('[id*="step-6"]');
+                if (step6 && !step6.classList.contains('hidden')) {
+                    ensureStep6Populated();
+                }
+            });
+            
+            // Start observing
+            observer.observe(document.body, { 
+                attributes: true, 
+                subtree: true, 
+                attributeFilter: ['class', 'style'] 
+            });
+        });
+    </script>
+</body>
+</html>

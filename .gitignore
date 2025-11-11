@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Build outputs
+frontend/dist/
+frontend/build/
+backend/dist/
+*.egg-info/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# AI/ML specific
+*.pkl
+*.pickle
+*.h5
+*.pt
+*.pth
+model_cache/
+data/raw/
+data/processed/
+
+# API Keys and secrets (extra safety)
+config.json
+secrets.json
+api_keys.json
+
+# Coverage
+coverage/
+.coverage
+.nyc_output
+
+# Misc
+.cache/
+*.tgz
+*.tar.gz

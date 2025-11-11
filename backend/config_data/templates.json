@@ -1,0 +1,45 @@
+[
+  {
+    "id": "adoherty-demo",
+    "name": "ADoherty Demo Environment",
+    "description": "Standard ADoherty demo sandbox configuration",
+    "category": "sandbox",
+    "template_data": {
+      "name": "ADoherty Demo",
+      "description": "ADoherty Demo Environment",
+      "api_url": "https://apiv2.eightfold.ai",
+      "environment_type": "sandbox",
+      "username": "demo@eightfolddemo-adoherty.com",
+      "grant_type": "password"
+    },
+    "is_system": true
+  },
+  {
+    "id": "test-sandbox",
+    "name": "Test Sandbox",
+    "description": "Generic test sandbox configuration",
+    "category": "sandbox",
+    "template_data": {
+      "name": "Test Sandbox",
+      "description": "Test Environment",
+      "api_url": "https://apiv2.eightfold.ai",
+      "environment_type": "sandbox",
+      "grant_type": "password"
+    },
+    "is_system": true
+  },
+  {
+    "id": "production-template",
+    "name": "Production Template",
+    "description": "Production environment template (credentials required)",
+    "category": "production",
+    "template_data": {
+      "name": "Production",
+      "description": "Production Environment",
+      "api_url": "https://api.eightfold.ai",
+      "environment_type": "production",
+      "grant_type": "authorization_code"
+    },
+    "is_system": true
+  }
+]

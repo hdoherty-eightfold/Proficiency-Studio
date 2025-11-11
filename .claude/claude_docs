@@ -1,0 +1,155 @@
+# Proficiency Studio - Claude Code Configuration
+# AI-Powered Skills Proficiency Assessment System
+
+This file provides guidance to Claude Code when working with this repository.
+
+## Project Overview
+
+Proficiency Studio (formerly SkillsProfGen) is an AI-powered skills proficiency assessment system with a modern React frontend and FastAPI backend. The application integrates with Eightfold APIs to extract job roles, analyze resumes, and perform multi-method skills assessments using various LLM providers.
+
+## Development Commands
+
+### Frontend Development
+```bash
+cd frontend
+npm run dev          # Development server (runs on http://localhost:5173)
+npm run build        # Production build
+npm run lint         # ESLint linting
+npm run preview      # Preview production build
+```
+
+### Backend Development
+```bash
+cd backend
+python main.py       # Start FastAPI server (runs on http://localhost:8000)
+pip install -r requirements.txt  # Install dependencies
+pytest              # Run tests (when available)
+```
+
+### Concurrent Development
+Both frontend and backend should run simultaneously during development:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/docs
+
+## Architecture & Key Components
+
+### Backend Core Architecture (`backend/core/`)
+
+**Configuration Management (`config_storage.py`)**
+- `EightfoldEnvironment`: Pydantic model for environment configurations
+- `ConfigStorage`: JSON-based persistence for authentication environments
+- Supports multiple Eightfold environments (sandbox, production) with templates
+
+**Assessment Pipeline**
+- `langchain_service.py`: Multi-provider LLM integration (OpenAI, Anthropic, Google Gemini)
+- `rag_pipeline.py`: RAG-based skills analysis with sentence transformers and PyTorch
+- `llm_service.py`: Core LLM abstraction layer
+
+**Data Management**
+- `assessment_storage.py`: JSON-based assessment result persistence
+- `models.py`: Core data models (Skill, SkillProficiency, etc.)
+- `eightfold_client.py`: Eightfold API integration
+
+### Frontend Architecture (`frontend/src/`)
+
+**Main Application Flow**
+- `App.tsx`: Main application with sidebar navigation and step-based workflow
+- Multi-step process: Welcome → Authentication → Skills Extraction → Resume Upload → CSV Data → LLM Config → Assessment → Results
+
+**Key Components**
+- `AuthenticationManager.tsx`: Enterprise-grade authentication with environment management, connection testing, import/export
+- `SkillsExtractionAdvanced.tsx`: JIE roles fetching and skills extraction
+- `AssessmentAdvanced.tsx`: Multi-method assessment execution with real-time progress
+- `ResultsAdvanced.tsx`: Comprehensive results display with proficiency analysis
+
+**State Management**
+- React hooks and context for session management
+- `api.ts`: Centralized API service with session handling
+
+## Important Development Patterns
+
+### Authentication Flow
+1. **Environment Configuration**: Users select/configure Eightfold environments via `AuthenticationManager`
+2. **Connection Testing**: Real HTTP connectivity validation using httpx in backend
+3. **Credential Storage**: Secure environment configurations with JSON persistence
+4. **Session Management**: Frontend maintains session IDs for API continuity
+
+### Assessment Pipeline
+1. **Skills Extraction**: From Eightfold JIE roles or manual upload
+2. **Resume Processing**: Multi-format support with automatic skills extraction
+3. **Multi-Method Assessment**:
+   - Direct LLM (fast, structured prompts)
+   - RAG-Enhanced (context-aware with vector similarity)
+   - Python-based (rule-based keyword matching)
+4. **Real-time Progress**: WebSocket-style progress tracking during batch processing
+
+### API Integration Points
+- **Eightfold API**: OAuth authentication, JIE roles extraction, connection testing
+- **LLM Providers**: OpenAI, Anthropic, Google Gemini integration via LangChain
+- **Vector Processing**: sentence-transformers with PyTorch for semantic similarity
+
+## Configuration Requirements
+
+### Environment Variables (.env files needed)
+
+**Backend (.env)**
+```
+# Required for LLM providers
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=AI...
+
+# Required for Eightfold integration
+EIGHTFOLD_USERNAME=your_username
+EIGHTFOLD_PASSWORD=your_password
+
+# Performance tuning
+PYTORCH_DEVICE=auto
+SKILLS_BATCH_SIZE=100
+MAX_CONCURRENT_BATCHES=3
+```
+
+**Frontend (.env)**
+```
+VITE_API_URL=http://localhost:8000
+```
+
+### CORS Configuration
+Backend is pre-configured for development with CORS allowing:
+- localhost:5173, 5174, 5175, 5176 (Vite dev servers)
+- localhost:3000 (alternative dev server)
+
+## Data Persistence
+
+### Storage Mechanisms
+- **Environment Configurations**: `backend/config_data/environments.json` via `ConfigStorage`
+- **Assessment Results**: `backend/assessment_data/` via `AssessmentStorage`
+- **Session Management**: Frontend localStorage for session IDs
+
+### Key Storage Classes
+- `ConfigStorage`: Environment configurations with CRUD operations, import/export
+- `AssessmentStorage`: Assessment results with metadata and history
+
+## Common Issues & Solutions
+
+### Backend Startup Issues
+- **LangChain Dependencies**: If backend fails to start with Pydantic errors, check LangChain version compatibility
+- **Missing Dependencies**: Run `pip install -r requirements.txt` from backend directory
+
+### Authentication Issues
+- **Connection Testing**: Use the "Test Connection" button in AuthenticationManager to verify API connectivity
+- **Environment Configuration**: Check `config_data/environments.json` for proper environment setup
+
+### Performance Considerations
+- **Batch Processing**: Assessment processes skills in configurable batches (default: 100)
+- **Concurrency**: Controlled concurrent processing (default: 3 batches)
+- **PyTorch Device**: Auto-detects GPU/CPU for embedding operations
+
+## Design System
+
+The application follows the **Eightfold/SnapMap design system**:
+- **Colors**: Custom CSS variables for Eightfold teal (#88e2d2) and navy (#191841)
+- **Components**: Modern React components with Tailwind CSS
+- **Navigation**: Sidebar-based navigation with step indicators
+- **Forms**: Consistent form styling with validation feedback

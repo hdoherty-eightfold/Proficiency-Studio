@@ -1,0 +1,358 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Integration Analysis Rule - ATS/HRIS to Eightfold
+
+## Summary Reporting Sections
+
+1. **Objective**: Capture end-to-end integration flow between ATS/HRIS and Eightfold and use the inferred customer name reference from group id for description
+
+2. **DAG Entity Mapping Table**
+
+### Adaptor Sync Entity Overview
+- Create separate entry for each dag, order by entity
+- Enabled in Config `sync_settings`
+- Sync Overrides `customer_ats_config.sync_settings.sync_source_settings.enabled`
+- Lookback Overrides `customer_ats_config.sync_settings.sync_source_settings.lookback_hours`
+
+## Sync Configuration Overview
+
+| Entity      | Enabled in Config | Frequency                    | Lookback | Sync Enabled (`is_entity_enabled` from `adaptor_dag context`)             | Lookback Overrides |
+|-------------|-------------------|------------------------------|----------|--------------------------|--------------------|
+| Candidate   | Yes               | Every 30 mins                | 4h       | No (config disabled) | No Overrides       |
+| Position    | Yes               | Global                       | 4h       | Yes (not explictly configiured/ defaut on as per sync_setting)| 4h                 |
+| Application | Yes               | Workday-specific (6h cycles) | 6h       | Yes  | 6h                 |
+| Role | No               | Not Enabled | NA       | not enabled in sync_settings.entities  | NA                 |
+
+Validation should confirm each config flag.
+
+3. **Inbound Capabilities Summary**
+
+| Entity     | Integration Approach | Default     | Customer Config |
+|------------|----------------------|-------------|------------------|
+| Candidate  | Hybrid (API + RAAS)  | Hybrid      | Hybrid        |
+| Employee   | API Only             | API Only    | API Only      |
+
+- Validation should confirm each config flag and follow only the given format
+- RAAS is report as service and not file based integration. <!-- RAAS is API based integration and added as supplement to API data -->
+- List out the minimal config reference if additional data source found.
+- List out all configs related to sync approach that drives the flow API only/ Hybrid/ RAAS only and specify the codebase default value and customer value (mark NA if not specified in customer_ats_config)
+
+4. **Writeback Capabilities Summary**
+
+Use the context from `outbound_sync` for more details
+
+| Entity     | Section   | Action / Operation | Enabled By         |
+|------------|-----------|--------------------|---------------------|
+| Candidate  | Languages, Skills | Add Candidate      | Enabled by Config   |
+| Employee   | Experience, Education  | Update Employee    | Enabled by Default in Adaptor |
+
+Validation should confirm each config flag and follow only the given format Include all operations and entity level writeback sync. Ie. Codebase default operation vs credentials.enterprise_config controlled.
+
+5. **Authentication Methods**
+
+Track all the connectivity methods from all sources enabled for this customer and follow only the given format
+
+| Source Type | Method          | Offered By | Customer Config (based on `oauth_settings` from customer_ats_config) |
+|-------------|------------------|------------|------------------|
+| Workday API | OAuth / Basic    | Workday    | Basic          |
+| RAAS     | OAuth / Basic   | RAAS       | Basic            |
+| SFTP | SSH  | RAAS       | SSH            |
+
+6. **File-based Ingestion Check**
+
+Use `sftp_context` to update the below placeholder and follow only the given format
+
+| Entity    | Method     | File Format | Source |
+|-----------|------------|-------------|--------|
+| Role      | SFTP       | CSV         | File   |
+
+7. **Enhanced Webhooks Analysis**
+
+Use `webhooks_context` to analyze comprehensive webhook configuration:
+
+**Webhook Status**: <Enabled/Disabled>
+
+### Webhook Configuration Details:
+- **Base URL**: Extract from `webhook_settings.base_url` or `webhook_settings.endpoint_url`
+- **Authentication Method**: Extract from `webhook_settings.auth_type` (Bearer, Basic, OAuth, etc.)
+- **Retry Configuration**: Extract `webhook_settings.retry_attempts`, `webhook_settings.retry_interval`
+- **Timeout Settings**: Extract `webhook_settings.timeout_seconds`
+- **Event Types Enabled**: List all enabled webhook event types from `webhook_settings.enabled_events[]`
+- **Security Configuration**: Extract `webhook_settings.signature_verification`, `webhook_settings.secret_token`
+
+### Supported Webhook Events:
+| Event Type | Entity | Trigger | Payload Fields | Status |
+|------------|--------|---------|----------------|--------|
+| candidate.created | Candidate | New candidate sync | id, name, email, status | Enabled/Disabled |
+| application.updated | Application | Status change | application_id, status, position_id | Enabled/Disabled |
+| position.opened | Position | Position activation | position_id, title, department | Enabled/Disabled |
+
+**Note**: If enabled, verify with customer Eightfold Implementation team for implemented webhook methods as the implementation methods are not config-driven at Eightfold side.
+
+8. **Enhanced RAAS Reports Analysis**
+
+Use `custom_raas_list_report_v2` context to provide comprehensive RAAS report details:
+
+### RAAS Report Configuration Overview:
+| Entity | Report Name | Report ID | Frequency | Status |
+|--------|-------------|-----------|-----------|--------|
+| Candidate | Worker Report | WR-001 | Daily | Active |
+| Employee | Employee Data Export | ED-002 | Hourly | Active |
+
+### Detailed RAAS Report Field Mapping:
+
+#### Report: [Report Name]
+- **Report ID**: [ID from config]
+- **Entity**: [Target Entity]
+- **Schedule**: [Frequency from config]
+- **Fields Sent**:
+  ```json
+  {
+    "worker_id": "employee_id",
+    "first_name": "personal.first_name", 
+    "last_name": "personal.last_name",
+    "email": "contact.primary_email",
+    "department": "organization.department",
+    "hire_date": "employment.start_date",
+    "job_title": "position.title",
+    "manager_id": "reporting.manager_employee_id",
+    "location": "organization.location",
+    "employment_status": "employment.status"
+  }
+  ```
+- **Report Parameters**: Extract any custom parameters from `custom_raas_list_report_v2.<entity>.parameters`
+- **Data Transformation**: Document any field mappings from `custom_raas_list_report_v2.<entity>.field_mappings`
+- **Filtering Logic**: Extract filter conditions from `custom_raas_list_report_v2.<entity>.filters`
+
+### RAAS Integration Method Analysis:
+- **Hybrid Sources**: List entities using both API + RAAS
+- **RAAS-Only Sources**: List entities using RAAS exclusively (from `entities_with_only_raas_list_enabled`)
+- **Data Combination Logic**: Document how RAAS data supplements API data for hybrid entities
+
+9. **Architecture Diagram**
+
+Create a data flow diagram only based on the below mermaid sample. Use the specific format given below and do not create/add any other design.
+- Use the context ONLY from below to create this architecture diagram
+    - inbound_sync
+    - outbound_sync
+    - sftp_context
+    - webhooks_context (use dotted line as "not confirmed" to integration layer.)
+- Clearly highlight the one way and two way directional sync. Do not include any sync if its not part of above 4 context listed
+
+*sample flow*
+```mermaid
+sequenceDiagram
+  %% Group: Customer ATS & HRIS
+  box Customer ATS & HRIS
+    participant API as API
+    participant Report as Report Service
+    participant File as File
+  end
+
+  %% Integration Layer
+  participant IL as Integration Layer
+
+  %% Eightfold
+  participant EF as Eightfold
+
+  %% --- Candidates ---
+  API->>IL: Push Candidates
+  IL->>EF: Sync Candidates
+  EF-->>IL: Writeback Candidates (if needed)
+  IL-->>API: Sync to ATS (Candidates)
+
+  %% --- Applications ---
+  API->>IL: Push Applications
+  IL->>EF: Sync Applications
+  EF-->>IL: Writeback Applications (if needed)
+  IL-->>API: Sync to ATS (Applications)
+
+  %% --- Positions ---
+  API->>IL: Push Positions
+  Report->>IL: Push Positions
+  IL->>EF: Sync Positions
+  EF-->>IL: Writeback Positions (if needed)
+  IL-->>API: Sync to ATS (Positions)
+
+  %% --- Employees ---
+  Report->>IL: Push Employees
+  IL->>EF: Sync Employees
+  EF-->>IL: Writeback Employees (if needed)
+  IL-->>Report: Sync to ATS (Employees)
+
+  %% --- Roles ---
+  File->>IL: Push Roles
+  IL->>EF: Push Roles (no writeback)
+
+  %% --- Courses ---
+  File->>IL: Push Courses
+  IL->>EF: Push Courses (no writeback)
+
+  %% --- Skills ---
+  File->>IL: Push Skills
+  IL->>EF: Push Skills (no writeback)
+
+  %% --- Webhooks (if enabled) ---
+  EF-.->IL: Webhook Events (dotted - not confirmed)
+  IL-.->API: Forward Webhook Events (dotted - not confirmed)
+```
+
+10. **Note**
+
+Add a note as disclaimer that this is AI generated notes and ask to check with support team for any clarification.
+
+---
+
+# Adaptor Integration Flow – Quick Reference (for Cursor)
+
+## Adapter/ATS Name Mapping
+Make the search based on the below and store the ats name list from this search as `ats_name_list`
+```shell
+grep -r "ADAPTER_REGISTRY" www/ats/ats_utils.py
+```
+
+## Inputs Required
+Mandatory:
+- `group_id: {{group_id}}`
+- `ats_name: {{ats_name}}`  <!-- Validate this input against `ats_name_list` -->
+- `ats_config`: default is `'ats_config'`
+- `system_id: {{system_id}}`
+
+Validation:
+- If **any field is missing**, prompt for details and HALT further steps.
+- Validate `ats_name` against `ats_name_list` and confirm final interpretation.
+- Print final values for:
+  - group_id
+  - ats_name
+  - ats_config
+  - system_id
+
+## Extract Config
+Run the following to extract the ATS config:
+```shell
+python Agent/Scripts/config_checker.py --group-id {{group_id}} --config-name ats_config --system-id {{system_id}}
+```
+- Store result as: `customer_ats_config`
+- Note: `ats_name` is not a valid argument for this command
+
+## DAG Context
+### Search Logic
+A DAG is relevant to an adapter if:
+1. It executes `sync-worker.py`, and
+2. Either:
+   - Has `--adapter {ats_name}`
+   - Or has no `--adapter` flag (i.e., global)
+- All the dags are mentioned in this file `/www/airflow_v2/dags_config.json`
+
+### DAG Context Storage
+Each DAG should be stored as `adaptor_dag` in context with this simplified structure:
+```xml
+<dags>
+  <dag>
+    <name>dag_name</name>
+    <file_path>scripts/airflow/dags-common/filename.py</file_path>
+    <description>Human readable description</description>
+    <schedule_interval>cron_expression</schedule_interval>
+    <frequency>Human readable frequency</frequency>
+    <entity>entity_type</entity> <!--Entity name from the dag or inferred top level entity name from dag name -->
+    <adapter>adapter_name_or_global</adapter>
+    <command_parameters>
+        <parameter name="is_entity_enabled">Yes, Only if entity_type present in customer_ats_config.sync_settings.entities[]</parameter>
+        <parameter name="is_sync_enabled">dag (sync) are enabled by default unless customer_ats_config.sync_settings.sync_source_settings.[dag_name].enabled:false </parameter>
+      <parameter name="lookback_hours">hours</parameter>
+      <parameter name="lookback_hours_override">lookback hours present in customer_ats_config.sync_settings.sync_source_settings.dag_name.lookback_hours</parameter>
+      <!-- Only include above parameters -->
+    </command_parameters>
+  </dag>
+  ...
+</dags>
+```
+
+## Integration Sync-Specific Context
+
+### Enhanced Outbound Sync Analysis
+The `get_all_operations()` from `www/ats/base.py` method serves as a contract declaring what operations are theoretically possible, while the actual execution depends on config keys in the adapter implementation.
+
+Operation → Handler mapping (static in write_back.py)
+Handler → Adapter method call (dynamic via adapter_class property)
+Adapter method → Config checks (via credentials.lookup_jsonpath())
+Config-driven execution (if enabled, make actual API calls)
+
+- Map all operations to top level entities
+- Infer supported Action from the method/operation name. Ex: add_candidate -> Add Candidate
+- Check whether the methods raising not-implemented exception or only placeholder is there. Document only if implemented
+- Deep analysis on what config/mapping is required for writeback. For Workday - Writeback config is used for writeback in conjunction with trigger_event_config, For SuccessFactors, no special config but based on trigger_event_config, custom_fields_v2.<entity> is used for enabled entity sync.
+
+Document in `outbound_sync`:
+```xml
+<entities>
+    <entity>
+      <entity_name>Name of the top level entity. Ex: Employee, Application, Candidate</entity_name>
+      <operation>Name of the operation & Action</operation><!-- applicable for workday adaptor only. Populate this based on Outbound Sync Analysis: Ex: Stage Advance, Add candidate, Move Candidate -->
+      <Sections>Sections from the entity enabled for writeback</Sections> <!-- For Adaptors, not entire entity data is supported for Writeback. Only section driven config or custom mapping are supported for writeback and taken as a runtime decisions. Ex: Experience, education, outside_experience, etc  -->
+      <data_source_1>Workday API</data_source_1> <!-- Writeback Strategy via API/ File-->
+      <integration_method>API</integration_method> <!-- Call it "API" as this is from adaptor. Will classify "File" for file based ingestion. RAAS is not to be classified as a file based ingestion -->
+<!-- Only include above parameters -->
+    </entity>
+    ...
+<entities>
+```
+
+Also, refer config keys from `customer_ats_config` to determine sync enablement and integration method that controls the outbound sync process in codebase. Document the config keys default value and highlight the customer selection as notes to this section
+
+### Enhanced Inbound Sync Analysis
+- Use customer_ats_config.sync_settings.entities list for all enabled entities sync. Use this to analyze how the data flow works tracking API calls.
+
+#### Workday Specific Knowledge
+- If Workday Adaptor, check if there is a hybrid data source approach via API. Data sync will make API calls to WD ODATA as well as RAAS Report Service depends on config enablement in custom_raas_list_report_v2. RAAS Report data is considered for supplement data that gets combined with API data.
+- **Sync Approach Analysis** The `entities_with_only_raas_list_enabled` config key is the point of control that determines RAAS only entity and `customer_ats_config.custom_raas_list_report_v2.<entity>` (infer top level entity name) config key is the point of control that holds the report config.
+  - RAAS-Only: Entity listed → Skip standard API completely
+  - API-Only: Entity NOT listed + No RAAS configured → Standard API only <!--  `custom_raas_list_report_v2` will have entity report config -->
+  - Hybrid: Entity NOT listed + RAAS configured → Use both approaches
+
+#### inbound_sync Context Storage
+Store the Inbound Integration approach as `inbound_sync` in the below format for each entity
+```xml
+<entities>
+    <entity>
+      <entity_name>Name of the top level entity. Ex: Employee</entity_name>
+      <dual_source>Yes/ No</dual_source> <!-- applicable for workday adaptor only. Populate this based on Sync Approach Analysis -->
+      <data_source_1>Workday API</data_source_1> <!-- If dual source, API is source 1. If single source then classify it as source 1 -->
+      <data_source_2>Workday RAAS</data_source_2> <!-- RAAS, only when its dual source -->
+      <integration_method>API</integration_method> <!-- Call it "API" as this is from adaptor. Will classify "File" for file based ingestion. RAAS is not to be classified as a file based ingestion -->
+<!-- Only include above parameters -->
+    </entity>
+    ...
+<entities>
+```
+
+### Enhanced SFTP File Source Context Storage
+Refer to `data_extract_ingest_settings` from `customer_ats_config` for SFTP file reference.
+- Use `customer_ats_config` from existing context if available for this check
+- Data source will be `remote` if enabled. `local` is considered as disabled
+- Refer `transformation_config_maps` for enabled config.
+  - Infer the top level entity name from the config naming pattern and document in below format for source reference. Ex: `user_upsert_transformation_config` is `User` Entity & `course_upsert_transformation_config` is `Course` reference
+- store the context as `sftp_context` that can be used to identify this context later
+
+```xml
+<entities>
+    <entity>
+      <entity_name>Name of the top level entity. Ex: Employee</entity_name> <!-- applicable for workday adaptor only. Populate this based on Sync Approach Analysis -->
+      <data_source_1>SFTP</data_source_1> <!-- If dual source, API is source 1. If single source then classify it as source 1 -->
+      <data_source_2></data_source_2> <!-- leave this empty for SFTP source -->
+      <integration_method>File</integration_method> <!-- Call it "File" as this is from SFTP File source. -->
+<!-- Only include above parameters -->
+    </entity>
+    ...
+<entities>
+```
+
+### Enhanced Webhook Sync Analysis
+- Use `customer_ats_config` from existing context if available for this check
+- Capture comprehensive webhook configuration from `webhook_settings`
+- Extract detailed webhook event configuration, authentication, and retry settings
+- Document all supported webhook event types and their payload structures
+- store the context as `webhooks_context`
