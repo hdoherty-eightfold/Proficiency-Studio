@@ -157,12 +157,6 @@ export class BackendManager {
         return;
       }
 
-      // Set a timer for force kill
-      const killTimer = setTimeout(() => {
-        log.warn('BackendManager: Graceful shutdown timed out, sending SIGKILL');
-        proc.kill('SIGKILL');
-      }, SHUTDOWN_GRACE_PERIOD);
-
       proc.once('exit', () => {
         clearTimeout(killTimer);
         this.process = null;
@@ -172,8 +166,19 @@ export class BackendManager {
         resolve();
       });
 
-      // Send SIGTERM for graceful shutdown
-      proc.kill('SIGTERM');
+      // On Windows, proc.kill() calls TerminateProcess (always a hard kill).
+      // On macOS/Linux, send SIGTERM first, then SIGKILL after timeout.
+      if (process.platform === 'win32') {
+        proc.kill();
+      } else {
+        proc.kill('SIGTERM');
+      }
+
+      // Set a timer for force kill (only meaningful on non-Windows)
+      const killTimer = setTimeout(() => {
+        log.warn('BackendManager: Graceful shutdown timed out, force killing');
+        proc.kill('SIGKILL');
+      }, SHUTDOWN_GRACE_PERIOD);
     });
 
     return this.shutdownPromise;

@@ -24,6 +24,14 @@ ProfStudio-Desktop/
 └── vite.config.ts
 ```
 
+## Windows Development
+
+The app runs on Windows with the same commands. Prerequisites:
+- Node.js 18+
+- Python 3.10+ on PATH (as `python`, not `python3`)
+- `npm run dev` starts everything (frontend + electron + backend)
+- `npm run build:win` builds the Windows installer (NSIS)
+
 ## Development Commands
 
 ```bash

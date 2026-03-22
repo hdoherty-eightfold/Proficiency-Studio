@@ -16,7 +16,7 @@
     "build:win": "npm run build:backend && npm run build && electron-builder --win",
     "build:mac": "npm run build:backend && npm run build && electron-builder --mac",
     "build:linux": "npm run build:backend && npm run build && electron-builder --linux",
-    "build:backend": "bash scripts/build-backend.sh",
+    "build:backend": "node scripts/build-backend.mjs",
     "build:all": "npm run build:backend && npm run build && electron-builder -mwl",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
