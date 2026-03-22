@@ -1,0 +1,11 @@
+Worker_ID,Legal_First_Name,Legal_Last_Name,Email_Address,Hire_Date,Job_Profile,Cost_Center,Work_Phone,Work_Location,Manager_Name,Skill1,Skill2
+W001,John,Doe,john.doe@company.com,10/30/2020,Software Engineer,ENG001,+1-555-0100,San Francisco,Jane Smith,Python,JavaScript
+W002,Jane,Smith,jane.smith@company.com,05/15/2019,Senior Engineer,ENG001,+1-555-0101,San Francisco,Bob Johnson,Java,React
+W003,Mike,Johnson,mike.johnson@company.com,12/01/2021,Product Manager,PROD001,+1-555-0102,New York,Sarah Williams,Agile,Scrum
+W004,Sarah,Williams,sarah.williams@company.com,03/15/2020,UX Designer,DESIGN001,+1-555-0103,Los Angeles,Mike Johnson,Figma,Sketch
+W005,David,Brown,david.brown@company.com,08/22/2018,Tech Lead,ENG001,+1-555-0104,San Francisco,Jane Smith,Architecture,AWS
+W006,Lisa,Garcia,lisa.garcia@company.com,11/10/2021,Data Analyst,ANALYTICS001,+1-555-0105,Chicago,Tom Martinez,SQL,Python
+W007,Tom,Martinez,tom.martinez@company.com,07/05/2019,Engineering Manager,ENG001,+1-555-0106,San Francisco,Bob Johnson,Leadership,Strategy
+W008,Emily,Davis,emily.davis@company.com,02/20/2020,Frontend Developer,ENG001,+1-555-0107,Austin,David Brown,React,TypeScript
+W009,Robert,Wilson,robert.wilson@company.com,09/12/2021,Backend Developer,ENG001,+1-555-0108,Seattle,David Brown,Node.js,MongoDB
+W010,Amanda,Taylor,amanda.taylor@company.com,06/18/2019,QA Engineer,QA001,+1-555-0109,San Francisco,Tom Martinez,Testing,Automation

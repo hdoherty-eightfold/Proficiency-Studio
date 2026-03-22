@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+dist/
+release/
+
+# Build output
+*.log
+*.tgz
+.DS_Store
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+# Electron
+out/
+.webpack/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

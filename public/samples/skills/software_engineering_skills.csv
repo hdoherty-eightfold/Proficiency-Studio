@@ -1,0 +1,41 @@
+skill_name,category
+Python,Programming Languages
+JavaScript,Programming Languages
+TypeScript,Programming Languages
+Java,Programming Languages
+Go,Programming Languages
+Rust,Programming Languages
+C++,Programming Languages
+React,Frontend Frameworks
+Vue.js,Frontend Frameworks
+Angular,Frontend Frameworks
+Node.js,Backend Frameworks
+FastAPI,Backend Frameworks
+Django,Backend Frameworks
+Spring Boot,Backend Frameworks
+PostgreSQL,Databases
+MongoDB,Databases
+Redis,Databases
+MySQL,Databases
+Docker,DevOps
+Kubernetes,DevOps
+AWS,Cloud Platforms
+Azure,Cloud Platforms
+GCP,Cloud Platforms
+Git,Version Control
+CI/CD,DevOps
+Terraform,Infrastructure as Code
+REST API Design,API Development
+GraphQL,API Development
+Microservices Architecture,System Design
+Event-Driven Architecture,System Design
+Test-Driven Development,Development Practices
+Agile Methodologies,Project Management
+System Design,Architecture
+Code Review,Development Practices
+Technical Documentation,Communication
+Performance Optimization,Engineering
+Security Best Practices,Security
+Machine Learning,AI/ML
+Deep Learning,AI/ML
+Natural Language Processing,AI/ML

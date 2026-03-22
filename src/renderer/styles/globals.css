@@ -1,0 +1,298 @@
+/* Plus Jakarta Sans - bundled locally for Electron CSP compliance */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/plus-jakarta-sans-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/plus-jakarta-sans-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/plus-jakarta-sans-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/plus-jakarta-sans-latin-700-normal.woff2') format('woff2');
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Eightfold.ai Light Mode — teal/navy palette */
+    --background: 168 20% 98%;
+    --foreground: 241 49% 18%;
+
+    --card: 168 15% 99%;
+    --card-foreground: 241 49% 18%;
+
+    --popover: 168 15% 99%;
+    --popover-foreground: 241 49% 18%;
+
+    --primary: 168 64% 42%;
+    --primary-foreground: 168 20% 98%;
+
+    --secondary: 168 25% 94%;
+    --secondary-foreground: 241 49% 18%;
+
+    --muted: 168 15% 93%;
+    --muted-foreground: 241 20% 46%;
+
+    --accent: 168 30% 92%;
+    --accent-foreground: 241 49% 18%;
+
+    --destructive: 2 80% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Semantic colors */
+    --success: 160 70% 36%;
+    --success-foreground: 160 20% 98%;
+
+    --warning: 29 92% 55%;
+    --warning-foreground: 29 80% 15%;
+
+    --info: 240 96% 48%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 168 20% 88%;
+    --input: 168 20% 88%;
+    --ring: 168 64% 42%;
+
+    --radius: 0.625rem;
+
+    /* Sidebar — navy background */
+    --sidebar: 241 49% 18%;
+    --sidebar-foreground: 168 30% 92%;
+
+    /* Design tokens: spacing */
+    --ps-spacing-xs: 0.25rem;
+    --ps-spacing-sm: 0.5rem;
+    --ps-spacing-md: 1rem;
+    --ps-spacing-lg: 1.5rem;
+    --ps-spacing-xl: 2rem;
+
+    /* Design tokens: border radius */
+    --ps-radius-sm: 0.25rem;
+    --ps-radius-md: 0.375rem;
+    --ps-radius-lg: 0.5rem;
+
+    /* Design tokens: shadows */
+    --ps-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --ps-shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+
+    /* Design tokens: transitions */
+    --ps-transition-fast: 150ms ease;
+    --ps-transition-normal: 250ms ease;
+
+    /* Elevation shadows */
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  }
+
+  .dark {
+    /* Eightfold.ai Dark Mode — navy-based with teal accents */
+    --background: 241 55% 8%;
+    --foreground: 168 15% 92%;
+
+    --card: 241 50% 12%;
+    --card-foreground: 168 15% 92%;
+
+    --popover: 241 50% 14%;
+    --popover-foreground: 168 15% 92%;
+
+    --primary: 168 55% 55%;
+    --primary-foreground: 241 55% 8%;
+
+    --secondary: 241 40% 16%;
+    --secondary-foreground: 168 15% 92%;
+
+    --muted: 241 35% 18%;
+    --muted-foreground: 168 10% 60%;
+
+    --accent: 241 40% 18%;
+    --accent-foreground: 168 15% 92%;
+
+    --destructive: 2 70% 45%;
+    --destructive-foreground: 168 15% 92%;
+
+    /* Semantic colors - dark mode */
+    --success: 160 60% 45%;
+    --success-foreground: 160 50% 10%;
+
+    --warning: 29 85% 55%;
+    --warning-foreground: 29 80% 15%;
+
+    --info: 240 80% 60%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 241 35% 20%;
+    --input: 241 35% 20%;
+    --ring: 168 55% 45%;
+
+    /* Sidebar — deeper navy in dark mode */
+    --sidebar: 241 55% 6%;
+    --sidebar-foreground: 168 15% 88%;
+
+    /* Elevation shadows - dark mode (subtle, per impeccable guidelines) */
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6), 0 8px 10px -6px rgb(0 0 0 / 0.6);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.7);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom scrollbar */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+}
+
+/* Smooth transitions */
+@layer utilities {
+  .transition-smooth {
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Glass morphism effects */
+@layer utilities {
+  .glass {
+    background: hsl(var(--background) / 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .glass-light {
+    background: hsl(var(--background) / 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .glass-strong {
+    background: hsl(var(--background) / 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+}
+
+/* Gradient text — Eightfold brand: teal → electric blue → purple */
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(240 96% 48%) 50%, hsl(250 66% 56%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-success {
+    background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(160 84% 39%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* Focus ring utility */
+@layer utilities {
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+}
+
+/* Shimmer animation for skeletons */
+@layer utilities {
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--foreground) / 0.05),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+  }
+}
+
+/* Interactive card hover */
+@layer utilities {
+  .card-interactive {
+    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/20;
+  }
+}
+
+/* Elevation utilities */
+@layer utilities {
+  .elevation-1 {
+    box-shadow: var(--shadow-xs);
+  }
+  .elevation-2 {
+    box-shadow: var(--shadow-sm);
+  }
+  .elevation-3 {
+    box-shadow: var(--shadow-md);
+  }
+  .elevation-4 {
+    box-shadow: var(--shadow-lg);
+  }
+  .elevation-5 {
+    box-shadow: var(--shadow-xl);
+  }
+}

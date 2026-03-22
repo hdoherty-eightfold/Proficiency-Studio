@@ -1,0 +1,41 @@
+skill_name,category
+Python,Programming
+R,Programming
+SQL,Data Management
+Statistics,Analytics
+Machine Learning,AI/ML
+Deep Learning,AI/ML
+TensorFlow,Frameworks
+PyTorch,Frameworks
+Scikit-learn,Libraries
+Pandas,Libraries
+NumPy,Libraries
+Data Visualization,Analytics
+Tableau,Tools
+Power BI,Tools
+Apache Spark,Big Data
+Hadoop,Big Data
+Data Warehousing,Data Management
+ETL Pipelines,Data Engineering
+Feature Engineering,ML Engineering
+Model Deployment,MLOps
+A/B Testing,Experimentation
+Natural Language Processing,AI/ML
+Computer Vision,AI/ML
+Time Series Analysis,Analytics
+Predictive Modeling,Analytics
+Data Cleaning,Data Preparation
+Exploratory Data Analysis,Analytics
+Statistical Modeling,Statistics
+Hypothesis Testing,Statistics
+Regression Analysis,Statistics
+Classification,Machine Learning
+Clustering,Machine Learning
+Recommendation Systems,ML Applications
+Neural Networks,Deep Learning
+Reinforcement Learning,AI/ML
+MLflow,MLOps
+Kubernetes,Infrastructure
+Docker,Infrastructure
+Git,Version Control
+Jupyter Notebooks,Tools

@@ -1,0 +1,144 @@
+skill_name,category
+Python,Programming Languages
+JavaScript,Programming Languages
+TypeScript,Programming Languages
+Java,Programming Languages
+C#,Programming Languages
+Go,Programming Languages
+Rust,Programming Languages
+C++,Programming Languages
+Ruby,Programming Languages
+PHP,Programming Languages
+Swift,Programming Languages
+Kotlin,Programming Languages
+Scala,Programming Languages
+React,Frontend Frameworks
+Vue.js,Frontend Frameworks
+Angular,Frontend Frameworks
+Svelte,Frontend Frameworks
+Next.js,Frontend Frameworks
+Node.js,Backend Frameworks
+Express.js,Backend Frameworks
+FastAPI,Backend Frameworks
+Django,Backend Frameworks
+Flask,Backend Frameworks
+Spring Boot,Backend Frameworks
+ASP.NET,Backend Frameworks
+Ruby on Rails,Backend Frameworks
+Laravel,Backend Frameworks
+PostgreSQL,Databases
+MySQL,Databases
+MongoDB,Databases
+Redis,Databases
+Elasticsearch,Databases
+Cassandra,Databases
+DynamoDB,Databases
+SQLite,Databases
+Docker,DevOps
+Kubernetes,DevOps
+Terraform,Infrastructure as Code
+Ansible,Infrastructure as Code
+Jenkins,CI/CD
+GitHub Actions,CI/CD
+GitLab CI,CI/CD
+CircleCI,CI/CD
+AWS,Cloud Platforms
+Azure,Cloud Platforms
+GCP,Cloud Platforms
+Digital Ocean,Cloud Platforms
+Heroku,Cloud Platforms
+Vercel,Cloud Platforms
+REST API Design,API Development
+GraphQL,API Development
+gRPC,API Development
+WebSockets,API Development
+OAuth,Security
+JWT,Security
+Encryption,Security
+Penetration Testing,Security
+Microservices,Architecture
+Event-Driven Architecture,Architecture
+Domain-Driven Design,Architecture
+CQRS,Architecture
+Serverless,Architecture
+Git,Version Control
+GitHub,Collaboration
+GitLab,Collaboration
+Bitbucket,Collaboration
+Jira,Project Management
+Confluence,Documentation
+Notion,Documentation
+Agile,Methodologies
+Scrum,Methodologies
+Kanban,Methodologies
+TDD,Development Practices
+BDD,Development Practices
+Code Review,Development Practices
+Pair Programming,Development Practices
+Machine Learning,AI/ML
+Deep Learning,AI/ML
+NLP,AI/ML
+Computer Vision,AI/ML
+TensorFlow,AI/ML Frameworks
+PyTorch,AI/ML Frameworks
+Scikit-learn,AI/ML Frameworks
+Pandas,Data Science
+NumPy,Data Science
+Data Visualization,Data Science
+Tableau,BI Tools
+Power BI,BI Tools
+Looker,BI Tools
+Apache Kafka,Messaging
+RabbitMQ,Messaging
+Apache Spark,Big Data
+Hadoop,Big Data
+Databricks,Big Data
+Snowflake,Data Warehousing
+Redshift,Data Warehousing
+BigQuery,Data Warehousing
+Linux,Operating Systems
+Shell Scripting,Automation
+PowerShell,Automation
+Nginx,Web Servers
+Apache,Web Servers
+Load Balancing,Infrastructure
+CDN,Infrastructure
+Monitoring,Operations
+Prometheus,Monitoring
+Grafana,Monitoring
+ELK Stack,Logging
+New Relic,APM
+Datadog,APM
+Unit Testing,Testing
+Integration Testing,Testing
+E2E Testing,Testing
+Selenium,Testing Tools
+Cypress,Testing Tools
+Jest,Testing Tools
+Pytest,Testing Tools
+Performance Testing,Testing
+Load Testing,Testing
+Mobile Development,Platforms
+iOS Development,Mobile
+Android Development,Mobile
+React Native,Cross-Platform
+Flutter,Cross-Platform
+Electron,Desktop
+WebAssembly,Web Technologies
+PWA,Web Technologies
+Accessibility,Web Standards
+SEO,Web Marketing
+Analytics,Business Intelligence
+UX Design,Design
+UI Design,Design
+Figma,Design Tools
+Sketch,Design Tools
+Adobe XD,Design Tools
+Technical Writing,Communication
+Public Speaking,Communication
+Leadership,Soft Skills
+Mentoring,Soft Skills
+Problem Solving,Soft Skills
+Critical Thinking,Soft Skills
+Time Management,Soft Skills
+Collaboration,Soft Skills
