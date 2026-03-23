@@ -170,6 +170,16 @@ class ElectronAPIService {
   }
 
   /**
+   * Listen for backend status events (crash, startup failure)
+   */
+  onBackendStatus(callback: (status: { status: string; error?: string }) => void): () => void {
+    if (!window.electron?.onBackendStatus) {
+      return () => {};
+    }
+    return window.electron.onBackendStatus(callback);
+  }
+
+  /**
    * Save assessment results to a JSON file
    */
   async saveAssessmentResults(data: Record<string, unknown>): Promise<{ success: boolean; filePath?: string; filename?: string; error?: string }> {

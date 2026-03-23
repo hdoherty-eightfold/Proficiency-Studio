@@ -292,6 +292,16 @@ app.whenReady().then(async () => {
   }
 
   createWindow();
+
+  // Notify renderer if backend failed to start
+  if (!backendManager.isRunning() && mainWindow) {
+    mainWindow.webContents.once('did-finish-load', () => {
+      mainWindow?.webContents.send('backend:status', {
+        status: 'failed',
+        error: 'Backend failed to start. Some features may be unavailable.'
+      });
+    });
+  }
   setupIpcHandlers(ipcMain, store, backendUrl);
 
   app.on('activate', () => {

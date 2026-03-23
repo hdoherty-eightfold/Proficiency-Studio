@@ -113,7 +113,9 @@ export function ExportActions({ assessments }: ExportActionsProps) {
                 if (data.roles && Array.isArray(data.roles)) {
                     setAvailableRoles(data.roles);
                 }
-            } catch { /* ignore */ }
+            } catch {
+                toast({ title: 'Could not load roles for export', variant: 'destructive' });
+            }
         }
     };
 
@@ -121,7 +123,9 @@ export function ExportActions({ assessments }: ExportActionsProps) {
         try {
             const response = await api.listSFTPCredentials();
             setSftpCredentials((response?.credentials as SFTPCredential[]) || []);
-        } catch { /* ignore */ }
+        } catch {
+            console.warn('Failed to load SFTP credentials');
+        }
     };
 
     const generateCSVContent = useCallback(() => {
@@ -339,9 +343,10 @@ export function ExportActions({ assessments }: ExportActionsProps) {
                     variant="outline"
                     onClick={() => setShowExportSettings(true)}
                     disabled={!hasAssessments || exporting || availableRoles.length === 0}
+                    title={availableRoles.length === 0 ? 'No roles found — extract skills with roles first' : undefined}
                 >
                     {exporting ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-                    Export to Eightfold
+                    Export to Eightfold{availableRoles.length === 0 && ' (no roles)'}
                 </Button>
             </div>
 

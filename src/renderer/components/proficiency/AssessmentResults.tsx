@@ -98,34 +98,22 @@ export function AssessmentResults({ results, onRestart }: AssessmentResultsProps
                             </div>
 
                             {expandedCategories.has(category) && (
-                                <div className="divide-y divide-border">
+                                <div className="p-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                                     {skills.map((skill, idx) => (
-                                        <div key={idx} className="p-4 hover:bg-muted/10 transition-colors">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div>
-                                                    <h4 className="font-bold text-foreground">{skill.skill_name}</h4>
-                                                    <div className="flex flex-wrap gap-2 mt-1">
-                                                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getProficiencyColor(skill.proficiency)}`}>
-                                                            Level {skill.proficiency}: {getProficiencyNames()[skill.proficiency - 1]}
-                                                        </span>
-                                                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">
-                                                            Confidence: {(skill.confidence_score * 100).toFixed(0)}%
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                        <div key={idx} className="p-3 rounded-lg border border-border/50 hover:bg-muted/10 transition-colors">
+                                            <div className="flex items-center justify-between gap-2 mb-1">
+                                                <h4 className="font-semibold text-sm text-foreground truncate">{skill.skill_name}</h4>
+                                                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                                    {(skill.confidence_score * 100).toFixed(0)}%
+                                                </span>
                                             </div>
-                                            <p className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
-                                                {skill.reasoning}
-                                            </p>
-                                            {skill.evidence && skill.evidence.length > 0 && (
-                                                <div className="mt-2 pl-4 border-l-2 border-muted">
-                                                    <div className="text-xs font-semibold text-muted-foreground mb-1">Evidence:</div>
-                                                    <ul className="list-disc pl-4 text-xs text-muted-foreground">
-                                                        {skill.evidence.map((ev, i) => (
-                                                            <li key={i}>{ev}</li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
+                                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getProficiencyColor(skill.proficiency)}`}>
+                                                L{skill.proficiency}: {getProficiencyNames()[skill.proficiency - 1]}
+                                            </span>
+                                            {skill.reasoning && (
+                                                <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                                                    {skill.reasoning}
+                                                </p>
                                             )}
                                         </div>
                                     ))}

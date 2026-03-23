@@ -181,6 +181,11 @@ export function useAssessment(): UseAssessmentReturn {
             }
         } catch (e: unknown) {
             console.warn('Assessment file save failed', e);
+            toast({
+                title: 'Could not save assessment to file',
+                description: 'Results are available in the current session but may not persist',
+                variant: 'destructive'
+            });
         }
     };
 

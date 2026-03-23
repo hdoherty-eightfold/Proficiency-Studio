@@ -79,6 +79,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
             setHistory(response.exports || []);
         } catch (err: unknown) {
             console.error('Failed to fetch export history:', err);
+            toast({ title: 'Failed to load export history', variant: 'destructive' });
         } finally {
             setLoadingHistory(false);
         }

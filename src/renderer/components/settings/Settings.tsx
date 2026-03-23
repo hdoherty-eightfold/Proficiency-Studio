@@ -87,7 +87,9 @@ const Settings: React.FC = () => {
         if (stored) {
             try {
                 setGeneralSettings(prev => ({ ...prev, ...JSON.parse(stored) }));
-            } catch (e) { }
+            } catch {
+                toast({ title: 'Failed to load settings', description: 'Using defaults', variant: 'destructive' });
+            }
         }
     }, []);
 

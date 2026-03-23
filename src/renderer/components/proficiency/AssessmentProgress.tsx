@@ -69,15 +69,20 @@ export function AssessmentProgress({
                         )}
                         <div>
                             {processedSkills} of {totalSkills} skills processed
-                            {failedSkills.length > 0 && (
-                                <span className="text-yellow-600 dark:text-yellow-400 ml-2">
-                                    ({failedSkills.length} failed)
-                                </span>
-                            )}
                         </div>
                         {retryCount > 0 && (
-                            <div className="text-yellow-600 dark:text-yellow-400">
-                                Retry attempt {retryCount}
+                            <div className="mt-2 px-3 py-1.5 bg-yellow-100 dark:bg-yellow-900/30 rounded-md text-yellow-700 dark:text-yellow-400 font-medium">
+                                Retry attempt {retryCount}/3 — previous attempt failed
+                            </div>
+                        )}
+                        {failedSkills.length > 0 && (
+                            <div className="mt-2 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 rounded-md text-red-700 dark:text-red-400">
+                                <span className="font-medium">{failedSkills.length} skills failed</span>
+                                {failedSkills.length <= 5 ? (
+                                    <span className="ml-1">: {failedSkills.join(', ')}</span>
+                                ) : (
+                                    <span className="ml-1">: {failedSkills.slice(0, 3).join(', ')} +{failedSkills.length - 3} more</span>
+                                )}
                             </div>
                         )}
                     </div>

@@ -54,6 +54,9 @@ export type ElectronAPI = {
   // Assessment streaming events
   onAssessmentEvent: (callback: (event: { streamId: string; eventType: string; data: Record<string, unknown> }) => void) => () => void;
 
+  // Backend status events (crash, startup failure)
+  onBackendStatus: (callback: (status: { status: string; error?: string }) => void) => () => void;
+
   // Assessment file storage
   assessmentStorage: {
     saveResults: (data: Record<string, unknown>) => Promise<{ success: boolean; filePath?: string; filename?: string; error?: string }>;
@@ -161,6 +164,15 @@ const electronAPI: ElectronAPI = {
     };
     ipcRenderer.on('assessment:event', handler);
     return () => ipcRenderer.removeListener('assessment:event', handler);
+  },
+
+  // Backend status events
+  onBackendStatus: (callback) => {
+    const handler = (_event: IpcRendererEvent, data: { status: string; error?: string }) => {
+      callback(data);
+    };
+    ipcRenderer.on('backend:status', handler);
+    return () => ipcRenderer.removeListener('backend:status', handler);
   },
 
   // LLM operations

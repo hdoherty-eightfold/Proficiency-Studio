@@ -482,6 +482,12 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
                 }
               } catch (parseError) {
                 log.warn('Failed to parse SSE data:', eventData);
+                if (!webContents.isDestroyed()) {
+                  webContents.send('assessment:event', {
+                    streamId, eventType: 'error',
+                    data: { error: `Failed to parse assessment response` }
+                  });
+                }
               }
             }
           }

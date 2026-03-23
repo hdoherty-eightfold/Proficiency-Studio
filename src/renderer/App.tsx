@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense, lazy } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useAppStore } from '@/stores/app-store';
 import { Toaster } from '@/components/ui/toaster';
@@ -98,6 +98,19 @@ function App() {
   const nextStep = useAppStore((state) => state.nextStep);
   const previousStep = useAppStore((state) => state.previousStep);
 
+  const [backendError, setBackendError] = useState<string | null>(null);
+
+  // Listen for backend crash/failure notifications
+  useEffect(() => {
+    if (!window.electron?.onBackendStatus) return;
+    const cleanup = window.electron.onBackendStatus((status: { status: string; error?: string }) => {
+      if (status.status === 'crashed' || status.status === 'failed') {
+        setBackendError(status.error || 'Backend is unavailable');
+      }
+    });
+    return cleanup;
+  }, []);
+
   // Listen for menu actions from Electron
   useEffect(() => {
     if (!window.electron) return;
@@ -152,6 +165,13 @@ function App() {
 
             {/* Backend Status Banner - shows when backend is unavailable */}
             <BackendStatusBanner />
+
+            {/* Backend crash/failure banner */}
+            {backendError && (
+              <div className="bg-red-600 text-white px-4 py-2 text-sm text-center font-medium">
+                Backend Error: {backendError}. Please restart the application.
+              </div>
+            )}
 
             <div className="flex flex-1">
               {/* Sidebar Navigation */}

@@ -68,6 +68,7 @@ export const ConfigurationManager: React.FC<ConfigurationManagerProps> = ({
             }
         } catch (err) {
             console.error('Error loading configurations:', err);
+            toast({ title: 'Failed to load configurations', description: 'Using defaults', variant: 'destructive' });
             // Fallback defaults if API fails
             setConfigurations([
                 {

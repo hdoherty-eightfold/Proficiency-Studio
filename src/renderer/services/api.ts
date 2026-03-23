@@ -5,6 +5,7 @@
  */
 
 import { electronAPI } from './electron-api';
+import { useToastStore } from '../stores/toast-store';
 
 // API version constant. Currently unused but available for future versioned endpoint support.
 // When the backend adds versioned routes, update base URL construction to include `/api/${API_VERSION}`.
@@ -81,6 +82,11 @@ function isRetryableError(error: unknown): boolean {
     return true;
   }
 
+  // 429 Too Many Requests - retryable (rate limit)
+  if (message.includes('429') || message.includes('rate limit') || message.includes('quota')) {
+    return true;
+  }
+
   // 5xx server errors - retryable (detect from error messages containing HTTP status)
   const httpStatusMatch = message.match(/\b(5\d{2})\b/);
   if (httpStatusMatch) {
@@ -133,10 +139,13 @@ async function retryWithBackoff<T>(
       const jitter = Math.random() * cappedDelay * 0.1; // 0-10% jitter
       const delay = cappedDelay + jitter;
 
-      console.warn(
-        `[API Retry] Attempt ${attempt + 1}/${maxRetries} failed, retrying in ${Math.round(delay)}ms:`,
-        error instanceof Error ? error.message : error
-      );
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.warn(`[API Retry] Attempt ${attempt + 1}/${maxRetries} failed, retrying in ${Math.round(delay)}ms:`, errorMsg);
+      useToastStore.getState().addToast({
+        title: `Request failed, retrying (${attempt + 1}/${maxRetries})...`,
+        description: errorMsg.substring(0, 100),
+        variant: 'default',
+      });
 
       await new Promise((resolve) => setTimeout(resolve, delay));
     }

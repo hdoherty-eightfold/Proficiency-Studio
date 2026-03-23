@@ -68,8 +68,8 @@ const RAGSettings: React.FC<RAGSettingsProps> = ({ onSettingsChange }) => {
         if (savedDocs) {
             try {
                 setContextDocuments(JSON.parse(savedDocs));
-            } catch (e) {
-                console.error('Failed to parse saved documents');
+            } catch {
+                toast({ title: 'Failed to load RAG documents', description: 'Starting fresh', variant: 'destructive' });
             }
         }
     }, []);

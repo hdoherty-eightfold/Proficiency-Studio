@@ -16,7 +16,7 @@ import { ChildProcess, spawn } from 'child_process';
 import { createServer, AddressInfo } from 'net';
 import { join } from 'path';
 import { mkdirSync, existsSync, copyFileSync, readdirSync } from 'fs';
-import { app } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import log from 'electron-log';
 import * as http from 'http';
 
@@ -109,6 +109,15 @@ export class BackendManager {
         this.scheduleRestart();
       } else if (!this.intentionalStop) {
         log.error(`BackendManager: Backend crashed ${MAX_RESTART_ATTEMPTS} times, giving up`);
+        // Notify all renderer windows that backend is permanently down
+        BrowserWindow.getAllWindows().forEach(w => {
+          if (!w.isDestroyed()) {
+            w.webContents.send('backend:status', {
+              status: 'crashed',
+              error: `Backend stopped after ${MAX_RESTART_ATTEMPTS} failed restart attempts`
+            });
+          }
+        });
       }
     });
 
