@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
-import { renderWithUser, screen } from '../../test/utils/render';
+import { renderWithUser, screen, waitFor } from '../../test/utils/render';
 import React from 'react';
 
 // Mock stores
@@ -51,40 +51,50 @@ beforeAll(async () => {
   Settings = mod.default;
 });
 
+/** Helper: renders Settings and waits for loading to finish */
+async function renderSettings() {
+  const result = renderWithUser(<Settings />);
+  // Wait for the async api.get() to resolve and loading to complete
+  await waitFor(() => {
+    expect(screen.queryByText(/loading settings/i)).not.toBeInTheDocument();
+  });
+  return result;
+}
+
 describe('Settings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (window.localStorage.getItem as ReturnType<typeof vi.fn>).mockReturnValue(null);
   });
 
-  it('should render the settings page heading', () => {
-    renderWithUser(<Settings />);
+  it('should render the settings page heading', async () => {
+    await renderSettings();
     expect(screen.getByText('Settings')).toBeInTheDocument();
   });
 
-  it('should show appearance tab content by default', () => {
-    renderWithUser(<Settings />);
+  it('should show appearance tab content by default', async () => {
+    await renderSettings();
     expect(screen.getByText('Customize the look and feel of the application')).toBeInTheDocument();
     expect(screen.getByText('Theme')).toBeInTheDocument();
     expect(screen.getByText('Choose your preferred color scheme')).toBeInTheDocument();
   });
 
-  it('should show theme options (Light, Dark, System)', () => {
-    renderWithUser(<Settings />);
+  it('should show theme options (Light, Dark, System)', async () => {
+    await renderSettings();
     expect(screen.getByText('Light')).toBeInTheDocument();
     expect(screen.getByText('Dark')).toBeInTheDocument();
     expect(screen.getByText('System')).toBeInTheDocument();
   });
 
-  it('should show display options section', () => {
-    renderWithUser(<Settings />);
+  it('should show display options section', async () => {
+    await renderSettings();
     expect(screen.getByText('Display Options')).toBeInTheDocument();
     expect(screen.getByText('Reduced Motion')).toBeInTheDocument();
     expect(screen.getByText('Compact Mode')).toBeInTheDocument();
   });
 
-  it('should show all sidebar navigation tabs', () => {
-    renderWithUser(<Settings />);
+  it('should show all sidebar navigation tabs', async () => {
+    await renderSettings();
     expect(screen.getByText('Notifications')).toBeInTheDocument();
     expect(screen.getByText('API Keys')).toBeInTheDocument();
     expect(screen.getByText('AI & Data')).toBeInTheDocument();
@@ -94,21 +104,21 @@ describe('Settings', () => {
   });
 
   it('should show notifications tab when clicked', async () => {
-    const { user } = renderWithUser(<Settings />);
+    const { user } = await renderSettings();
     await user.click(screen.getByText('Notifications'));
     expect(screen.getByText('In-App Notifications')).toBeInTheDocument();
     expect(screen.getByText('Desktop Notifications')).toBeInTheDocument();
   });
 
   it('should show API Keys tab when clicked', async () => {
-    const { user } = renderWithUser(<Settings />);
+    const { user } = await renderSettings();
     await user.click(screen.getByText('API Keys'));
     expect(screen.getByText('Google Gemini API Key')).toBeInTheDocument();
     expect(screen.getByText(/Kimi API Key/)).toBeInTheDocument();
   });
 
   it('should show shortcuts tab when clicked', async () => {
-    const { user } = renderWithUser(<Settings />);
+    const { user } = await renderSettings();
     await user.click(screen.getByText('Shortcuts'));
     expect(screen.getByText('Keyboard Shortcuts')).toBeInTheDocument();
     expect(screen.getByText('Command Palette')).toBeInTheDocument();
@@ -116,7 +126,7 @@ describe('Settings', () => {
   });
 
   it('should show security tab when clicked', async () => {
-    const { user } = renderWithUser(<Settings />);
+    const { user } = await renderSettings();
     await user.click(screen.getByText('Security'));
     expect(screen.getByText('Security & Privacy')).toBeInTheDocument();
     expect(screen.getByText('Danger Zone')).toBeInTheDocument();
@@ -124,7 +134,7 @@ describe('Settings', () => {
   });
 
   it('should show about tab with version info when clicked', async () => {
-    const { user } = renderWithUser(<Settings />);
+    const { user } = await renderSettings();
     await user.click(screen.getByText('About'));
     expect(screen.getByText('About Proficiency Studio')).toBeInTheDocument();
     expect(screen.getByText('1.0.0')).toBeInTheDocument();

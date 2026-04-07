@@ -25,23 +25,36 @@ vi.mock('../../services/api', () => ({
   },
 }));
 
-describe('CSVEditor', () => {
-  it('should have api mock for getFilePreview', async () => {
+describe('CSVEditor API contract', () => {
+  it('getFilePreview resolves with data and columns arrays', async () => {
     const { api } = await import('../../services/api');
-    expect(api.getFilePreview).toBeDefined();
-    expect(typeof api.getFilePreview).toBe('function');
+    const result = await api.getFilePreview('file_1');
+    expect(result).toHaveProperty('data');
+    expect(result).toHaveProperty('columns');
+    expect(Array.isArray(result.data)).toBe(true);
+    expect(Array.isArray(result.columns)).toBe(true);
   });
 
-  it('should have api mock for cell operations', async () => {
+  it('updateCellValue resolves with success status', async () => {
     const { api } = await import('../../services/api');
-    expect(api.updateCellValue).toBeDefined();
-    expect(api.deleteRows).toBeDefined();
+    const result = await api.updateCellValue({
+      file_id: 'file_1',
+      row_index: 0,
+      column_name: 'name',
+      new_value: 'TypeScript',
+    });
+    expect(result).toHaveProperty('status', 'success');
   });
 
-  it('should have toast mock available', async () => {
+  it('deleteRows resolves with success status', async () => {
+    const { api } = await import('../../services/api');
+    const result = await api.deleteRows({ file_id: 'file_1', row_indices: [0, 1] });
+    expect(result).toHaveProperty('status', 'success');
+  });
+
+  it('toast function is callable without throwing', async () => {
     const { useToast } = await import('../../stores/toast-store');
-    expect(useToast).toBeDefined();
     const { toast } = useToast();
-    expect(toast).toBeDefined();
+    expect(() => toast({ title: 'Test' })).not.toThrow();
   });
 });

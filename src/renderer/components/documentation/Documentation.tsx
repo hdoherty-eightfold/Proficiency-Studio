@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import {
   BookOpen,
@@ -30,19 +31,30 @@ const GettingStartedContent = () => (
     <div>
       <h3 className="text-lg font-semibold mb-3">Welcome to Proficiency Studio</h3>
       <p className="text-muted-foreground mb-4">
-        Proficiency Studio is an AI-powered skills assessment platform that helps you evaluate
-        and manage professional competencies across your organization.
+        Proficiency Studio is an AI-powered skills assessment platform that helps you evaluate and
+        manage professional competencies across your organization.
       </p>
     </div>
 
     <div>
       <h4 className="font-medium mb-2">Quick Start</h4>
       <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-        <li>Navigate to <strong>Integration</strong> to import your skills data (CSV, SFTP, or Eightfold API)</li>
-        <li>Go to <strong>Extract Skills</strong> to parse and identify skills from your data</li>
-        <li>Configure assessment parameters in <strong>Configure</strong></li>
-        <li>Run AI-powered assessments in <strong>Assessment</strong></li>
-        <li>Review results and export in <strong>Review</strong></li>
+        <li>
+          Navigate to <strong>Integration</strong> to import your skills data (CSV, SFTP, or
+          Eightfold API)
+        </li>
+        <li>
+          Go to <strong>Extract Skills</strong> to parse and identify skills from your data
+        </li>
+        <li>
+          Configure assessment parameters in <strong>Configure</strong>
+        </li>
+        <li>
+          Run AI-powered assessments in <strong>Assessment</strong>
+        </li>
+        <li>
+          Review results and export in <strong>Review</strong>
+        </li>
       </ol>
     </div>
 
@@ -73,8 +85,8 @@ const IntegrationPathsContent = () => {
             CSV Upload
           </h4>
           <p className="text-sm text-muted-foreground mb-3">
-            Upload a CSV file containing skills data directly from your computer.
-            Supports files up to 5MB with automatic encoding detection.
+            Upload a CSV file containing skills data directly from your computer. Supports files up
+            to 5MB with automatic encoding detection.
           </p>
           <div className="text-sm">
             <strong>Supported formats:</strong>
@@ -92,8 +104,8 @@ const IntegrationPathsContent = () => {
             SFTP Connection
           </h4>
           <p className="text-sm text-muted-foreground mb-3">
-            Connect to an SFTP server to browse and download skills files remotely.
-            Credentials are stored securely using system encryption.
+            Connect to an SFTP server to browse and download skills files remotely. Credentials are
+            stored securely using system encryption.
           </p>
           <div className="text-sm">
             <strong>Requirements:</strong>
@@ -111,8 +123,8 @@ const IntegrationPathsContent = () => {
             Eightfold API
           </h4>
           <p className="text-sm text-muted-foreground mb-3">
-            Connect directly to Eightfold's Talent Intelligence Platform to fetch
-            roles and extract skills from job data.
+            Connect directly to Eightfold's Talent Intelligence Platform to fetch roles and extract
+            skills from job data.
           </p>
           <div className="text-sm">
             <strong>Requirements:</strong>
@@ -125,11 +137,7 @@ const IntegrationPathsContent = () => {
         </div>
       </div>
 
-      <Button
-        variant="outline"
-        onClick={() => setCurrentStep(1)}
-        className="mt-4"
-      >
+      <Button variant="outline" onClick={() => setCurrentStep(1)} className="mt-4">
         Go to Integration <ChevronRight className="ml-2 h-4 w-4" />
       </Button>
     </div>
@@ -219,7 +227,9 @@ const KeyboardShortcutsContent = () => (
           </div>
           <div className="flex justify-between p-2 rounded bg-muted">
             <span>Toggle Theme</span>
-            <kbd className="px-2 py-0.5 rounded bg-background border text-xs">Ctrl/Cmd + Shift + T</kbd>
+            <kbd className="px-2 py-0.5 rounded bg-background border text-xs">
+              Ctrl/Cmd + Shift + T
+            </kbd>
           </div>
           <div className="flex justify-between p-2 rounded bg-muted">
             <span>New Project</span>
@@ -269,8 +279,8 @@ const TroubleshootingContent = () => (
           Special characters appearing incorrectly in your data.
         </p>
         <p className="text-sm">
-          <strong>Solution:</strong> Re-save your CSV as UTF-8 with BOM, or the app will
-          attempt auto-detection of common encodings.
+          <strong>Solution:</strong> Re-save your CSV as UTF-8 with BOM, or the app will attempt
+          auto-detection of common encodings.
         </p>
       </div>
 
@@ -280,16 +290,14 @@ const TroubleshootingContent = () => (
           Operations taking longer than 30 seconds will timeout.
         </p>
         <p className="text-sm">
-          <strong>Solution:</strong> For large batch operations, reduce the batch size
-          or check backend logs for performance issues.
+          <strong>Solution:</strong> For large batch operations, reduce the batch size or check
+          backend logs for performance issues.
         </p>
       </div>
 
       <div className="border rounded-lg p-4">
         <h4 className="font-medium mb-2">SFTP Connection Failed</h4>
-        <p className="text-sm text-muted-foreground mb-2">
-          Cannot connect to your SFTP server.
-        </p>
+        <p className="text-sm text-muted-foreground mb-2">Cannot connect to your SFTP server.</p>
         <p className="text-sm">
           <strong>Solutions:</strong>
         </p>
@@ -323,27 +331,48 @@ const AIConfigContent = () => {
       <div className="space-y-4">
         <div className="border rounded-lg p-4">
           <h4 className="font-medium mb-2 flex items-center gap-2">
-            <span className="bg-green-500/10 text-green-600 px-2 py-0.5 rounded text-sm">Recommended</span>
+            <span className="bg-green-500/10 text-green-600 px-2 py-0.5 rounded text-sm">
+              Recommended
+            </span>
             Google Gemini 3.1
           </h4>
           <p className="text-sm text-muted-foreground mb-2">
-            Fast and FREE. Supports Gemini 3.1 Flash-Lite (fast) and Pro (advanced reasoning) models.
+            Fast and FREE. Supports Gemini 3.1 Flash-Lite (fast) and Pro (advanced reasoning)
+            models.
           </p>
           <div className="text-sm">
-            <strong>Setup:</strong> Get API key from <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">aistudio.google.com</a>
+            <strong>Setup:</strong> Get API key from{' '}
+            <a
+              href="https://aistudio.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              aistudio.google.com
+            </a>
           </div>
         </div>
 
         <div className="border rounded-lg p-4">
           <h4 className="font-medium mb-2 flex items-center gap-2">
-            <span className="bg-green-500/10 text-green-600 px-2 py-0.5 rounded text-sm">Recommended</span>
+            <span className="bg-green-500/10 text-green-600 px-2 py-0.5 rounded text-sm">
+              Recommended
+            </span>
             Kimi K2.5 (Moonshot AI)
           </h4>
           <p className="text-sm text-muted-foreground mb-2">
             Powerful multimodal agentic model with 256K context. OpenAI-compatible API.
           </p>
           <div className="text-sm">
-            <strong>Setup:</strong> Get API key from <a href="https://platform.moonshot.cn" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">platform.moonshot.cn</a>
+            <strong>Setup:</strong> Get API key from{' '}
+            <a
+              href="https://platform.moonshot.cn"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              platform.moonshot.cn
+            </a>
           </div>
         </div>
       </div>
@@ -351,16 +380,13 @@ const AIConfigContent = () => {
       <div className="border-l-4 border-primary bg-primary/5 p-4 rounded-r-lg">
         <h4 className="font-medium mb-2">AI Frameworks</h4>
         <p className="text-sm text-muted-foreground">
-          The backend uses <strong>LangChain</strong> for LLM orchestration and <strong>LangGraph</strong> for
-          workflow state management. <strong>PydanticAI</strong> provides type-safe structured outputs for assessments.
+          The backend uses <strong>LangChain</strong> for LLM orchestration and{' '}
+          <strong>LangGraph</strong> for workflow state management. <strong>PydanticAI</strong>{' '}
+          provides type-safe structured outputs for assessments.
         </p>
       </div>
 
-      <Button
-        variant="outline"
-        onClick={() => setCurrentStep(9)}
-        className="mt-4"
-      >
+      <Button variant="outline" onClick={() => setCurrentStep(9)} className="mt-4">
         Go to Environments <ChevronRight className="ml-2 h-4 w-4" />
       </Button>
     </div>
@@ -373,42 +399,107 @@ const DOC_SECTIONS: DocSection[] = [
     title: 'Getting Started',
     icon: Rocket,
     content: <GettingStartedContent />,
-    keywords: ['welcome', 'start', 'quick', 'setup', 'prerequisites', 'introduction', 'overview', 'begin', 'install'],
+    keywords: [
+      'welcome',
+      'start',
+      'quick',
+      'setup',
+      'prerequisites',
+      'introduction',
+      'overview',
+      'begin',
+      'install',
+    ],
   },
   {
     id: 'integration-paths',
     title: 'Integration Paths',
     icon: GitBranch,
     content: <IntegrationPathsContent />,
-    keywords: ['csv', 'upload', 'sftp', 'eightfold', 'api', 'import', 'data', 'file', 'connect', 'source', 'integration'],
+    keywords: [
+      'csv',
+      'upload',
+      'sftp',
+      'eightfold',
+      'api',
+      'import',
+      'data',
+      'file',
+      'connect',
+      'source',
+      'integration',
+    ],
   },
   {
     id: 'ai-configuration',
     title: 'AI Configuration',
     icon: Cpu,
     content: <AIConfigContent />,
-    keywords: ['ai', 'llm', 'kimi', 'moonshot', 'gemini', 'model', 'provider', 'langchain', 'api key'],
+    keywords: [
+      'ai',
+      'llm',
+      'kimi',
+      'moonshot',
+      'gemini',
+      'model',
+      'provider',
+      'langchain',
+      'api key',
+    ],
   },
   {
     id: 'workflow-steps',
     title: 'Workflow Steps',
     icon: Workflow,
     content: <WorkflowStepsContent />,
-    keywords: ['workflow', 'steps', 'navigate', 'assessment', 'review', 'extract', 'configure', 'history', 'analytics', 'settings'],
+    keywords: [
+      'workflow',
+      'steps',
+      'navigate',
+      'assessment',
+      'review',
+      'extract',
+      'configure',
+      'history',
+      'analytics',
+      'settings',
+    ],
   },
   {
     id: 'keyboard-shortcuts',
     title: 'Keyboard Shortcuts',
     icon: Keyboard,
     content: <KeyboardShortcutsContent />,
-    keywords: ['keyboard', 'shortcut', 'hotkey', 'ctrl', 'cmd', 'navigation', 'sidebar', 'theme', 'action'],
+    keywords: [
+      'keyboard',
+      'shortcut',
+      'hotkey',
+      'ctrl',
+      'cmd',
+      'navigation',
+      'sidebar',
+      'theme',
+      'action',
+    ],
   },
   {
     id: 'troubleshooting',
     title: 'Troubleshooting',
     icon: AlertTriangle,
     content: <TroubleshootingContent />,
-    keywords: ['error', 'problem', 'issue', 'fix', 'solution', 'backend', 'connection', 'timeout', 'encoding', 'storage', 'debug'],
+    keywords: [
+      'error',
+      'problem',
+      'issue',
+      'fix',
+      'solution',
+      'backend',
+      'connection',
+      'timeout',
+      'encoding',
+      'storage',
+      'debug',
+    ],
   },
 ];
 
@@ -447,7 +538,12 @@ export default function Documentation() {
     <div className="min-h-screen p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 rounded-lg bg-primary/10">
               <BookOpen className="h-6 w-6 text-primary" />
@@ -457,12 +553,17 @@ export default function Documentation() {
           <p className="text-muted-foreground">
             Learn how to use Proficiency Studio to assess and manage professional skills.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="flex gap-8">
+        <div className="flex gap-6">
           {/* Sidebar Navigation */}
-          <div className="w-64 shrink-0">
-            <div className="sticky top-8 space-y-4">
+          <motion.div
+            className="w-60 shrink-0"
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            <div className="sticky top-8 space-y-3">
               {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -475,7 +576,7 @@ export default function Documentation() {
               </div>
 
               {/* Section Links */}
-              <nav className="space-y-1">
+              <nav className="space-y-1 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-2">
                 {filteredSections.length > 0 ? (
                   filteredSections.map((section) => {
                     const Icon = section.icon;
@@ -492,43 +593,50 @@ export default function Documentation() {
                             : 'hover:bg-accent text-muted-foreground hover:text-foreground'
                         )}
                       >
-                        <Icon className="h-4 w-4" />
+                        <Icon className="h-4 w-4 shrink-0" />
                         <span className="text-sm font-medium">{section.title}</span>
                       </button>
                     );
                   })
                 ) : (
                   <div className="px-3 py-4 text-sm text-muted-foreground text-center">
-                    No results for "{searchQuery}"
+                    No results for &ldquo;{searchQuery}&rdquo;
                   </div>
                 )}
               </nav>
 
               {/* External Links */}
-              <div className="pt-4 border-t">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+              <div className="pt-2 border-t border-border/50">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1">
                   Resources
                 </p>
                 <a
                   href="https://github.com/ProfStudio/docs"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-1"
                 >
                   <ExternalLink className="h-3 w-3" />
                   Full Documentation
                 </a>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Content Area */}
-          <div className="flex-1 min-w-0">
-            <div className="bg-card rounded-lg border p-6">
+          <motion.div
+            className="flex-1 min-w-0"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
+          >
+            <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/50 shadow-sm p-6">
               {currentSection && (
                 <>
-                  <div className="flex items-center gap-3 mb-6 pb-4 border-b">
-                    <currentSection.icon className="h-5 w-5 text-primary" />
+                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border/50">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <currentSection.icon className="h-5 w-5 text-primary" />
+                    </div>
                     <h2 className="text-xl font-semibold">{currentSection.title}</h2>
                   </div>
                   <ScrollArea className="h-[calc(100vh-300px)]">
@@ -537,7 +645,7 @@ export default function Documentation() {
                 </>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

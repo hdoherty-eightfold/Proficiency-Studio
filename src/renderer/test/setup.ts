@@ -7,6 +7,8 @@
 
 import '@testing-library/jest-dom/vitest';
 import { vi, afterEach } from 'vitest';
+// Initialize i18n with English translations so t() calls resolve in tests
+import '../i18n';
 
 // Mock window.electron for Electron API
 const mockElectronApi = {

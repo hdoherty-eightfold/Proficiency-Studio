@@ -92,8 +92,8 @@
     --ps-radius-lg: 0.5rem;
 
     /* Design tokens: shadows */
-    --ps-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-    --ps-shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --ps-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --ps-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
 
     /* Design tokens: transitions */
     --ps-transition-fast: 150ms ease;
@@ -168,20 +168,58 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+  }
+
+  /* Modern glass scrollbars — applied globally, never gray */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.3) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary) / 0.55) 0%,
+      hsl(var(--primary) / 0.28) 100%
+    );
+    border-radius: 100px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary) / 0.85) 0%,
+      hsl(var(--primary) / 0.6) 100%
+    );
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar utility — for explicit use, matches global glass style */
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+    scrollbar-color: hsl(var(--primary) / 0.3) transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -189,12 +227,24 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.3);
-    border-radius: 4px;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary) / 0.55) 0%,
+      hsl(var(--primary) / 0.28) 100%
+    );
+    border-radius: 100px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.5);
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary) / 0.85) 0%,
+      hsl(var(--primary) / 0.6) 100%
+    );
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-corner {
+    background: transparent;
   }
 }
 
@@ -202,44 +252,6 @@
 @layer utilities {
   .transition-smooth {
     transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
-/* Glass morphism effects */
-@layer utilities {
-  .glass {
-    background: hsl(var(--background) / 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  .glass-light {
-    background: hsl(var(--background) / 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-
-  .glass-strong {
-    background: hsl(var(--background) / 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-}
-
-/* Gradient text — Eightfold brand: teal → electric blue → purple */
-@layer utilities {
-  .text-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(240 96% 48%) 50%, hsl(250 66% 56%) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .text-gradient-success {
-    background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(160 84% 39%) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
 }
 
@@ -261,12 +273,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      hsl(var(--foreground) / 0.05),
-      transparent
-    );
+    background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.05), transparent);
     animation: shimmer 2s infinite;
   }
 }
@@ -275,6 +282,18 @@
 @layer utilities {
   .card-interactive {
     @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/20;
+  }
+}
+
+/* Reduced motion support for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -294,5 +313,66 @@
   }
   .elevation-5 {
     box-shadow: var(--shadow-xl);
+  }
+}
+
+/* Partial arc gradient border — Google-search-bar inspired
+ * Creates a colored arc covering the left + top edges only (conic-gradient + mask trick).
+ * The remaining edges stay transparent so only ~40% of the border perimeter is coloured. */
+@layer utilities {
+  .arc-border {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .arc-border::before {
+    content: '';
+    position: absolute;
+    inset: -1.5px;
+    border-radius: inherit;
+    /* conic-gradient from 180° (6-o'clock). Clockwise:
+       80–95° range  → 9-o'clock (left centre)  : teal
+       95–155°       → across left → top         : teal → blue
+       155–180°      → top → past top-centre      : blue → purple
+       180–200°      → fade to transparent        */
+    background: conic-gradient(
+      from 180deg at 50% 50%,
+      transparent 0deg,
+      transparent 78deg,
+      hsl(var(--primary)) 93deg,
+      #3b82f6 148deg,
+      #a855f7 180deg,
+      transparent 205deg,
+      transparent 360deg
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    padding: 1.5px;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.85;
+    transition: opacity 200ms ease;
+  }
+
+  .arc-border:hover::before {
+    opacity: 1;
+  }
+}
+
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+    width: 40%;
+  }
+  60% {
+    transform: translateX(250%);
+    width: 40%;
+  }
+  100% {
+    transform: translateX(250%);
+    width: 40%;
   }
 }

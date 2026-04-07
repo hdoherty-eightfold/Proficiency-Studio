@@ -1,0 +1,160 @@
+{
+  "common": {
+    "back": "Back",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "close": "Close",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "yes": "Yes",
+    "no": "No",
+    "startOver": "Start Over"
+  },
+  "nav": {
+    "welcome": "Welcome",
+    "integration": "Integration",
+    "extractSkills": "Extract Skills",
+    "configure": "Configure",
+    "assessment": "Assessment",
+    "review": "Review",
+    "history": "History",
+    "analytics": "Analytics",
+    "prompts": "Prompts",
+    "environments": "Environments",
+    "settings": "Settings",
+    "documentation": "Documentation",
+    "workflow": "Workflow",
+    "tools": "Tools",
+    "workflowProgress": "Workflow Progress",
+    "stepsCompleted": "{{completed}} of {{total}} steps completed",
+    "connected": "Connected",
+    "eightfoldApi": "Eightfold API",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar"
+  },
+  "sidebar": {
+    "startOver": {
+      "title": "Start Over?",
+      "description": "This will reset your workflow progress and clear imported skills. Your API keys and settings will be kept.",
+      "confirm": "Start Over"
+    }
+  },
+  "welcome": {
+    "title": "Welcome to Proficiency Studio",
+    "subtitle": "AI-Powered Skills Assessment",
+    "description": "Proficiency Studio helps you assess employee skills using AI. Connect your data source, extract skills, and run a proficiency assessment in minutes.",
+    "getStarted": "Get Started",
+    "features": {
+      "aiPowered": {
+        "title": "AI-Powered Assessment",
+        "description": "Leverage state-of-the-art LLMs to assess proficiency levels with high accuracy"
+      },
+      "multiSource": {
+        "title": "Multiple Data Sources",
+        "description": "Import from CSV files, SFTP servers, or connect directly to Eightfold API"
+      },
+      "exportReady": {
+        "title": "Export Ready",
+        "description": "Export results to CSV or directly to Eightfold for immediate use"
+      }
+    }
+  },
+  "integration": {
+    "title": "Choose Integration Path",
+    "subtitle": "Select how you want to import your skills data",
+    "csv": {
+      "title": "CSV Upload",
+      "description": "Upload a CSV file with your skills data"
+    },
+    "sftp": {
+      "title": "SFTP Server",
+      "description": "Connect to an SFTP server to fetch employee data"
+    },
+    "api": {
+      "title": "API Connection",
+      "description": "Connect to Eightfold API to fetch roles"
+    },
+    "noSource": "No data source detected. Go back to Step 1 to choose an integration type.",
+    "changeType": "Change Integration Type"
+  },
+  "extractSkills": {
+    "title": "Extract Skills",
+    "subtitle": "Extract unique skills from your selected data source",
+    "extract": "Extract Skills",
+    "extracting": "Extracting...",
+    "totalSkills": "Total Skills",
+    "status": "Status",
+    "lastExtracted": "Last Extracted",
+    "viewSkills": "View Skills List",
+    "hideSkills": "Hide Skills List",
+    "showQuality": "Show Quality Analysis",
+    "hideQuality": "Hide Quality Analysis",
+    "extracted": "Extracted {{count}} skills",
+    "emptySource": "No data source detected. Go back to Step 1 to choose an integration type.",
+    "errorRetry": "Correct the issue above and try again."
+  },
+  "configure": {
+    "title": "Configure Proficiency Assessment",
+    "subtitle": "Set up proficiency levels, choose your LLM provider, and customize assessment prompts",
+    "loadConfig": "Load Config",
+    "saveConfig": "Save Config",
+    "continueToAssessment": "Continue to Assessment",
+    "apiKeyRequired": "API Key Required",
+    "skillsRequired": "Skills Required",
+    "configSaved": "Configuration Saved"
+  },
+  "assessment": {
+    "title": "Run Assessment",
+    "start": "Start Assessment",
+    "cancel": "Cancel Assessment",
+    "running": "Running assessment...",
+    "complete": "Assessment Complete"
+  },
+  "review": {
+    "title": "Review & Export",
+    "skillsAssessed": "{{count}} skills assessed",
+    "exportCsv": "Export CSV",
+    "exportToEightfold": "Export to Eightfold",
+    "noResults": "No assessment results available.",
+    "noResultsHint": "Run an assessment in the previous step to see results here.",
+    "columns": {
+      "skill": "Skill",
+      "level": "Level",
+      "confidence": "Confidence",
+      "reasoning": "Reasoning",
+      "evidence": "Evidence"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "apiKeys": "API Keys",
+    "geminiKey": "Google Gemini API Key",
+    "kimiKey": "Kimi API Key",
+    "kimiSubtitle": "(Moonshot AI)",
+    "save": "Save"
+  },
+  "backend": {
+    "starting": "Backend is starting up...",
+    "failed": "Backend failed to start",
+    "connected": "Backend connected",
+    "disconnected": "Backend offline",
+    "checking": "Checking connection..."
+  },
+  "errors": {
+    "noApiKey": "Please configure an API key first",
+    "noSkills": "No skills found",
+    "noIntegration": "No data source selected. Please go back to Step 1.",
+    "loadFailed": "Failed to load data. Please try again.",
+    "accessDenied": "Access denied",
+    "unexpected": "An unexpected error occurred"
+  }
+}

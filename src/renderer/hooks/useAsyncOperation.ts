@@ -41,22 +41,18 @@ export interface AsyncOperationReturn<T> extends AsyncOperationState<T> {
   getSignal: () => AbortSignal | undefined;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useAsyncOperation<T = any>(
   options: UseAsyncOperationOptions<T> = {}
 ): AsyncOperationReturn<T> {
-  const {
-    onSuccess,
-    onError,
-    abortOnUnmount = true,
-    initialData = null
-  } = options;
+  const { onSuccess, onError, abortOnUnmount = true, initialData = null } = options;
 
   const [state, setState] = useState<AsyncOperationState<T>>({
     data: initialData,
     isLoading: false,
     error: null,
     isSuccess: false,
-    isError: false
+    isError: false,
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -73,72 +69,72 @@ export function useAsyncOperation<T = any>(
     };
   }, [abortOnUnmount]);
 
-  const execute = useCallback(async (
-    asyncFn: (signal: AbortSignal) => Promise<T>,
-    context?: string
-  ): Promise<T | null> => {
-    // Abort any previous operation
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
+  const execute = useCallback(
+    async (asyncFn: (signal: AbortSignal) => Promise<T>, context?: string): Promise<T | null> => {
+      // Abort any previous operation
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = new AbortController();
 
-    // Update state to loading
-    setState({
-      data: null,
-      isLoading: true,
-      error: null,
-      isSuccess: false,
-      isError: false
-    });
-
-    try {
-      const result = await asyncFn(abortControllerRef.current.signal);
-
-      // Don't update state if unmounted
-      if (!mountedRef.current) return null;
-
-      setState({
-        data: result,
-        isLoading: false,
-        error: null,
-        isSuccess: true,
-        isError: false
-      });
-
-      onSuccess?.(result);
-      return result;
-    } catch (error: unknown) {
-      // Don't update state if unmounted
-      if (!mountedRef.current) return null;
-
-      // Don't treat abort as error
-      if (error instanceof Error && error.name === 'AbortError') {
-        setState(prev => ({
-          ...prev,
-          isLoading: false
-        }));
-        return null;
-      }
-
-      const appError = createAppError(error, context);
-
+      // Update state to loading
       setState({
         data: null,
-        isLoading: false,
-        error: appError,
+        isLoading: true,
+        error: null,
         isSuccess: false,
-        isError: true
+        isError: false,
       });
 
-      onError?.(appError);
-      return null;
-    }
-  }, [onSuccess, onError]);
+      try {
+        const result = await asyncFn(abortControllerRef.current.signal);
+
+        // Don't update state if unmounted
+        if (!mountedRef.current) return null;
+
+        setState({
+          data: result,
+          isLoading: false,
+          error: null,
+          isSuccess: true,
+          isError: false,
+        });
+
+        onSuccess?.(result);
+        return result;
+      } catch (error: unknown) {
+        // Don't update state if unmounted
+        if (!mountedRef.current) return null;
+
+        // Don't treat abort as error
+        if (error instanceof Error && error.name === 'AbortError') {
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+          }));
+          return null;
+        }
+
+        const appError = createAppError(error, context);
+
+        setState({
+          data: null,
+          isLoading: false,
+          error: appError,
+          isSuccess: false,
+          isError: true,
+        });
+
+        onError?.(appError);
+        return null;
+      }
+    },
+    [onSuccess, onError]
+  );
 
   const abort = useCallback(() => {
     abortControllerRef.current?.abort();
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      isLoading: false
+      isLoading: false,
     }));
   }, []);
 
@@ -149,7 +145,7 @@ export function useAsyncOperation<T = any>(
       isLoading: false,
       error: null,
       isSuccess: false,
-      isError: false
+      isError: false,
     });
   }, [initialData]);
 
@@ -162,7 +158,7 @@ export function useAsyncOperation<T = any>(
     execute,
     abort,
     reset,
-    getSignal
+    getSignal,
   };
 }
 
@@ -177,34 +173,35 @@ export function useAsyncOperations<TKeys extends string>() {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
-      // Abort all operations on unmount
-      operations.current.forEach(controller => controller.abort());
+      // Abort all pending operations on unmount — intentionally reads ref at cleanup time
+      operations.current.forEach((controller) => controller.abort());
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       operations.current.clear();
     };
   }, []);
 
-  const execute = useCallback(async <T>(
-    key: TKeys,
-    asyncFn: (signal: AbortSignal) => Promise<T>
-  ): Promise<T | null> => {
-    // Abort previous operation with same key
-    operations.current.get(key)?.abort();
+  const execute = useCallback(
+    async <T>(key: TKeys, asyncFn: (signal: AbortSignal) => Promise<T>): Promise<T | null> => {
+      // Abort previous operation with same key
+      operations.current.get(key)?.abort();
 
-    const controller = new AbortController();
-    operations.current.set(key, controller);
+      const controller = new AbortController();
+      operations.current.set(key, controller);
 
-    try {
-      const result = await asyncFn(controller.signal);
-      operations.current.delete(key);
-      return result;
-    } catch (error: unknown) {
-      operations.current.delete(key);
-      if (error instanceof Error && error.name === 'AbortError') {
-        return null;
+      try {
+        const result = await asyncFn(controller.signal);
+        operations.current.delete(key);
+        return result;
+      } catch (error: unknown) {
+        operations.current.delete(key);
+        if (error instanceof Error && error.name === 'AbortError') {
+          return null;
+        }
+        throw error;
       }
-      throw error;
-    }
-  }, []);
+    },
+    []
+  );
 
   const abort = useCallback((key: TKeys) => {
     operations.current.get(key)?.abort();
@@ -212,7 +209,7 @@ export function useAsyncOperations<TKeys extends string>() {
   }, []);
 
   const abortAll = useCallback(() => {
-    operations.current.forEach(controller => controller.abort());
+    operations.current.forEach((controller) => controller.abort());
     operations.current.clear();
   }, []);
 
@@ -224,13 +221,14 @@ export function useAsyncOperations<TKeys extends string>() {
     execute,
     abort,
     abortAll,
-    isRunning
+    isRunning,
   };
 }
 
 /**
  * Hook for debounced async operations
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useDebouncedAsyncOperation<T = any>(
   delay: number = 300,
   options: UseAsyncOperationOptions<T> = {}
@@ -238,20 +236,20 @@ export function useDebouncedAsyncOperation<T = any>(
   const asyncOp = useAsyncOperation<T>(options);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const executeDebounced = useCallback((
-    asyncFn: (signal: AbortSignal) => Promise<T>,
-    context?: string
-  ) => {
-    // Clear existing debounce timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
+  const executeDebounced = useCallback(
+    (asyncFn: (signal: AbortSignal) => Promise<T>, context?: string) => {
+      // Clear existing debounce timer
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
 
-    // Set new debounce timer
-    debounceTimerRef.current = setTimeout(() => {
-      asyncOp.execute(asyncFn, context);
-    }, delay);
-  }, [asyncOp, delay]);
+      // Set new debounce timer
+      debounceTimerRef.current = setTimeout(() => {
+        asyncOp.execute(asyncFn, context);
+      }, delay);
+    },
+    [asyncOp, delay]
+  );
 
   const cancel = useCallback(() => {
     if (debounceTimerRef.current) {
@@ -272,6 +270,6 @@ export function useDebouncedAsyncOperation<T = any>(
   return {
     ...asyncOp,
     executeDebounced,
-    cancel
+    cancel,
   };
 }

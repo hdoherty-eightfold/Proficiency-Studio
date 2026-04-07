@@ -162,7 +162,13 @@ class ElectronAPIService {
    * Listen for assessment streaming events
    * Returns a cleanup function to stop listening
    */
-  onAssessmentEvent(callback: (event: { streamId: string; eventType: string; data: Record<string, unknown> }) => void): () => void {
+  onAssessmentEvent(
+    callback: (event: {
+      streamId: string;
+      eventType: string;
+      data: Record<string, unknown>;
+    }) => void
+  ): () => void {
     if (!window.electron) {
       throw new Error('Electron API not available');
     }
@@ -182,7 +188,9 @@ class ElectronAPIService {
   /**
    * Save assessment results to a JSON file
    */
-  async saveAssessmentResults(data: Record<string, unknown>): Promise<{ success: boolean; filePath?: string; filename?: string; error?: string }> {
+  async saveAssessmentResults(
+    data: Record<string, unknown>
+  ): Promise<{ success: boolean; filePath?: string; filename?: string; error?: string }> {
     if (!window.electron) {
       throw new Error('Electron API not available');
     }
@@ -192,7 +200,27 @@ class ElectronAPIService {
   /**
    * List previously saved assessment files
    */
-  async listSavedAssessments(): Promise<{ success: boolean; assessments: Array<{ filename: string; saved_at: string; total_skills: number; avg_proficiency: number; model_used: string }>; error?: string }> {
+  async listSavedAssessments(): Promise<{
+    success: boolean;
+    assessments: Array<{
+      filename: string;
+      saved_at: string;
+      total_skills: number;
+      avg_proficiency: number;
+      avg_confidence: number;
+      model_used: string;
+      provider: string;
+      processing_time: number;
+      content_hash: string;
+      extraction_source: string;
+      source_filename: string;
+      environment_name: string;
+      total_tokens: number;
+      estimated_cost: number;
+      success_rate: number;
+    }>;
+    error?: string;
+  }> {
     if (!window.electron) {
       throw new Error('Electron API not available');
     }
@@ -202,11 +230,23 @@ class ElectronAPIService {
   /**
    * Load a specific saved assessment by filename
    */
-  async loadSavedAssessment(filename: string): Promise<{ success: boolean; data?: unknown; error?: string }> {
+  async loadSavedAssessment(
+    filename: string
+  ): Promise<{ success: boolean; data?: unknown; error?: string }> {
     if (!window.electron) {
       throw new Error('Electron API not available');
     }
     return window.electron.assessmentStorage.loadSaved(filename);
+  }
+
+  /**
+   * Delete a saved assessment by filename
+   */
+  async deleteSavedAssessment(filename: string): Promise<{ success: boolean; error?: string }> {
+    if (!window.electron) {
+      throw new Error('Electron API not available');
+    }
+    return window.electron.assessmentStorage.deleteSaved(filename);
   }
 }
 

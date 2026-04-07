@@ -2,6 +2,10 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // Skills types
+// NOTE: This is a CLIENT-SIDE SUPERSET of the API's Skill type (src/renderer/types/api.ts).
+// The `proficiency` and `proficiency_name` fields are added client-side after assessment
+// and are never present in the raw API response. Components reading these fields must
+// only do so after the assessment flow has run (step 4 → store enrichment).
 export interface Skill {
   id?: string;
   name: string;
@@ -9,8 +13,8 @@ export interface Skill {
   category?: string;
   source?: 'csv' | 'api' | 'sftp';
   sourceId?: string;
-  proficiency?: number;        // 1-5 proficiency level
-  proficiency_name?: string;   // e.g., "Novice", "Expert"
+  proficiency?: number; // 1-5 proficiency level (client-side, post-assessment)
+  proficiency_name?: string; // e.g., "Novice", "Expert" (client-side, post-assessment)
 }
 
 export interface SkillsState {
@@ -56,6 +60,12 @@ interface AppState {
   // Settings
   autoAdvanceEnabled: boolean;
 
+  // Connected API environment (e.g. Eightfold)
+  connectedEnvironment: { name: string; url: string } | null;
+
+  // Connected SFTP server
+  connectedSFTPServer: { id: string; name: string; host: string } | null;
+
   // Actions
   setCurrentStep: (step: number) => void;
   nextStep: () => void;
@@ -69,6 +79,8 @@ interface AppState {
   resetSkillsState: () => void;
   setUploadedFile: (file: UploadResponse | null) => void;
   setAutoAdvanceEnabled: (enabled: boolean) => void;
+  setConnectedEnvironment: (env: { name: string; url: string } | null) => void;
+  setConnectedSFTPServer: (server: { id: string; name: string; host: string } | null) => void;
   markStepCompleted: (step: number) => void;
   markStepIncomplete: (step: number) => void;
   resetWorkflowProgress: () => void;
@@ -117,6 +129,8 @@ export const useAppStore = create<AppState>()(
       skillsState: INITIAL_SKILLS_STATE,
       uploadedFile: null,
       autoAdvanceEnabled: true,
+      connectedEnvironment: null,
+      connectedSFTPServer: null,
 
       setCurrentStep: (step) => {
         if (step >= 0 && step < STEP_NAMES.length) {
@@ -125,9 +139,12 @@ export const useAppStore = create<AppState>()(
       },
 
       nextStep: () => {
-        const { currentStep } = get();
+        const { currentStep, completedSteps } = get();
         if (currentStep < STEP_NAMES.length - 1) {
-          set({ currentStep: currentStep + 1 });
+          // Auto-mark the current step as completed when advancing
+          const newCompleted = new Set(completedSteps);
+          newCompleted.add(currentStep);
+          set({ currentStep: currentStep + 1, completedSteps: newCompleted });
         }
       },
 
@@ -149,7 +166,7 @@ export const useAppStore = create<AppState>()(
       setLoading: (loading, message = '') => {
         set({ isLoading: loading, loadingMessage: message });
       },
-      
+
       setError: (error) => {
         set({ error });
       },
@@ -160,7 +177,7 @@ export const useAppStore = create<AppState>()(
 
       updateSkillsState: (updates) => {
         set((state) => ({
-          skillsState: { ...state.skillsState, ...updates }
+          skillsState: { ...state.skillsState, ...updates },
         }));
       },
 
@@ -174,6 +191,14 @@ export const useAppStore = create<AppState>()(
 
       setAutoAdvanceEnabled: (enabled) => {
         set({ autoAdvanceEnabled: enabled });
+      },
+
+      setConnectedEnvironment: (env) => {
+        set({ connectedEnvironment: env });
+      },
+
+      setConnectedSFTPServer: (server) => {
+        set({ connectedSFTPServer: server });
       },
 
       markStepCompleted: (step) => {
@@ -193,7 +218,18 @@ export const useAppStore = create<AppState>()(
       },
 
       resetWorkflowProgress: () => {
-        set({ completedSteps: new Set<number>() });
+        // Clear all workflow-related localStorage keys
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith('profstudio_'))
+          .forEach((k) => localStorage.removeItem(k));
+        set({
+          currentStep: 0,
+          completedSteps: new Set<number>(),
+          skillsState: INITIAL_SKILLS_STATE,
+          uploadedFile: null,
+          connectedEnvironment: null,
+          connectedSFTPServer: null,
+        });
       },
 
       getStepName: (step) => {
@@ -203,7 +239,9 @@ export const useAppStore = create<AppState>()(
       getWorkflowProgress: () => {
         const { completedSteps } = get();
         // Only count workflow steps (0-5)
-        const workflowCompleted = Array.from(completedSteps).filter(s => s < WORKFLOW_STEP_COUNT).length;
+        const workflowCompleted = Array.from(completedSteps).filter(
+          (s) => s < WORKFLOW_STEP_COUNT
+        ).length;
         return {
           completed: workflowCompleted,
           total: WORKFLOW_STEP_COUNT,
@@ -218,9 +256,13 @@ export const useAppStore = create<AppState>()(
         isSidebarCollapsed: state.isSidebarCollapsed,
         autoAdvanceEnabled: state.autoAdvanceEnabled,
         completedSteps: Array.from(state.completedSteps), // Convert Set to Array for JSON serialization
+        connectedEnvironment: state.connectedEnvironment,
+        skillsState: state.skillsState,
       }),
       merge: (persistedState: unknown, currentState: AppState) => {
-        const state = persistedState as Partial<AppState> & { completedSteps?: number[] } | undefined;
+        const state = persistedState as
+          | (Partial<AppState> & { completedSteps?: number[] })
+          | undefined;
         return {
           ...currentState,
           ...state,

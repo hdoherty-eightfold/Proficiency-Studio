@@ -9,6 +9,7 @@ import { CommandPalette } from '@/components/common/CommandPalette';
 import { Loader2 } from 'lucide-react';
 import { Skeleton, SkeletonStats } from '@/components/ui/skeleton';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { useWindowSize } from '@/hooks/useWindowSize';
 
 /**
  * Lazy-loaded step components for code splitting
@@ -73,18 +74,18 @@ const PageTransition = ({ children, pageKey }: { children: React.ReactNode; page
  * Step component mapping for cleaner rendering
  */
 const STEP_COMPONENTS = [
-  Welcome,           // 0
-  IntegrationPath,   // 1
-  ExtractSkills,     // 2
+  Welcome, // 0
+  IntegrationPath, // 1
+  ExtractSkills, // 2
   ConfigureProficiency, // 3
-  RunAssessment,     // 4
-  ReviewAssessment,  // 5
+  RunAssessment, // 4
+  ReviewAssessment, // 5
   AssessmentHistory, // 6
   AnalyticsDashboard, // 7
-  PromptEditor,      // 8
+  PromptEditor, // 8
   EnvironmentManager, // 9
-  Settings,          // 10
-  Documentation,     // 11
+  Settings, // 10
+  Documentation, // 11
 ];
 
 /**
@@ -94,20 +95,31 @@ const STEP_COMPONENTS = [
 function App() {
   const currentStep = useAppStore((state) => state.currentStep);
   const isSidebarCollapsed = useAppStore((state) => state.isSidebarCollapsed);
+  const setSidebarCollapsed = useAppStore((state) => state.setSidebarCollapsed);
   const setCurrentStep = useAppStore((state) => state.setCurrentStep);
   const nextStep = useAppStore((state) => state.nextStep);
   const previousStep = useAppStore((state) => state.previousStep);
 
+  const { width: windowWidth } = useWindowSize();
   const [backendError, setBackendError] = useState<string | null>(null);
+
+  // Auto-collapse sidebar when window is narrow
+  useEffect(() => {
+    if (windowWidth < 768 && !isSidebarCollapsed) {
+      setSidebarCollapsed(true);
+    }
+  }, [windowWidth, isSidebarCollapsed, setSidebarCollapsed]);
 
   // Listen for backend crash/failure notifications
   useEffect(() => {
     if (!window.electron?.onBackendStatus) return;
-    const cleanup = window.electron.onBackendStatus((status: { status: string; error?: string }) => {
-      if (status.status === 'crashed' || status.status === 'failed') {
-        setBackendError(status.error || 'Backend is unavailable');
+    const cleanup = window.electron.onBackendStatus(
+      (status: { status: string; error?: string }) => {
+        if (status.status === 'crashed' || status.status === 'failed') {
+          setBackendError(status.error || 'Backend is unavailable');
+        }
       }
-    });
+    );
     return cleanup;
   }, []);
 
@@ -158,7 +170,7 @@ function App() {
             {/* Skip to content link for keyboard navigation */}
             <a
               href="#main-content"
-              className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-white focus:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-background focus:text-primary focus:outline-none focus:ring-2 focus:ring-ring focus:rounded-md"
             >
               Skip to content
             </a>
@@ -167,11 +179,16 @@ function App() {
             <BackendStatusBanner />
 
             {/* Backend crash/failure banner */}
-            {backendError && (
-              <div className="bg-red-600 text-white px-4 py-2 text-sm text-center font-medium">
-                Backend Error: {backendError}. Please restart the application.
-              </div>
-            )}
+            <div aria-live="assertive" aria-atomic="true">
+              {backendError && (
+                <div
+                  role="alert"
+                  className="bg-destructive text-destructive-foreground px-4 py-2 text-sm text-center font-medium"
+                >
+                  Backend Error: {backendError}. Please restart the application.
+                </div>
+              )}
+            </div>
 
             <div className="flex flex-1">
               {/* Sidebar Navigation */}

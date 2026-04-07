@@ -1,10 +1,15 @@
 import { IpcMain, dialog, BrowserWindow, safeStorage, app } from 'electron';
-import { readFile, writeFile, readdir, mkdir } from 'fs/promises';
+import { readFile, writeFile, readdir, mkdir, unlink } from 'fs/promises';
+import { createHash, randomUUID } from 'crypto';
 import * as path from 'path';
 import axios, { AxiosError } from 'axios';
+import * as FormData from 'form-data';
 import log from 'electron-log';
-import { validateAndSanitizePath, isPathAllowed, sanitizeFilename } from './utils/path-validator.js';
-import { randomUUID } from 'crypto';
+import {
+  validateAndSanitizePath,
+  isPathAllowed,
+  sanitizeFilename,
+} from './utils/path-validator.js';
 
 // Maximum content size for file operations (50MB)
 const MAX_CONTENT_SIZE = 50 * 1024 * 1024;
@@ -19,6 +24,37 @@ const HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
 
 // Track active SSE connections for cancellation
 const activeStreams = new Map<string, AbortController>();
+
+// Allowlist of permitted store keys — prevents arbitrary data injection via renderer
+const ALLOWED_STORE_KEYS = new Set([
+  'theme',
+  'sidebarCollapsed',
+  'currentStep',
+  'completedSteps',
+  'windowBounds',
+  'lastUsedProvider',
+  'lastUsedModel',
+  'connectedEnvironment',
+  'assessmentConfig',
+]);
+
+// Maximum SSE chunk buffer size (prevent memory exhaustion on malformed streams)
+const MAX_SSE_BUFFER_SIZE = 1024 * 1024; // 1MB
+
+/**
+ * Validate that a backend API endpoint is safe to proxy.
+ * Allows only relative paths starting with '/' and rejects path traversal.
+ */
+function validateEndpoint(endpoint: string): void {
+  if (
+    typeof endpoint !== 'string' ||
+    !endpoint.startsWith('/') ||
+    endpoint.includes('..') ||
+    /[\r\n]/.test(endpoint)
+  ) {
+    throw new Error(`Invalid API endpoint: ${endpoint}`);
+  }
+}
 
 // Module-level backend URL and client — set in setupIpcHandlers
 let BACKEND_URL = 'http://127.0.0.1:8000';
@@ -37,7 +73,7 @@ async function checkBackendHealth(): Promise<boolean> {
 
   try {
     const response = await axios.get(`${BACKEND_URL}/health`, {
-      timeout: 5000
+      timeout: 5000,
     });
     backendHealthy = response.data?.status === 'healthy' || response.status === 200;
     lastHealthCheck = now;
@@ -52,10 +88,14 @@ async function checkBackendHealth(): Promise<boolean> {
 /**
  * Format error message from API response
  */
-function formatApiError(error: AxiosError<{ detail?: string | Array<{ msg?: string }> | { msg?: string } } | unknown>): string {
+function formatApiError(
+  error: AxiosError<{ detail?: string | Array<{ msg?: string }> | { msg?: string } } | unknown>
+): string {
   // Connection refused
   if (error.code === 'ECONNREFUSED') {
-    return 'Cannot connect to backend server. Please ensure the backend is running on ' + BACKEND_URL;
+    return (
+      'Cannot connect to backend server. Please ensure the backend is running on ' + BACKEND_URL
+    );
   }
 
   // Timeout
@@ -70,11 +110,14 @@ function formatApiError(error: AxiosError<{ detail?: string | Array<{ msg?: stri
 
   // API response error
   const data = error.response?.data;
-  const detail = data && typeof data === 'object' && 'detail' in data ? (data as Record<string, unknown>).detail : undefined;
+  const detail =
+    data && typeof data === 'object' && 'detail' in data
+      ? (data as Record<string, unknown>).detail
+      : undefined;
   if (Array.isArray(detail)) {
     return detail.map((e: Record<string, unknown>) => e.msg || JSON.stringify(e)).join('; ');
   } else if (typeof detail === 'object' && detail !== null) {
-    return (detail as Record<string, unknown>).msg as string || JSON.stringify(detail);
+    return ((detail as Record<string, unknown>).msg as string) || JSON.stringify(detail);
   } else if (detail) {
     return String(detail);
   }
@@ -96,6 +139,15 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
     apiClient = axios.create({ baseURL: BACKEND_URL, timeout: API_TIMEOUT });
   }
   log.info('Setting up IPC handlers, backend URL:', BACKEND_URL);
+
+  // Renderer → main log bridge: forwards renderer console.* to electron-log file
+  ipcMain.on(
+    'log:renderer',
+    (_event, level: 'info' | 'warn' | 'error' | 'debug', message: string, ...args: unknown[]) => {
+      const logFn = log[level] ?? log.info;
+      logFn('[renderer]', message, ...args);
+    }
+  );
 
   // Window controls
   ipcMain.on('window:close', (event) => {
@@ -123,14 +175,23 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
   });
 
   ipcMain.handle('store:set', (_, key: string, value: unknown) => {
+    if (typeof key !== 'string' || !ALLOWED_STORE_KEYS.has(key)) {
+      log.warn(`store:set rejected for key: ${key}`);
+      throw new Error(`Store key not permitted: ${key}`);
+    }
     store.set(key, value);
   });
 
   ipcMain.handle('store:delete', (_, key: string) => {
+    if (typeof key !== 'string' || !ALLOWED_STORE_KEYS.has(key)) {
+      log.warn(`store:delete rejected for key: ${key}`);
+      throw new Error(`Store key not permitted: ${key}`);
+    }
     store.delete(key);
   });
 
   ipcMain.handle('store:clear', () => {
+    log.warn('store:clear called — wiping all persisted settings');
     store.clear();
   });
 
@@ -192,7 +253,7 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
 
   // File dialogs
   ipcMain.handle('dialog:select-file', async (event, options) => {
-    const win= BrowserWindow.fromWebContents(event.sender);
+    const win = BrowserWindow.fromWebContents(event.sender);
     if (!win) return undefined;
 
     const result = await dialog.showOpenDialog(win, {
@@ -236,7 +297,9 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
 
       // Validate content size to prevent DoS
       if (content.length > MAX_CONTENT_SIZE) {
-        throw new Error(`Content exceeds maximum allowed size (${MAX_CONTENT_SIZE / 1024 / 1024}MB)`);
+        throw new Error(
+          `Content exceeds maximum allowed size (${MAX_CONTENT_SIZE / 1024 / 1024}MB)`
+        );
       }
 
       await writeFile(validatedPath, content, 'utf-8');
@@ -259,15 +322,18 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
   ipcMain.handle('api:health-check', async () => {
     const isHealthy = await checkBackendHealth();
     return {
+      status: isHealthy ? 'healthy' : 'unhealthy',
       healthy: isHealthy,
       backendUrl: BACKEND_URL,
-      lastChecked: new Date(lastHealthCheck).toISOString()
+      timestamp: new Date(lastHealthCheck).toISOString(),
+      lastChecked: new Date(lastHealthCheck).toISOString(),
     };
   });
 
   // Backend API proxy with health check and timeouts
   ipcMain.handle('api:get', async (_, endpoint: string, params?: Record<string, unknown>) => {
     try {
+      validateEndpoint(endpoint);
       log.info(`API GET: ${endpoint}`, params);
       const response = await apiClient.get(endpoint, { params });
       return response.data;
@@ -280,6 +346,7 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
 
   ipcMain.handle('api:post', async (_, endpoint: string, data?: unknown) => {
     try {
+      validateEndpoint(endpoint);
       log.info(`API POST: ${endpoint}`);
       const response = await apiClient.post(endpoint, data);
       return response.data;
@@ -292,6 +359,7 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
 
   ipcMain.handle('api:put', async (_, endpoint: string, data?: unknown) => {
     try {
+      validateEndpoint(endpoint);
       log.info(`API PUT: ${endpoint}`);
       const response = await apiClient.put(endpoint, data);
       return response.data;
@@ -304,6 +372,7 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
 
   ipcMain.handle('api:delete', async (_, endpoint: string) => {
     try {
+      validateEndpoint(endpoint);
       log.info(`API DELETE: ${endpoint}`);
       const response = await apiClient.delete(endpoint);
       return response.data;
@@ -320,7 +389,6 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
       log.info(`API UPLOAD: ${endpoint}`, filePaths.length, 'files');
 
       // Use form-data package for Node.js file uploads
-      const FormData = require('form-data');
       const formData = new FormData();
 
       // Read files from disk and append to form data (with path validation)
@@ -341,7 +409,7 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
         headers: formData.getHeaders(),
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
-        timeout: 120000 // 2 minutes for uploads
+        timeout: 120000, // 2 minutes for uploads
       });
 
       return response.data;
@@ -363,22 +431,26 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
           const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelToTest}:generateContent?key=${apiKey}`;
           await axios.post(url, {
             contents: [{ parts: [{ text: 'Hello' }] }],
-            generationConfig: { maxOutputTokens: 5 }
+            generationConfig: { maxOutputTokens: 5 },
           });
           return { valid: true };
         }
         case 'kimi': {
           const kimiBaseUrl = process.env.KIMI_BASE_URL || 'https://api.moonshot.cn/v1';
-          await axios.post(`${kimiBaseUrl}/chat/completions`, {
-            model: model || 'kimi-k2.5',
-            max_tokens: 5,
-            messages: [{ role: 'user', content: 'Hi' }]
-          }, {
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-              'Content-Type': 'application/json'
+          await axios.post(
+            `${kimiBaseUrl}/chat/completions`,
+            {
+              model: model || 'kimi-k2.5',
+              max_tokens: 5,
+              messages: [{ role: 'user', content: 'Hi' }],
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+              },
             }
-          });
+          );
           return { valid: true };
         }
         default:
@@ -388,31 +460,50 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
       const axiosErr = error as AxiosError<{ error?: { message?: string } | string }>;
       log.error(`API key test error for ${provider}:`, axiosErr.message);
       const responseError = axiosErr.response?.data?.error;
-      const errorMessage = (typeof responseError === 'object' && responseError !== null ? responseError.message : responseError as string) ||
-                          axiosErr.message ||
-                          'Unknown error';
+      const errorMessage =
+        (typeof responseError === 'object' && responseError !== null
+          ? responseError.message
+          : (responseError as string)) ||
+        axiosErr.message ||
+        'Unknown error';
       return { valid: false, error: errorMessage };
     }
   });
 
   // Streaming assessment handler using SSE
   ipcMain.handle('api:stream-assessment', async (event, requestData: Record<string, unknown>) => {
+    // Input validation
+    if (!requestData || typeof requestData !== 'object' || Array.isArray(requestData)) {
+      throw new Error('api:stream-assessment: requestData must be a non-null object');
+    }
+    if (!Array.isArray(requestData.skills) || requestData.skills.length === 0) {
+      throw new Error('api:stream-assessment: skills must be a non-empty array');
+    }
+    if (requestData.skills.length > 5000) {
+      throw new Error('api:stream-assessment: too many skills (max 5000)');
+    }
+
     const streamId = randomUUID();
     const abortController = new AbortController();
     activeStreams.set(streamId, abortController);
 
     const webContents = event.sender;
 
-    log.info(`Starting streaming assessment: ${streamId}, skills: ${Array.isArray(requestData.skills) ? requestData.skills.length : 'N/A'}`);
+    log.info(
+      `Starting streaming assessment: ${streamId}, skills: ${Array.isArray(requestData.skills) ? requestData.skills.length : 'N/A'}`
+    );
 
     // Auto-cleanup after 10 minutes to prevent memory leaks
-    const streamTimeout = setTimeout(() => {
-      if (activeStreams.has(streamId)) {
-        log.warn(`Stream ${streamId} timed out after 10 minutes, aborting`);
-        abortController.abort();
-        activeStreams.delete(streamId);
-      }
-    }, 10 * 60 * 1000);
+    const streamTimeout = setTimeout(
+      () => {
+        if (activeStreams.has(streamId)) {
+          log.warn(`Stream ${streamId} timed out after 10 minutes, aborting`);
+          abortController.abort();
+          activeStreams.delete(streamId);
+        }
+      },
+      10 * 60 * 1000
+    );
 
     // Start the stream processing in the background
     (async () => {
@@ -421,7 +512,7 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestData),
-          signal: abortController.signal
+          signal: abortController.signal,
         });
 
         if (!response.ok) {
@@ -448,6 +539,12 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
           if (done) break;
 
           buffer += decoder.decode(value, { stream: true });
+          // Guard against memory exhaustion from malformed streams
+          if (buffer.length > MAX_SSE_BUFFER_SIZE) {
+            log.warn(`Stream ${streamId} buffer exceeded ${MAX_SSE_BUFFER_SIZE} bytes, aborting`);
+            abortController.abort();
+            break;
+          }
           const events = buffer.split('\n\n');
           buffer = events.pop() || '';
 
@@ -472,9 +569,13 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
                 const parsedData = JSON.parse(eventData);
                 if (eventType === 'complete') {
                   const summary = parsedData.summary || parsedData;
-                  log.info(`Assessment complete: ${(summary.assessments as unknown[])?.length || 0} results, status=${summary.status}, failed=${summary.failed_assessments}`);
+                  log.info(
+                    `Assessment complete: ${(summary.assessments as unknown[])?.length || 0} results, status=${summary.status}, failed=${summary.failed_assessments}`
+                  );
                   if (summary.failed_assessments > 0) {
-                    log.warn(`Failed skills sample: ${JSON.stringify((summary.failed_skills as string[])?.slice(0, 3))}`);
+                    log.warn(
+                      `Failed skills sample: ${JSON.stringify((summary.failed_skills as string[])?.slice(0, 3))}`
+                    );
                   }
                 }
                 if (!webContents.isDestroyed()) {
@@ -484,8 +585,9 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
                 log.warn('Failed to parse SSE data:', eventData);
                 if (!webContents.isDestroyed()) {
                   webContents.send('assessment:event', {
-                    streamId, eventType: 'error',
-                    data: { error: `Failed to parse assessment response` }
+                    streamId,
+                    eventType: 'error',
+                    data: { error: `Failed to parse assessment response` },
                   });
                 }
               }
@@ -497,7 +599,6 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
           webContents.send('assessment:event', { streamId, eventType: 'done', data: {} });
         }
         log.info(`Streaming assessment completed: ${streamId}`);
-
       } catch (err: unknown) {
         if (err instanceof Error && err.name === 'AbortError') {
           log.info(`Streaming assessment cancelled: ${streamId}`);
@@ -508,7 +609,11 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
           const message = err instanceof Error ? err.message : 'Unknown streaming error';
           log.error(`Streaming assessment error: ${streamId}`, message);
           if (!webContents.isDestroyed()) {
-            webContents.send('assessment:event', { streamId, eventType: 'error', data: { error: message } });
+            webContents.send('assessment:event', {
+              streamId,
+              eventType: 'error',
+              data: { error: message },
+            });
           }
         }
       } finally {
@@ -542,17 +647,50 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
     return dir;
   };
 
-  // Save assessment results to a JSON file
+  // Generate a content hash for duplicate detection
+  const hashAssessmentData = (data: Record<string, unknown>): string => {
+    const results = data.results as Record<string, unknown> | undefined;
+    if (!results) return '';
+    const assessments = (results.assessments as Array<Record<string, unknown>>) || [];
+    // Create a stable signature from skill names + proficiency levels
+    const signature = assessments
+      .map((a) => `${a.skill_name}:${a.proficiency ?? a.proficiency_numeric}`)
+      .sort()
+      .join('|');
+    return createHash('sha256').update(signature).digest('hex').slice(0, 16);
+  };
+
+  // Save assessment results to a JSON file (with duplicate detection)
   ipcMain.handle('assessment:save-results', async (_, data: Record<string, unknown>) => {
     try {
       const dir = await getAssessmentsDir();
+
+      // Check for duplicates by content hash
+      const contentHash = hashAssessmentData(data);
+      if (contentHash) {
+        const existingFiles = await readdir(dir);
+        for (const f of existingFiles.filter((f) => f.endsWith('.json'))) {
+          try {
+            const content = await readFile(path.join(dir, f), 'utf-8');
+            const parsed = JSON.parse(content);
+            if (parsed.content_hash === contentHash) {
+              log.info(`Duplicate assessment detected (hash: ${contentHash}), skipping save`);
+              return { success: true, filePath: path.join(dir, f), filename: f, duplicate: true };
+            }
+          } catch {
+            // Skip malformed files
+          }
+        }
+      }
+
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `assessment_${timestamp}.json`;
       const filePath = path.join(dir, filename);
 
       const payload = {
         saved_at: new Date().toISOString(),
-        ...data
+        content_hash: contentHash,
+        ...data,
       };
 
       await writeFile(filePath, JSON.stringify(payload, null, 2), 'utf-8');
@@ -571,7 +709,7 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
       const dir = await getAssessmentsDir();
       const files = await readdir(dir);
       const jsonFiles = files
-        .filter(f => f.endsWith('.json'))
+        .filter((f) => f.endsWith('.json'))
         .sort()
         .reverse(); // newest first
 
@@ -580,12 +718,35 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
         try {
           const content = await readFile(path.join(dir, filename), 'utf-8');
           const parsed = JSON.parse(content);
+          const assessments = (parsed.results?.assessments as Array<Record<string, unknown>>) || [];
+          const avgConfidence =
+            assessments.length > 0
+              ? assessments.reduce(
+                  (sum: number, a) => sum + ((a.confidence_score as number) || 0),
+                  0
+                ) / assessments.length
+              : 0;
+          const summary = parsed.summary || {};
+          const source = parsed.source || {};
+          const config = parsed.config || {};
           results.push({
             filename,
             saved_at: parsed.saved_at,
-            total_skills: parsed.results?.total_skills || 0,
+            total_skills: parsed.results?.total_skills || assessments.length || 0,
             avg_proficiency: parsed.results?.avg_proficiency || 0,
+            avg_confidence: avgConfidence,
             model_used: parsed.results?.model_used || 'unknown',
+            provider: config.llmConfig?.provider || '',
+            processing_time: parsed.results?.processing_time || 0,
+            content_hash: parsed.content_hash || '',
+            // Source info
+            extraction_source: source.extractionSource || '',
+            source_filename: source.filename || '',
+            environment_name: source.environmentName || '',
+            // Summary stats
+            total_tokens: summary.total_tokens_used || 0,
+            estimated_cost: summary.estimated_cost || 0,
+            success_rate: summary.success_rate || 0,
           });
         } catch {
           // Skip malformed files
@@ -601,14 +762,146 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
   // Load a specific saved assessment
   ipcMain.handle('assessment:load-saved', async (_, filename: string) => {
     try {
+      if (!filename || typeof filename !== 'string') {
+        return { success: false, error: 'Invalid filename' };
+      }
       const dir = await getAssessmentsDir();
       const safeName = sanitizeFilename(filename);
       const filePath = path.join(dir, safeName);
+      // Verify resolved path stays within the assessments directory
+      const resolvedDir = path.resolve(dir);
+      const resolvedFile = path.resolve(filePath);
+      if (!resolvedFile.startsWith(resolvedDir + path.sep) && resolvedFile !== resolvedDir) {
+        log.warn(`assessment:load-saved path traversal blocked: ${filename}`);
+        return { success: false, error: 'Access denied' };
+      }
       const content = await readFile(filePath, 'utf-8');
       return { success: true, data: JSON.parse(content) };
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       return { success: false, error: message };
+    }
+  });
+
+  // Delete a saved assessment file
+  ipcMain.handle('assessment:delete-saved', async (_, filename: string) => {
+    try {
+      if (!filename || typeof filename !== 'string') {
+        return { success: false, error: 'Invalid filename' };
+      }
+      const dir = await getAssessmentsDir();
+      const safeName = sanitizeFilename(filename);
+      const filePath = path.join(dir, safeName);
+      // Verify resolved path stays within the assessments directory
+      const resolvedDir = path.resolve(dir);
+      const resolvedFile = path.resolve(filePath);
+      if (!resolvedFile.startsWith(resolvedDir + path.sep) && resolvedFile !== resolvedDir) {
+        log.warn(`assessment:delete-saved path traversal blocked: ${filename}`);
+        return { success: false, error: 'Access denied' };
+      }
+      await unlink(filePath);
+      log.info(`Assessment deleted: ${filePath}`);
+      return { success: true };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      log.error('Failed to delete assessment:', message);
+      return { success: false, error: message };
+    }
+  });
+
+  // ==========================================
+  // Feedback File Storage (score corrections for calibration)
+  // ==========================================
+
+  const getFeedbackDir = async (): Promise<string> => {
+    const dir = path.join(app.getPath('userData'), 'feedback');
+    await mkdir(dir, { recursive: true });
+    return dir;
+  };
+
+  // Save or update feedback for a skill correction
+  ipcMain.handle('feedback:save', async (_, feedbackItem: Record<string, unknown>) => {
+    try {
+      const skillName = feedbackItem.skill_name;
+      if (!skillName || typeof skillName !== 'string') {
+        return { success: false, error: 'skill_name is required' };
+      }
+      const dir = await getFeedbackDir();
+      const hash = createHash('sha256')
+        .update(skillName.toLowerCase().trim())
+        .digest('hex')
+        .slice(0, 16);
+      const filename = `feedback_${hash}.json`;
+      const filePath = path.join(dir, filename);
+
+      // Load existing history for this skill (if any)
+      let existing: Record<string, unknown> = { skill_name: skillName, corrections: [] };
+      try {
+        const content = await readFile(filePath, 'utf-8');
+        existing = JSON.parse(content);
+      } catch {
+        /* no existing file */
+      }
+
+      const corrections = (existing.corrections as Array<Record<string, unknown>>) || [];
+      corrections.push({
+        original_score: feedbackItem.original_score,
+        corrected_score: feedbackItem.corrected_score,
+        model_used: feedbackItem.model_used,
+        note: feedbackItem.note || '',
+        timestamp: new Date().toISOString(),
+      });
+
+      const payload = { skill_name: skillName, corrections };
+      await writeFile(filePath, JSON.stringify(payload, null, 2), 'utf-8');
+      log.info(`Feedback saved for skill: ${skillName}`);
+      return { success: true, filename };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      log.error('Failed to save feedback:', message);
+      return { success: false, error: message };
+    }
+  });
+
+  // Load feedback for a specific skill (by name)
+  ipcMain.handle('feedback:load-skill', async (_, skillName: string) => {
+    try {
+      if (!skillName || typeof skillName !== 'string') {
+        return { success: false, error: 'skill_name is required' };
+      }
+      const dir = await getFeedbackDir();
+      const hash = createHash('sha256')
+        .update(skillName.toLowerCase().trim())
+        .digest('hex')
+        .slice(0, 16);
+      const filename = `feedback_${hash}.json`;
+      const filePath = path.join(dir, filename);
+      const content = await readFile(filePath, 'utf-8');
+      return { success: true, data: JSON.parse(content) };
+    } catch {
+      return { success: true, data: null }; // No feedback yet is not an error
+    }
+  });
+
+  // Load all feedback (for calibration / few-shot injection)
+  ipcMain.handle('feedback:load-all', async () => {
+    try {
+      const dir = await getFeedbackDir();
+      const files = await readdir(dir);
+      const jsonFiles = files.filter((f) => f.startsWith('feedback_') && f.endsWith('.json'));
+      const allFeedback: Array<Record<string, unknown>> = [];
+      for (const filename of jsonFiles) {
+        try {
+          const content = await readFile(path.join(dir, filename), 'utf-8');
+          allFeedback.push(JSON.parse(content));
+        } catch {
+          /* skip malformed */
+        }
+      }
+      return { success: true, feedback: allFeedback };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      return { success: false, error: message, feedback: [] };
     }
   });
 

@@ -8,6 +8,7 @@ import React from 'react';
 
 // Mock app store
 const mockSetCurrentStep = vi.fn();
+const mockMarkStepCompleted = vi.fn();
 const mockGetWorkflowProgress = vi.fn(() => ({
   completed: 0,
   total: 6,
@@ -19,6 +20,7 @@ vi.mock('../../stores/app-store', () => ({
     const state = {
       currentStep: 0,
       setCurrentStep: mockSetCurrentStep,
+      markStepCompleted: mockMarkStepCompleted,
       getWorkflowProgress: mockGetWorkflowProgress,
       skillsState: {
         skills: [],
@@ -45,10 +47,46 @@ vi.mock('../../stores/command-store', () => ({
 // Mock framer motion to avoid animation issues in tests
 vi.mock('motion/react', () => ({
   motion: {
-    div: React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLDivElement>) => <div ref={ref} {...filterMotionProps(props)}>{children}</div>),
-    h1: React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLHeadingElement>) => <h1 ref={ref} {...filterMotionProps(props)}>{children}</h1>),
-    p: React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLParagraphElement>) => <p ref={ref} {...filterMotionProps(props)}>{children}</p>),
-    button: React.forwardRef(({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>, ref: React.Ref<HTMLButtonElement>) => <button ref={ref} {...filterMotionProps(props)}>{children}</button>),
+    div: React.forwardRef(
+      (
+        { children, ...props }: React.PropsWithChildren<Record<string, unknown>>,
+        ref: React.Ref<HTMLDivElement>
+      ) => (
+        <div ref={ref} {...filterMotionProps(props)}>
+          {children}
+        </div>
+      )
+    ),
+    h1: React.forwardRef(
+      (
+        { children, ...props }: React.PropsWithChildren<Record<string, unknown>>,
+        ref: React.Ref<HTMLHeadingElement>
+      ) => (
+        <h1 ref={ref} {...filterMotionProps(props)}>
+          {children}
+        </h1>
+      )
+    ),
+    p: React.forwardRef(
+      (
+        { children, ...props }: React.PropsWithChildren<Record<string, unknown>>,
+        ref: React.Ref<HTMLParagraphElement>
+      ) => (
+        <p ref={ref} {...filterMotionProps(props)}>
+          {children}
+        </p>
+      )
+    ),
+    button: React.forwardRef(
+      (
+        { children, ...props }: React.PropsWithChildren<Record<string, unknown>>,
+        ref: React.Ref<HTMLButtonElement>
+      ) => (
+        <button ref={ref} {...filterMotionProps(props)}>
+          {children}
+        </button>
+      )
+    ),
   },
 }));
 
@@ -90,7 +128,9 @@ describe('Welcome', () => {
   it('should render the subtitle description', () => {
     renderWithUser(<Welcome />);
     expect(
-      screen.getByText('AI-Powered Proficiency Assessment Platform for Data-Driven Talent Management')
+      screen.getByText(
+        'AI-Powered Proficiency Assessment Platform for Data-Driven Talent Management'
+      )
     ).toBeInTheDocument();
   });
 
@@ -117,6 +157,7 @@ describe('Welcome', () => {
     const getStartedButton = screen.getByText('Get Started');
     expect(getStartedButton).toBeInTheDocument();
     await user.click(getStartedButton);
+    expect(mockMarkStepCompleted).toHaveBeenCalledWith(0);
     expect(mockSetCurrentStep).toHaveBeenCalledWith(1);
   });
 });

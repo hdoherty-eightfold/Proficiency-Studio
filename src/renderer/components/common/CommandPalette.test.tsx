@@ -33,8 +33,8 @@ vi.mock('../../stores/command-store', () => ({
 
 describe('CommandPalette', () => {
   it('should render without crashing', () => {
-    const { container } = renderWithUser(<CommandPalette />);
-    expect(container).toBeDefined();
+    // Component returns null when closed — verify it mounts without throwing
+    expect(() => renderWithUser(<CommandPalette />)).not.toThrow();
   });
 
   it('should not be visible when closed', () => {

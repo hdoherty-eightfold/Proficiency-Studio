@@ -30,9 +30,10 @@ beforeAll(async () => {
 });
 
 describe('BackendStatus', () => {
-  it('should render without crashing', () => {
+  it('should render a status indicator when healthy', () => {
     const { container } = renderWithUser(<BackendStatus />);
-    expect(container).toBeDefined();
+    // Healthy state should render the green check icon area (compact dot or icon)
+    expect(container.firstChild).toBeTruthy();
   });
 
   it('should show "Backend connected" text when healthy and showDetails is true', () => {

@@ -1,0 +1,712 @@
+ "workflow_template_to_stage_transition_map": {
+    "template_to_stage_transition_map": {
+      "default": {
+        "REVIEW": [
+          {
+            "stage": "ASSESSMENT - Pymetrics Assessment",
+            "wf_stage": "ASSESSMENT",
+            "wf_sub_stage": "Pymetrics Assessment",
+            "ats_wf_stage": "PYMETRICS_GAMES",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "ASSESSMENT Pymetrics Games"
+          },
+          {
+            "stage": "SCREEN",
+            "wf_stage": "SCREEN",
+            "wf_sub_stage": "",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_REVIEW_ACTION_2",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "SCREEN - Phone Screen - EU non UR"
+          },
+          {
+            "stage": "SCREEN - Phone Screen",
+            "wf_stage": "SCREEN",
+            "wf_sub_stage": "Phone Screen",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_REVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "SCREEN - Phone Screen",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "SCREEN - Hiring Manager Screen",
+            "wf_stage": "SCREEN",
+            "wf_sub_stage": "Hiring Manager Screen",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_H_REVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "SCREEN - Hiring Manager Screen",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_REVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW*",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "OFFER - Offer",
+            "wf_stage": "OFFER",
+            "wf_sub_stage": "Offer",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_REVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "OFFER",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "ASSESSMENT - Assessment",
+            "wf_stage": "ASSESSMENT",
+            "wf_sub_stage": "Assessment",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_REVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "ASSESSMENT (to be Removed? or disallowed) x",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "ASSESSMENT - Pymetrics Digital Interview Only",
+            "wf_stage": "ASSESSMENT",
+            "wf_sub_stage": "Pymetrics Digital Interview Only",
+            "ats_wf_stage": "PYMETRICS_DIONLY",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "ASSESSMENT Pymetrics  Digital Interview (REMOVE? will bounce for US Salaried) x",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_REVIEW_ACTION",
+            "display_stage": "X INTERVIEW delete? x",
+            "mandatory_stage_before_advance": false,
+            "stage": "INTERVIEW - Interview",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Interview",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "REVIEW REJECTED",
+            "wf_stage": "REVIEW REJECTED",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "REVIEW REJECTED",
+            "reasons": [
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_REVIEW_CONCLUSION:_BASIC_QUALIFICATIONS",
+                "display_name": "Basic Qualifications"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_I_REVIEW_CONCLUSION:_HIRED_FOR_ANOTHER_JOB",
+                "display_name": "Hired For Another Job"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_REVIEW_CONCLUSION:_HIRING_POLICY",
+                "display_name": "Hiring Policy"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_REVIEW_CONCLUSION:_HIRING_RESTRICTIONS",
+                "display_name": "Hiring Restrictions"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_REVIEW_CONCLUSION:_LOCATION_–_SEEKING_100%_REMOTE",
+                "display_name": "Location – Seeking 100% Remote"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_F_REVIEW_CONCLUSION:_LOCATION_–_NOT_OPEN_TO_RELOCATION",
+                "display_name": "Location – Not Open to Relocation"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_REVIEW_CONCLUSION:_NOT_REVIEWED_NOT_CONSIDERED",
+                "display_name": "Not Reviewed Not Considered"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_H_REVIEW_CONCLUSION:_POSITION_CANCELLED",
+                "display_name": "Position Cancelled"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_REVIEW_CONCLUSION:_SKILLS_OR_ABILITIES",
+                "display_name": "Skills or Abilities"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_REVIEW_CONCLUSION:_SELECTED_OTHER_MORE_QUALIFIED_CANDIDATE",
+                "display_name": "Selected other more qualified candidate"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_REVIEW_CONCLUSION:_SALARY_EXPECTATIONS_TOO_HIGH",
+                "display_name": "Salary Expectations too high"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_G_REVIEW_CONCLUSION:_VOLUNTARY_WITHDREW",
+                "display_name": "Voluntary Withdrew"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_O_REVIEW_CONCLUSION:_NOT_ABLE_TO_CONTACT",
+                "display_name": "Not able to contact"
+              }
+            ],
+            "action_type": "reject"
+          },
+          {
+            "action_type": "withdraw",
+            "display_stage": "REVIEW WITHDRAW",
+            "wf_stage": "DECLINE",
+            "stage": "DECLINE",
+            "mandatory_stage_before_advance": false,
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_G_REVIEW_CONCLUSION:_VOLUNTARY_WITHDREW",
+            "reasons": [
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_G_REVIEW_CONCLUSION:_VOLUNTARY_WITHDREW",
+                "display_name": "Voluntary Withdrawal"
+              }
+            ]
+          }
+        ],
+        "SCREEN": [
+          {
+            "stage": "INTERVIEW",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_SCREEN_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW*",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "ASSESSMENT - Assessment",
+            "wf_stage": "ASSESSMENT",
+            "wf_sub_stage": "Assessment",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_SCREEN_ACTION_2",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "ASSESSMENT - Assessment",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "SCREEN - Hiring Manager Screen",
+            "wf_stage": "SCREEN",
+            "wf_sub_stage": "Hiring Manager Screen",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_SCREEN_ACTION_2",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "SCREEN - Hiring Manager Screen",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "REVIEW",
+            "wf_stage": "REVIEW",
+            "wf_sub_stage": "",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_SCREEN_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "REVIEW",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW - Interview",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Interview",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_SCREEN_ACTION_3",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "X INTERVIEW - Interview DISALLOW",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "SCREEN REJECTED",
+            "wf_stage": "SCREEN REJECTED",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "SCREEN REJECTED",
+            "reasons": [
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_SCREEN_CONCLUSION:_BASIC_QUALIFICATIONS",
+                "display_name": "Basic Qualifications"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_H_SCREEN_CONCLUSION:_HIRED_FOR_ANOTHER_JOB",
+                "display_name": "Hired For Another Job"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_SCREEN_CONCLUSION:_HIRING_POLICY",
+                "display_name": "Hiring Policy"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_SCREEN_CONCLUSION:_HIRING_RESTRICTIONS",
+                "display_name": "Hiring Restrictions"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_SCREEN_CONCLUSION:_LOCATION_–_SEEKING_100%_REMOTE",
+                "display_name": "Location – Seeking 100% Remote"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_F_SCREEN_CONCLUSION:_LOCATION_–_NOT_OPEN_TO_RELOCATION",
+                "display_name": "Location – Not Open to Relocation"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_F_SCREEN_CONCLUSION:_NO_SHOW_(INTERVIEW_/_FIRST_DAY)",
+                "display_name": "Candidate No Show"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_G_SCREEN_CONCLUSION:_POSITION_CANCELLED",
+                "display_name": "Position Cancelled"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_SCREEN_CONCLUSION:_SKILLS_OR_ABILITIES",
+                "display_name": "Skills or Abilities"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_SCREEN_CONCLUSION:_SELECTED_OTHER_MORE_QUALIFIED_CANDIDATE",
+                "display_name": "Selected other more qualified candidate"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_SCREEN_CONCLUSION:_SALARY_EXPECTATIONS_TOO_HIGH",
+                "display_name": "Salary Expectations too high"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_SCREEN_CONCLUSION:_VOLUNTARY_WITHDREW",
+                "display_name": "Voluntary Withdrew"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_M_SCREEN_CONCLUSION:_NOT_ABLE_TO_CONTACT",
+                "display_name": "Not able to contact"
+              }
+            ],
+            "action_type": "reject"
+          },
+          {
+            "action_type": "withdraw",
+            "display_stage": "SCREEN WITHDRAW",
+            "wf_stage": "DECLINE",
+            "stage": "DECLINE",
+            "mandatory_stage_before_advance": false,
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_SCREEN_CONCLUSION:_VOLUNTARY_WITHDREW",
+            "reasons": [
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_SCREEN_CONCLUSION:_VOLUNTARY_WITHDREW",
+                "display_name": "Voluntary Withdrawal"
+              }
+            ]
+          }
+        ],
+        "ASSESSMENT": [
+          {
+            "stage": "ASSESSMENT - Undo Move to Review Stage",
+            "wf_stage": "ASSESSMENT",
+            "wf_sub_stage": "Undo Move to Review Stage",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_ASSESSMENT_ACTION_2",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "ASSESSMENT - Undo Move to Review Stage",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "ASSESSMENT - Another Assessment",
+            "wf_stage": "ASSESSMENT",
+            "wf_sub_stage": "Another Assessment",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_ASSESSMENT_ACTION_2",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "ASSESSMENT - Another Assessment",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "SCREEN - Phone Screen",
+            "wf_stage": "SCREEN",
+            "wf_sub_stage": "Phone Screen",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_ASSESSMENT_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "SCREEN - Phone Screen",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_ASSESSMENT_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW*",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "REVIEW",
+            "wf_stage": "REVIEW",
+            "wf_sub_stage": "",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_ASSESSMENT_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "X REVIEW r",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "ASSESSMENT - Undo Move to initial Assessment Stage",
+            "wf_stage": "ASSESSMENT",
+            "wf_sub_stage": "Undo Move to initial Assessment Stage",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_ASSESSMENT_ACTION_3",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "X ASSESSMENT - Undo Move to initial Assessment Stage",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW - First Round Interview",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "First Round Interview",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_ASSESSMENT_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "X INTERVIEW f",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "ASSESSMENT REJECTED",
+            "wf_stage": "ASSESSMENT REJECTED",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "ASSESSMENT REJECTED",
+            "reasons": [
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_ASSESSMENT_CONCLUSION:_BASIC_QUALIFICATIONS",
+                "display_name": "Basic Qualifications"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_H_ASSESSMENT_CONCLUSION:_HIRED_FOR_ANOTHER_JOB",
+                "display_name": "Hired For Another Job"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_ASSESSMENT_CONCLUSION:_HIRING_POLICY",
+                "display_name": "Hiring Policy"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_ASSESSMENT_CONCLUSION:_LOCATION_–_SEEKING_100%_REMOTE",
+                "display_name": "Location – Seeking 100% Remote"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_ASSESSMENT_CONCLUSION:_LOCATION_–_NOT_OPEN_TO_RELOCATION",
+                "display_name": "Location – Not Open to Relocation"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_F_ASSESSMENT_CONCLUSION:_NO_SHOW_(INTERVIEW_/_FIRST_DAY)",
+                "display_name": "Candidate No Show"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_ASSESSMENT_CONCLUSION:_SKILLS_OR_ABILITIES",
+                "display_name": "Skills or Abilities"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_G_ASSESSMENT_CONCLUSION:_POSITION_CANCELLED",
+                "display_name": "Position Cancelled"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_ASSESSMENT_CONCLUSION:_SELECTED_OTHER_MORE_QUALIFIED_CANDIDATE",
+                "display_name": "Selected other more qualified candidate"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_ASSESSMENT_CONCLUSION:_SALARY_EXPECTATIONS_TOO_HIGH",
+                "display_name": "Salary Expectations too high"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_ASSESSMENT_CONCLUSION:_VOLUNTARY_WITHDREW",
+                "display_name": "Voluntary Withdrew"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_L_ASSESSMENT_CONCLUSION:_NOT_ABLE_TO_CONTACT",
+                "display_name": "Not able to contact"
+              }
+            ],
+            "action_type": "reject"
+          },
+          {
+            "action_type": "withdraw",
+            "display_stage": "ASSESSMENT WITHDRAW",
+            "wf_stage": "DECLINE",
+            "stage": "DECLINE",
+            "mandatory_stage_before_advance": false,
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_ASSESSMENT_CONCLUSION:_VOLUNTARY_WITHDREW",
+            "reasons": [
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_ASSESSMENT_CONCLUSION:_VOLUNTARY_WITHDREW",
+                "display_name": "Voluntary Withdrawal"
+              }
+            ]
+          }
+        ],
+        "INTERVIEW": [
+          {
+            "stage": "REVIEW",
+            "wf_stage": "REVIEW",
+            "wf_sub_stage": "",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_INTERVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "REVIEW",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "SCREEN - Phone Screen",
+            "wf_stage": "SCREEN",
+            "wf_sub_stage": "Phone Screen",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_F_INTERVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "SCREEN - Phone Screen",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW - Second Round",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Second Round",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_INTERVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW - Second Round"
+          },
+          {
+            "stage": "INTERVIEW - Third Round Interview",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Third Round Interview",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_INTERVIEW_ACTION_2",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW - Third Round",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW - Fourth Round Interview",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Fourth Round Interview",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_F_INTERVIEW_ACTION_2",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW - Fourth Round",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW - Final Round",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Final Round",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_INTERVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW - Final Round (2nd, 3rd, or 4th complete)"
+          },
+          {
+            "stage": "INTERVIEW - Second Round Interview",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Second Round Interview",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_H_INTERVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW - Second from Final",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW - Final Interview",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Final Interview",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_H_INTERVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW - Final Interview (from First)"
+          },
+          {
+            "stage": "INTERVIEW - Final Round Interview",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Final Round Interview",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_I_INTERVIEW_ACTION_2",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW - Final Round Interview (Trainee/Student)",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "ASSESSMENT - Assessment",
+            "wf_stage": "ASSESSMENT",
+            "wf_sub_stage": "Assessment",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_I_INTERVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "ASSESSMENT - Assessment",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "OFFER - Offer",
+            "wf_stage": "OFFER",
+            "wf_sub_stage": "Offer",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_INTERVIEW_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "OFFER",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW REJECTED",
+            "wf_stage": "INTERVIEW REJECTED",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW REJECTED",
+            "reasons": [
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_INTERVIEW_CONCLUSION:_BASIC_QUALIFICATIONS",
+                "display_name": "Basic Qualifications"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_H_INTERVIEW_CONCLUSION:_HIRED_FOR_ANOTHER_JOB",
+                "display_name": "Hired For Another Job"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_INTERVIEW_CONCLUSION:_LOCATION_–_SEEKING_100%_REMOTE",
+                "display_name": "Location – Seeking 100% Remote"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_INTERVIEW_CONCLUSION:_LOCATION_–_NOT_OPEN_TO_RELOCATION",
+                "display_name": "Location – Not Open to Relocation"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_G_INTERVIEW_CONCLUSION:_POSITION_CANCELLED",
+                "display_name": "Position Cancelled"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_INTERVIEW_CONCLUSION:_POST-INTERVIEW_WITHDRAWAL",
+                "display_name": "Post-Interview Withdrawal"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_INTERVIEW_CONCLUSION:_PRE-INTERVIEW_WITHDRAWAL",
+                "display_name": "Pre-Interview Withdrawal"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_INTERVIEW_CONCLUSION:_SKILLS_OR_ABILITIES",
+                "display_name": "Skills or Abilities"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_INTERVIEW_CONCLUSION:_SELECTED_OTHER_MORE_QUALIFIED_CANDIDATE",
+                "display_name": "Selected other more qualified candidate"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_INTERVIEW_CONCLUSION:_SALARY_EXPECTATIONS_TOO_HIGH",
+                "display_name": "Salary Expectations too high"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_K_INTERVIEW_CONCLUSION:_NOT_ABLE_TO_CONTACT",
+                "display_name": "Not able to contact"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_M_INTERVIEW_CONCLUSION:_CANDIDATE_NO_SHOW",
+                "display_name": "Candidate No Show"
+              }
+            ],
+            "hide_in_ta_pipeline": false,
+            "action_type": "reject"
+          },
+          {
+            "action_type": "withdraw",
+            "display_stage": "INTERVIEW WITHDRAW",
+            "wf_stage": "DECLINE",
+            "stage": "DECLINE",
+            "mandatory_stage_before_advance": false,
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_INTERVIEW_CONCLUSION:_PRE-INTERVIEW_WITHDRAWAL",
+            "reasons": [
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_INTERVIEW_CONCLUSION:_PRE-INTERVIEW_WITHDRAWAL",
+                "display_name": "Voluntary Withdrawal"
+              }
+            ]
+          }
+        ],
+        "OFFER": [
+          {
+            "stage": "REVIEW",
+            "wf_stage": "REVIEW",
+            "wf_sub_stage": "",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_OFFER_ACTION_2",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "REVIEW",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_OFFER_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW - Second Round Interview",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Second Round Interview",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_OFFER_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW - Second Round Interview",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "INTERVIEW - Final Round Interview",
+            "wf_stage": "INTERVIEW",
+            "wf_sub_stage": "Final Round Interview",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_F_OFFER_ACTION",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "INTERVIEW - Final Round Interview",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "stage": "OFFER REJECTED",
+            "wf_stage": "OFFER REJECTED",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "OFFER REJECTED",
+            "reasons": [
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_G_OFFER_CONCLUSION:_HIRED_FOR_ANOTHER_JOB",
+                "display_name": "Hired For Another Job"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_OFFER_CONCLUSION:_LOCATION_–_SEEKING_100%_REMOTE",
+                "display_name": "Location – Seeking 100% Remote"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_OFFER_CONCLUSION:_LOCATION_–_NOT_OPEN_TO_RELOCATION",
+                "display_name": "Location – Not Open to Relocation"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_E_OFFER_CONCLUSION:_NO_SHOW_(INTERVIEW_/_FIRST_DAY)",
+                "display_name": "Candidate No Show"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_C_OFFER_CONCLUSION:_OFFER_REJECTED",
+                "display_name": "Offer Rejected"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_F_OFFER_CONCLUSION:_POSITION_CANCELLED",
+                "display_name": "Position Cancelled"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_OFFER_CONCLUSION:_SELECTED_OTHER_MORE_QUALIFIED_CANDIDATE",
+                "display_name": "Selected other more qualified candidate"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_B_OFFER_CONCLUSION:_SALARY_EXPECTATIONS_TOO_HIGH",
+                "display_name": "Salary Expectations too high"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_OFFER_CONCLUSION:_VOLUNTARY_WITHDREW",
+                "display_name": "Voluntary Withdrew"
+              },
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_J_OFFER_CONCLUSION:_NOT_ABLE_TO_CONTACT",
+                "display_name": "Not able to contact"
+              }
+            ],
+            "action_type": "reject",
+            "hide_in_ta_pipeline": false
+          },
+          {
+            "action_type": "withdraw",
+            "display_stage": "OFFER WITHDRAW",
+            "wf_stage": "DECLINE",
+            "stage": "DECLINE",
+            "mandatory_stage_before_advance": false,
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_OFFER_CONCLUSION:_VOLUNTARY_WITHDREW",
+            "reasons": [
+              {
+                "code": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_D_OFFER_CONCLUSION:_VOLUNTARY_WITHDREW",
+                "display_name": "Voluntary Withdrawal"
+              }
+            ]
+          }
+        ],
+        "HIRED_display": [
+          {
+            "stage": "HIRED - Ready for Hire",
+            "wf_stage": "HIRED",
+            "wf_sub_stage": "Ready for Hire",
+            "ats_wf_stage": "JOB_APPLICATION_DEFAULT_DEFINITION_STEP_A_BACKGROUND_CHECK_ACTION_2",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "Ready for Hire"
+          },
+          {
+            "stage": "HIRED",
+            "wf_stage": "HIRED",
+            "wf_sub_stage": "",
+            "ats_wf_stage": "HIRED",
+            "mandatory_stage_before_advance": false,
+            "display_stage": "Ready for Hire"
+          }
+        ]
+      }
+    },
+    "default_workflow_template_id": "default",
+    "advance_stage_mode": "only_stage_group"
+  },

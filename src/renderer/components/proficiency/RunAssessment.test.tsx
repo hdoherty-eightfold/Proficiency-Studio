@@ -47,6 +47,7 @@ vi.mock('../../services/electron-api', () => ({
     streamAssessment: vi.fn().mockResolvedValue({ streamId: 'test-stream' }),
     onAssessmentEvent: vi.fn().mockReturnValue(() => {}),
     cancelAssessment: vi.fn().mockResolvedValue({ success: true }),
+    listSavedAssessments: vi.fn().mockResolvedValue({ success: true, assessments: [] }),
   },
 }));
 

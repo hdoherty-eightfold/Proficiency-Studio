@@ -1,0 +1,42 @@
+skill_name,category
+Network Security,Core Security
+Application Security,Core Security
+Cloud Security,Core Security
+Endpoint Security,Core Security
+Identity and Access Management,IAM
+Zero Trust Architecture,Architecture
+Penetration Testing,Offensive Security
+Vulnerability Assessment,Offensive Security
+Ethical Hacking,Offensive Security
+Red Team Operations,Offensive Security
+Blue Team Operations,Defensive Security
+Incident Response,Defensive Security
+Threat Hunting,Defensive Security
+Security Operations Center,Defensive Security
+SIEM,Tools
+Splunk,Tools
+CrowdStrike,Tools
+Wireshark,Tools
+Burp Suite,Tools
+Metasploit,Tools
+Nmap,Tools
+Firewalls,Network Security
+VPN,Network Security
+IDS/IPS,Network Security
+Encryption,Cryptography
+PKI,Cryptography
+SSL/TLS,Cryptography
+OWASP Top 10,Standards
+NIST Framework,Compliance
+ISO 27001,Compliance
+SOC 2,Compliance
+GDPR,Compliance
+PCI DSS,Compliance
+Risk Assessment,Governance
+Security Auditing,Governance
+Malware Analysis,Threat Intelligence
+Forensics,Investigation
+Social Engineering,Human Factors
+Security Awareness Training,Human Factors
+DevSecOps,Development
+

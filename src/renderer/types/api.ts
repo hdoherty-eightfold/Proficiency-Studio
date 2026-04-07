@@ -44,12 +44,19 @@ export interface Skill {
   source?: 'csv' | 'api' | 'sftp';
 }
 
+/** API key values entered by the user (not persisted as plaintext — stored via electron-store) */
+export interface ApiKeys {
+  gemini: string;
+  kimi: string;
+}
+
 export interface SkillsExtractResponse {
   status: 'success' | 'error';
   skills: Skill[];
   total_count: number;
   file_id?: string;
   message?: string;
+  roles?: Array<Record<string, unknown>>;
 }
 
 export interface SkillsListResponse {
@@ -350,7 +357,9 @@ export interface SFTPCredential {
   host: string;
   port: number;
   username: string;
-  default_path?: string;
+  remote_path?: string;
+  connection_status?: 'connected' | 'failed' | 'unknown';
+  last_tested?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -362,43 +371,60 @@ export interface SFTPCredentialsResponse {
 }
 
 export interface SFTPCredentialResponse {
-  status: 'success' | 'error';
-  credential: SFTPCredential;
+  status?: 'success' | 'error';
+  credential?: SFTPCredential;
   message?: string;
+  // Backend returns the credential directly (not wrapped)
+  id?: string;
+  name?: string;
+  host?: string;
+  port?: number;
+  username?: string;
+  remote_path?: string;
 }
 
 export interface SFTPConnectionTestResponse {
-  status: 'success' | 'error';
-  success?: boolean;
-  connected: boolean;
-  latency_ms?: number;
-  server_info?: string;
+  success: boolean;
   message?: string;
   error?: string;
+  file_count?: number;
 }
 
 export interface SFTPFileItem {
   name: string;
-  path: string;
-  type: 'file' | 'directory';
+  path?: string;
+  type?: 'file' | 'directory';
+  is_directory?: boolean;
   size: number;
-  modified_at: string;
+  modified?: string;
+  modified_at?: string;
+  permissions?: string;
+}
+
+export interface SFTPUploadResponse {
+  success: boolean;
+  path?: string;
+  filename: string;
+  size_bytes?: number;
+  error?: string;
 }
 
 export interface SFTPBrowseResponse {
-  status: 'success' | 'error';
+  success?: boolean;
   path: string;
   items: SFTPFileItem[];
   files?: SFTPFileItem[];
-  message?: string;
+  count?: number;
+  error?: string;
 }
 
 export interface SFTPDownloadResponse {
-  status: 'success' | 'error';
-  content: string;
-  filename: string;
-  size: number;
-  message?: string;
+  success: boolean;
+  content?: string;
+  local_path?: string;
+  remote_path?: string;
+  size?: number;
+  error?: string;
 }
 
 // ==========================================
@@ -675,14 +701,18 @@ export interface DataAnalysisResponse {
   success?: boolean;
   file_id?: string;
   quality: DataQualityGrade;
-  field_stats: Record<string, {
-    type: string;
-    null_count: number;
-    unique_count: number;
-    sample_values: string[];
-  }>;
+  field_stats: Record<
+    string,
+    {
+      type: string;
+      null_count: number;
+      unique_count: number;
+      sample_values: string[];
+    }
+  >;
   recommendations: string[];
   message?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unstructured backend analysis object, fields vary by analysis type
   analysis?: Record<string, any>;
 }
 
@@ -726,4 +756,63 @@ export interface UploadResponse {
   filename: string;
   size: number;
   message?: string;
+}
+
+// ==========================================
+// Skill-Role Matching Types
+// ==========================================
+
+export interface SkillMatchItem {
+  assessed_skill: string;
+  proficiency_numeric: number;
+  role_skill: string;
+  confidence: number;
+  method: 'exact' | 'partial' | 'fuzzy' | 'semantic';
+}
+
+export interface UnmatchedAssessedSkill {
+  assessed_skill: string;
+  proficiency_numeric: number;
+}
+
+export interface PreviewMappingResponse {
+  role_id: string;
+  role_title: string;
+  matches: SkillMatchItem[];
+  unmatched_assessed: UnmatchedAssessedSkill[];
+  unmatched_role: string[];
+  total_role_skills: number;
+  total_assessed: number;
+  match_count: number;
+}
+
+export interface ExplicitSkillMapping {
+  assessed_skill: string;
+  role_skill: string;
+}
+
+export interface ExportWithMappingsRequest {
+  assessments: Array<{ skill_name: string; proficiency_numeric: number }>;
+  environment_id: string;
+  role_id: string;
+  role_title?: string;
+  role_data?: Record<string, unknown>;
+  auth_token?: string;
+  explicit_mappings: ExplicitSkillMapping[];
+}
+
+export interface EightfoldExportResponse {
+  success: boolean;
+  exported_count: number;
+  assessed_skills: number;
+  total_skills: number;
+  skipped_skills: number;
+  environment: string;
+  role_id: string;
+  role_title: string;
+  message: string;
+  reason: string;
+  endpoint_used: string;
+  method_used: string;
+  timestamp: string;
 }

@@ -7,6 +7,7 @@
 
 import { useState } from 'react';
 import { AlertCircle, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useBackendHealth } from '../../hooks/useBackendHealth';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
@@ -26,17 +27,12 @@ export function BackendStatus({
   showDetails = false,
   className,
   compact = false,
-  onStatusChange
+  onStatusChange,
 }: BackendStatusProps) {
-  const {
-    isHealthy,
-    isChecking,
-    error,
-    refresh,
-    consecutiveFailures,
-  } = useBackendHealth({
+  const { t } = useTranslation();
+  const { isHealthy, isChecking, error, refresh, consecutiveFailures } = useBackendHealth({
     onHealthy: () => onStatusChange?.(true),
-    onUnhealthy: () => onStatusChange?.(false)
+    onUnhealthy: () => onStatusChange?.(false),
   });
 
   // Compact dot indicator
@@ -44,21 +40,18 @@ export function BackendStatus({
     return (
       <div
         className={cn('flex items-center gap-1.5', className)}
-        title={isHealthy ? 'Backend connected' : error || 'Backend disconnected'}
+        title={isHealthy ? t('backend.connected') : error || t('backend.disconnected')}
       >
         <div
           className={cn(
             'w-2 h-2 rounded-full',
-            isChecking && 'bg-yellow-500 animate-pulse',
-            !isChecking && isHealthy && 'bg-green-500',
-            !isChecking && !isHealthy && 'bg-red-500'
+            isChecking && 'bg-warning animate-pulse',
+            !isChecking && isHealthy && 'bg-success',
+            !isChecking && !isHealthy && 'bg-destructive'
           )}
         />
         {showDetails && (
-          <span className={cn(
-            'text-xs',
-            isHealthy ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-          )}>
+          <span className={cn('text-xs', isHealthy ? 'text-success' : 'text-destructive')}>
             {isHealthy ? 'Connected' : 'Disconnected'}
           </span>
         )}
@@ -71,36 +64,28 @@ export function BackendStatus({
     <div className={cn('flex items-center gap-2', className)}>
       {isChecking ? (
         <>
-          <Loader2 className="w-4 h-4 animate-spin text-yellow-500" />
-          {showDetails && (
-            <span className="text-sm text-yellow-600 dark:text-yellow-400">
-              Checking connection...
-            </span>
-          )}
+          <Loader2 className="w-4 h-4 animate-spin text-warning" />
+          {showDetails && <span className="text-sm text-warning">{t('backend.checking')}</span>}
         </>
       ) : isHealthy ? (
         <>
-          <CheckCircle className="w-4 h-4 text-green-500" />
-          {showDetails && (
-            <span className="text-sm text-green-600 dark:text-green-400">
-              Backend connected
-            </span>
-          )}
+          <CheckCircle className="w-4 h-4 text-success" />
+          {showDetails && <span className="text-sm text-success">{t('backend.connected')}</span>}
         </>
       ) : (
         <>
-          <AlertCircle className="w-4 h-4 text-red-500" />
+          <AlertCircle className="w-4 h-4 text-destructive" />
           {showDetails ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-red-600 dark:text-red-400">
-                Backend offline
+              <span className="text-sm text-destructive">
+                {t('backend.disconnected')}
                 {consecutiveFailures > 1 && ` (${consecutiveFailures} failures)`}
               </span>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={refresh}
-                className="h-6 px-2 text-red-600 hover:text-red-700"
+                className="h-6 px-2 text-destructive hover:text-destructive/80"
               >
                 <RefreshCw className="w-3 h-3" />
               </Button>
@@ -129,6 +114,7 @@ export function BackendStatus({
  * Distinguishes between "starting" (first 60s) and "failed" states.
  */
 export function BackendStatusBanner({ className }: { className?: string }) {
+  const { t } = useTranslation();
   const { isHealthy, isChecking, error, refresh, consecutiveFailures } = useBackendHealth();
   const [mountTime] = useState(() => Date.now());
   const isStarting = Date.now() - mountTime < 60_000 && consecutiveFailures < 5;
@@ -139,15 +125,17 @@ export function BackendStatusBanner({ className }: { className?: string }) {
   // Starting state: yellow banner, less alarming
   if (isStarting) {
     return (
-      <div className={cn(
-        'bg-yellow-500 text-yellow-950 px-4 py-2 flex items-center justify-between',
-        className
-      )}>
+      <div
+        role="alert"
+        aria-live="polite"
+        className={cn(
+          'bg-warning text-warning-foreground px-4 py-2 flex items-center justify-between',
+          className
+        )}
+      >
         <div className="flex items-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-sm font-medium">
-            Backend is starting up...
-          </span>
+          <span className="text-sm font-medium">{t('backend.starting')}</span>
         </div>
       </div>
     );
@@ -155,29 +143,22 @@ export function BackendStatusBanner({ className }: { className?: string }) {
 
   // Failed state: red banner
   return (
-    <div className={cn(
-      'bg-red-500 text-white px-4 py-2 flex items-center justify-between',
-      className
-    )}>
+    <div
+      role="alert"
+      aria-live="assertive"
+      className={cn(
+        'bg-destructive text-destructive-foreground px-4 py-2 flex items-center justify-between',
+        className
+      )}
+    >
       <div className="flex items-center gap-2">
         <AlertCircle className="w-4 h-4" />
-        <span className="text-sm font-medium">
-          Backend failed to start
-        </span>
-        {error && (
-          <span className="text-sm text-red-100">
-            — {error}
-          </span>
-        )}
+        <span className="text-sm font-medium">{t('backend.failed')}</span>
+        {error && <span className="text-sm opacity-80">— {error}</span>}
       </div>
-      <Button
-        size="sm"
-        variant="secondary"
-        onClick={refresh}
-        className="gap-1"
-      >
+      <Button size="sm" variant="secondary" onClick={refresh} className="gap-1">
         <RefreshCw className="w-3 h-3" />
-        Retry
+        {t('common.retry')}
       </Button>
     </div>
   );
@@ -186,6 +167,7 @@ export function BackendStatusBanner({ className }: { className?: string }) {
 /**
  * Hook for checking if backend is available before operations
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useRequireBackend() {
   const { isHealthy, isChecking, refresh, error } = useBackendHealth();
 
@@ -198,7 +180,7 @@ export function useRequireBackend() {
       if (isHealthy) return true;
       const result = await refresh();
       return result;
-    }
+    },
   };
 }
 

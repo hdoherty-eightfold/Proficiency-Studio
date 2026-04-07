@@ -37,11 +37,15 @@ vi.mock('@/lib/date-utils', () => ({
 vi.mock('@radix-ui/react-popover', () => ({
   Root: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Trigger: React.forwardRef(({ children, ...props }: any, ref: any) => (
-    <div ref={ref} {...props}>{children}</div>
+    <div ref={ref} {...props}>
+      {children}
+    </div>
   )),
   Portal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Content: React.forwardRef(({ children, ...props }: any, ref: any) => (
-    <div ref={ref} {...props}>{children}</div>
+    <div ref={ref} {...props}>
+      {children}
+    </div>
   )),
 }));
 
@@ -49,9 +53,13 @@ vi.mock('@radix-ui/react-popover', () => ({
 vi.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   TooltipTrigger: React.forwardRef(({ children, ...props }: any, ref: any) => (
-    <div ref={ref} {...props}>{children}</div>
+    <div ref={ref} {...props}>
+      {children}
+    </div>
   )),
   TooltipContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  TooltipProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SimpleTooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 let NotificationCenter: typeof import('./NotificationCenter').NotificationCenter;

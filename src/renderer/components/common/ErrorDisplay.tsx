@@ -2,12 +2,14 @@
  * Error Display Component
  *
  * Reusable component for displaying errors with consistent styling.
- * Supports different variants and optional retry/dismiss actions.
+ * Built on top of the shadcn Alert component for design-system consistency.
+ * Supports AppError types, retry/dismiss actions, and compact mode.
  */
 
-import { AlertTriangle, RefreshCw, X, Info, AlertCircle } from 'lucide-react';
+import { RefreshCw, X, Info } from 'lucide-react';
 import { AppError, ErrorType } from '../../lib/errors';
 import { Button } from '../ui/button';
+import { Alert, AlertDescription, AlertTitle, InlineAlert } from '../ui/alert';
 import { cn } from '../../lib/utils';
 
 interface ErrorDisplayProps {
@@ -35,25 +37,11 @@ function normalizeError(error: AppError | string | null): AppError | null {
     return {
       type: ErrorType.UNKNOWN,
       message: error,
-      recoverable: true
+      recoverable: true,
     };
   }
 
   return error;
-}
-
-/**
- * Get icon for error type
- */
-function getErrorIcon(type: ErrorType) {
-  switch (type) {
-    case ErrorType.NETWORK:
-    case ErrorType.BACKEND:
-    case ErrorType.TIMEOUT:
-      return AlertCircle;
-    default:
-      return AlertTriangle;
-  }
 }
 
 export function ErrorDisplay({
@@ -62,63 +50,23 @@ export function ErrorDisplay({
   onDismiss,
   variant = 'inline',
   className,
-  compact = false
+  compact = false,
 }: ErrorDisplayProps) {
   const appError = normalizeError(error);
 
   if (!appError) return null;
 
-  const Icon = getErrorIcon(appError.type);
-
-  // Variant styles
-  const variantStyles = {
-    inline: 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4',
-    banner: 'bg-red-500 text-white px-4 py-3',
-    card: 'bg-card border border-red-200 dark:border-red-800 rounded-xl shadow-lg p-6'
-  };
-
-  const textStyles = {
-    inline: {
-      title: 'text-red-800 dark:text-red-200',
-      detail: 'text-red-600 dark:text-red-400',
-      action: 'text-red-600 dark:text-red-400'
-    },
-    banner: {
-      title: 'text-white',
-      detail: 'text-red-100',
-      action: 'text-red-100'
-    },
-    card: {
-      title: 'text-red-700 dark:text-red-300',
-      detail: 'text-red-600 dark:text-red-400',
-      action: 'text-red-600 dark:text-red-400'
-    }
-  };
-
-  const styles = textStyles[variant];
-
   if (compact) {
     return (
-      <div className={cn(variantStyles[variant], 'flex items-center gap-2', className)}>
-        <Icon className={cn('w-4 h-4 flex-shrink-0', styles.title)} />
-        <span className={cn('text-sm', styles.title)}>{appError.message}</span>
+      <div className={cn('flex items-center gap-2', className)}>
+        <InlineAlert variant="destructive">{appError.message}</InlineAlert>
         {onRetry && appError.recoverable && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onRetry}
-            className="ml-auto h-6 px-2"
-          >
+          <Button size="sm" variant="ghost" onClick={onRetry} className="h-6 px-2">
             <RefreshCw className="w-3 h-3" />
           </Button>
         )}
         {onDismiss && (
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onDismiss}
-            className="h-6 px-2"
-          >
+          <Button size="sm" variant="ghost" onClick={onDismiss} className="h-6 px-2">
             <X className="w-3 h-3" />
           </Button>
         )}
@@ -126,59 +74,46 @@ export function ErrorDisplay({
     );
   }
 
+  const alertClass = cn(
+    variant === 'banner' ? 'rounded-none border-x-0' : undefined,
+    variant === 'card' ? 'shadow-lg' : undefined,
+    className
+  );
+
   return (
-    <div className={cn(variantStyles[variant], className)}>
-      <div className="flex items-start gap-3">
-        <Icon className={cn(
-          'w-5 h-5 flex-shrink-0 mt-0.5',
-          styles.title
-        )} />
+    <Alert
+      variant="destructive"
+      className={alertClass}
+      dismissible={!!onDismiss}
+      onDismiss={onDismiss}
+    >
+      <AlertTitle className="flex items-center justify-between">
+        <span>{appError.message}</span>
+        {onRetry && appError.recoverable && (
+          <Button
+            size="sm"
+            variant={variant === 'banner' ? 'secondary' : 'outline'}
+            onClick={onRetry}
+            className="gap-1 ml-4"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Retry
+          </Button>
+        )}
+      </AlertTitle>
 
-        <div className="flex-1 min-w-0">
-          <p className={cn('font-medium', styles.title)}>
-            {appError.message}
-          </p>
-
-          {appError.details && (
-            <p className={cn('text-sm mt-1', styles.detail)}>
-              {appError.details}
-            </p>
-          )}
-
+      {(appError.details || appError.userAction) && (
+        <AlertDescription>
+          {appError.details && <p>{appError.details}</p>}
           {appError.userAction && (
-            <p className={cn('text-sm mt-2 flex items-center gap-1', styles.action)}>
+            <p className="flex items-center gap-1 mt-1">
               <Info className="w-4 h-4" />
               {appError.userAction}
             </p>
           )}
-        </div>
-
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {onRetry && appError.recoverable && (
-            <Button
-              size="sm"
-              variant={variant === 'banner' ? 'secondary' : 'outline'}
-              onClick={onRetry}
-              className="gap-1"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Retry
-            </Button>
-          )}
-
-          {onDismiss && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={onDismiss}
-              className={variant === 'banner' ? 'text-white hover:bg-red-600' : ''}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
-      </div>
-    </div>
+        </AlertDescription>
+      )}
+    </Alert>
   );
 }
 
@@ -187,7 +122,7 @@ export function ErrorDisplay({
  */
 export function ErrorMessage({
   message,
-  className
+  className,
 }: {
   message: string | null | undefined;
   className?: string;
@@ -195,10 +130,9 @@ export function ErrorMessage({
   if (!message) return null;
 
   return (
-    <p className={cn('text-sm text-red-600 dark:text-red-400 flex items-center gap-1', className)}>
-      <AlertTriangle className="w-4 h-4" />
+    <InlineAlert variant="destructive" className={className}>
       {message}
-    </p>
+    </InlineAlert>
   );
 }
 

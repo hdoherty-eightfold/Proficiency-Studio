@@ -4,14 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import {
-  Search,
-  Edit3,
-  ChevronLeft,
-  ChevronRight,
-  Save,
-  Trash2,
-} from 'lucide-react';
+import { Search, Edit3, ChevronLeft, ChevronRight, Save, Trash2, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useToast } from '../../stores/toast-store';
 import type { Skill } from '../../stores/app-store';
@@ -19,7 +12,7 @@ import {
   DEFAULT_PROFICIENCY_LEVELS,
   PROFICIENCY_HEX_COLORS,
   getProficiencyHexColor,
-  type ProficiencyLevel
+  type ProficiencyLevel,
 } from '../../config/proficiency';
 
 interface SkillsTableEditorProps {
@@ -42,7 +35,7 @@ export default function SkillsTableEditor({
   skills,
   proficiencyLevels = TABLE_EDITOR_LEVELS,
   onSkillsChange,
-  onClose: _onClose,
+  onClose,
 }: SkillsTableEditorProps) {
   const { toast } = useToast();
 
@@ -83,10 +76,11 @@ export default function SkillsTableEditor({
   const filteredSkills = useMemo(() => {
     if (!searchTerm) return localSkills;
     const term = searchTerm.toLowerCase();
-    return localSkills.filter(skill =>
-      skill.name.toLowerCase().includes(term) ||
-      skill.description?.toLowerCase().includes(term) ||
-      skill.category?.toLowerCase().includes(term)
+    return localSkills.filter(
+      (skill) =>
+        skill.name.toLowerCase().includes(term) ||
+        skill.description?.toLowerCase().includes(term) ||
+        skill.category?.toLowerCase().includes(term)
     );
   }, [localSkills, searchTerm]);
 
@@ -100,7 +94,7 @@ export default function SkillsTableEditor({
   // Get original index in localSkills array
   const getOriginalIndex = (displayIndex: number): number => {
     const displaySkill = paginatedSkills[displayIndex];
-    return localSkills.findIndex(s => s.id === displaySkill.id || s.name === displaySkill.name);
+    return localSkills.findIndex((s) => s.id === displaySkill.id || s.name === displaySkill.name);
   };
 
   // Start editing a cell
@@ -126,7 +120,7 @@ export default function SkillsTableEditor({
     if (editingCell.col === 'proficiency') {
       const level = parseInt(editValue) || 0;
       skill.proficiency = level;
-      const levelInfo = proficiencyLevels.find(p => p.level === level);
+      const levelInfo = proficiencyLevels.find((p) => p.level === level);
       skill.proficiency_name = levelInfo?.name;
     } else {
       (skill as Record<string, unknown>)[editingCell.col] = editValue;
@@ -160,7 +154,7 @@ export default function SkillsTableEditor({
     const newSkills = [...localSkills];
     const skill = { ...newSkills[originalIndex] };
     skill.proficiency = level;
-    const levelInfo = proficiencyLevels.find(p => p.level === level);
+    const levelInfo = proficiencyLevels.find((p) => p.level === level);
     skill.proficiency_name = levelInfo?.name;
     newSkills[originalIndex] = skill;
     setLocalSkills(newSkills);
@@ -184,10 +178,13 @@ export default function SkillsTableEditor({
   };
 
   // Get proficiency level color (from props levels or fallback to centralized hex colors)
-  const getProficiencyColor = useCallback((level?: number): string => {
-    const levelInfo = proficiencyLevels.find(p => p.level === level);
-    return levelInfo?.color || getProficiencyHexColor(level);
-  }, [proficiencyLevels]);
+  const getProficiencyColor = useCallback(
+    (level?: number): string => {
+      const levelInfo = proficiencyLevels.find((p) => p.level === level);
+      return levelInfo?.color || getProficiencyHexColor(level);
+    },
+    [proficiencyLevels]
+  );
 
   // Render cell value
   const renderCell = (skill: Skill, col: string, displayIndex: number) => {
@@ -200,10 +197,13 @@ export default function SkillsTableEditor({
           value={skill.proficiency || 0}
           onChange={(e) => handleProficiencyChange(displayIndex, parseInt(e.target.value))}
           className="w-full px-2 py-1 text-sm border border-border rounded bg-background text-foreground focus:ring-2 focus:ring-primary"
-          style={{ borderLeftColor: getProficiencyColor(skill.proficiency), borderLeftWidth: '4px' }}
+          style={{
+            borderLeftColor: getProficiencyColor(skill.proficiency),
+            borderLeftWidth: '4px',
+          }}
         >
           <option value={0}>Not Set</option>
-          {proficiencyLevels.map(level => (
+          {proficiencyLevels.map((level) => (
             <option key={level.level} value={level.level}>
               {level.level} - {level.name}
             </option>
@@ -269,13 +269,15 @@ export default function SkillsTableEditor({
 
         <div className="flex items-center gap-2">
           {hasChanges && (
-            <Button
-              size="sm"
-              onClick={handleSaveAll}
-              className="bg-green-600 hover:bg-green-700"
-            >
+            <Button size="sm" variant="outline-green" onClick={handleSaveAll}>
               <Save className="w-4 h-4 mr-1" />
               Save Changes
+            </Button>
+          )}
+          {onClose && (
+            <Button size="sm" variant="outline" onClick={onClose}>
+              <X className="w-4 h-4 mr-1" />
+              Close
             </Button>
           )}
         </div>
@@ -286,10 +288,13 @@ export default function SkillsTableEditor({
         <table className="w-full text-sm" aria-label="Skills table">
           <thead className="bg-muted">
             <tr>
-              <th scope="col" className="w-12 px-3 py-3 text-left font-semibold text-foreground border-b border-border">
+              <th
+                scope="col"
+                className="w-12 px-3 py-3 text-left font-semibold text-foreground border-b border-border"
+              >
                 #
               </th>
-              {columns.map(col => (
+              {columns.map((col) => (
                 <th
                   key={col.key}
                   scope="col"
@@ -306,7 +311,10 @@ export default function SkillsTableEditor({
                   </div>
                 </th>
               ))}
-              <th scope="col" className="w-12 px-3 py-3 text-center font-semibold text-foreground border-b border-border">
+              <th
+                scope="col"
+                className="w-12 px-3 py-3 text-center font-semibold text-foreground border-b border-border"
+              >
                 <Trash2 className="w-4 h-4 mx-auto text-muted-foreground" aria-hidden="true" />
                 <span className="sr-only">Actions</span>
               </th>
@@ -320,10 +328,8 @@ export default function SkillsTableEditor({
                   key={skill.id || `skill-${displayIndex}`}
                   className={`border-b border-border ${displayIndex % 2 === 0 ? 'bg-background' : 'bg-muted/30'} hover:bg-muted/50 transition-colors`}
                 >
-                  <td className="px-3 py-2 text-muted-foreground font-mono text-xs">
-                    {rowNumber}
-                  </td>
-                  {columns.map(col => (
+                  <td className="px-3 py-2 text-muted-foreground font-mono text-xs">{rowNumber}</td>
+                  {columns.map((col) => (
                     <td key={col.key} className="px-3 py-2">
                       {renderCell(skill, col.key, displayIndex)}
                     </td>
@@ -343,7 +349,10 @@ export default function SkillsTableEditor({
             })}
             {paginatedSkills.length === 0 && (
               <tr>
-                <td colSpan={columns.length + 2} className="px-6 py-12 text-center text-muted-foreground">
+                <td
+                  colSpan={columns.length + 2}
+                  className="px-6 py-12 text-center text-muted-foreground"
+                >
                   {searchTerm ? (
                     <>No skills found matching "{searchTerm}"</>
                   ) : (
@@ -360,13 +369,14 @@ export default function SkillsTableEditor({
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
           <div className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * rowsPerPage + 1} - {Math.min(currentPage * rowsPerPage, filteredSkills.length)} of {filteredSkills.length}
+            Showing {(currentPage - 1) * rowsPerPage + 1} -{' '}
+            {Math.min(currentPage * rowsPerPage, filteredSkills.length)} of {filteredSkills.length}
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -402,7 +412,7 @@ export default function SkillsTableEditor({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
               Next
@@ -420,7 +430,7 @@ export default function SkillsTableEditor({
         </div>
         <div className="flex items-center gap-2">
           Proficiency levels:
-          {proficiencyLevels.map(level => (
+          {proficiencyLevels.map((level) => (
             <span
               key={level.level}
               className="px-2 py-0.5 rounded text-white text-xs"

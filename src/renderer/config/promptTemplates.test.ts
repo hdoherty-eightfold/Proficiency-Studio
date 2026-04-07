@@ -3,7 +3,13 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { promptTemplates, getDefaultPrompt, getPromptById, PromptTemplate } from './promptTemplates';
+import {
+  promptTemplates,
+  getDefaultPrompt,
+  getPromptById,
+  interpolateTemplate,
+  PromptTemplate,
+} from './promptTemplates';
 
 describe('promptTemplates', () => {
   it('should be defined and non-empty', () => {
@@ -30,7 +36,7 @@ describe('promptTemplates', () => {
   });
 
   it('should have unique IDs across all templates', () => {
-    const ids = promptTemplates.map(t => t.id);
+    const ids = promptTemplates.map((t) => t.id);
     const uniqueIds = new Set(ids);
     expect(uniqueIds.size).toBe(ids.length);
   });
@@ -48,18 +54,18 @@ describe('promptTemplates', () => {
   });
 
   it('should have exactly one recommended template', () => {
-    const recommended = promptTemplates.filter(t => t.recommended);
+    const recommended = promptTemplates.filter((t) => t.recommended);
     expect(recommended).toHaveLength(1);
   });
 
   it('should include a simple template', () => {
-    const simple = promptTemplates.find(t => t.id === 'simple');
+    const simple = promptTemplates.find((t) => t.id === 'simple');
     expect(simple).toBeDefined();
     expect(simple!.outputFormat).toBe('simple');
   });
 
   it('should include a detailed template', () => {
-    const detailed = promptTemplates.find(t => t.id === 'detailed');
+    const detailed = promptTemplates.find((t) => t.id === 'detailed');
     expect(detailed).toBeDefined();
     expect(detailed!.outputFormat).toBe('detailed');
   });
@@ -119,5 +125,32 @@ describe('getPromptById', () => {
   it('should return undefined for empty string', () => {
     const result = getPromptById('');
     expect(result).toBeUndefined();
+  });
+});
+
+describe('interpolateTemplate', () => {
+  it('should replace a single placeholder', () => {
+    const result = interpolateTemplate('Hello {name}!', { name: 'World' });
+    expect(result).toBe('Hello World!');
+  });
+
+  it('should replace multiple placeholders', () => {
+    const result = interpolateTemplate('Skills: {skills}\nLevels: {proficiency_levels}', {
+      skills: 'Python, TypeScript',
+      proficiency_levels: '1-Novice, 5-Expert',
+    });
+    expect(result).toBe('Skills: Python, TypeScript\nLevels: 1-Novice, 5-Expert');
+  });
+
+  it('should leave unknown placeholders intact', () => {
+    const result = interpolateTemplate('Hello {unknown}!', { name: 'World' });
+    expect(result).toBe('Hello {unknown}!');
+  });
+
+  it('should work with real prompt templates', () => {
+    const simple = getPromptById('simple')!;
+    const result = interpolateTemplate(simple.template, { skills: 'Python, Java' });
+    expect(result).toContain('Python, Java');
+    expect(result).not.toContain('{skills}');
   });
 });

@@ -1,4 +1,11 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+/** Click a sidebar nav button by its label text and wait for the new page to render. */
+async function navigateTo(page: Page, label: string | RegExp, expectedHeading: string | RegExp) {
+  const btn = page.getByRole('button', { name: label }).first();
+  await btn.click();
+  await expect(page.getByRole('heading', { name: expectedHeading }).first()).toBeVisible({ timeout: 5000 });
+}
 
 test.describe('UI Redesign - Eightfold.ai Branding', () => {
   test.beforeEach(async ({ page }) => {
@@ -58,7 +65,7 @@ test.describe('UI Redesign - Eightfold.ai Branding', () => {
   });
 
   test('sidebar has navy background', async ({ page }) => {
-    const sidebar = page.locator('nav[aria-label="Main navigation"]').locator('..');
+    const _sidebar = page.locator('nav[aria-label="Main navigation"]').locator('..');
     // The sidebar parent div should have navy background
     const sidebarContainer = page.locator('.bg-sidebar').first();
     await expect(sidebarContainer).toBeVisible();
@@ -221,6 +228,66 @@ test.describe('UI Redesign - Eightfold.ai Branding', () => {
   test('workflow progress bar is visible', async ({ page }) => {
     const progressText = page.getByText('Workflow Progress');
     await expect(progressText).toBeVisible();
+  });
+
+  // ─── Step Navigation ──────────────────────────────────────────────────────────
+  // These tests verify that clicking sidebar items renders the correct step content.
+  // They run against vite preview (browser only — no Electron IPC).
+  // Steps that load data from IPC will show loading/error/empty states; headings still render.
+
+  test.describe('step navigation', () => {
+    test('Welcome step renders heading and subtitle', async ({ page }) => {
+      await expect(page.getByText('Proficiency Studio')).toBeVisible();
+      await expect(page.getByText(/AI-powered proficiency/i)).toBeVisible();
+    });
+
+    test('navigating to Integration step shows Choose Integration Path', async ({ page }) => {
+      await navigateTo(page, /Integration/i, /Choose Integration Path/i);
+    });
+
+    test('navigating to Extract Skills step shows Extract Skills heading', async ({ page }) => {
+      await navigateTo(page, /Extract Skills/i, /Extract Skills/i);
+    });
+
+    test('navigating to Configure step shows Configure Proficiency heading', async ({ page }) => {
+      await navigateTo(page, /Configure/i, /Configure Proficiency/i);
+    });
+
+    test('navigating to Assessment step shows Run Proficiency Assessment heading', async ({ page }) => {
+      await navigateTo(page, /Assessment/i, /Run Proficiency Assessment|Assessment Complete|Assessment Failed/i);
+    });
+
+    test('navigating to Review step shows Assessment Review or loading state', async ({ page }) => {
+      const reviewBtn = page.getByRole('button', { name: /Review/i }).first();
+      await reviewBtn.click();
+      // Review loads async — wait for heading OR loading text
+      await expect(
+        page.getByText(/Assessment Review|Loading latest assessment|No assessments yet/i).first()
+      ).toBeVisible({ timeout: 5000 });
+    });
+
+    test('navigating to History step shows Assessment History heading', async ({ page }) => {
+      await navigateTo(page, /History/i, /Assessment History/i);
+    });
+
+    test('navigating to Analytics step shows Analytics Dashboard heading', async ({ page }) => {
+      await navigateTo(page, /Analytics/i, /Analytics Dashboard/i);
+    });
+
+    test('navigating to Settings step shows Settings heading', async ({ page }) => {
+      await navigateTo(page, /Settings/i, /Settings/i);
+    });
+
+    test('navigating back to Welcome renders correctly', async ({ page }) => {
+      // Go to settings then back to welcome
+      const settingsBtn = page.getByRole('button', { name: /Settings/i }).first();
+      await settingsBtn.click();
+      await expect(page.getByRole('heading', { name: /Settings/i }).first()).toBeVisible({ timeout: 5000 });
+
+      const welcomeBtn = page.getByRole('button', { name: /Welcome/i }).first();
+      await welcomeBtn.click();
+      await expect(page.getByText('Proficiency Studio')).toBeVisible({ timeout: 5000 });
+    });
   });
 
   test.describe('visual screenshots', () => {

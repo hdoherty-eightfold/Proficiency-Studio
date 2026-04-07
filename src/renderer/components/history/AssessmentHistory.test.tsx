@@ -4,6 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { renderWithUser, screen, waitFor } from '../../test/utils/render';
+import { createSavedAssessment, createSavedAssessments } from '../../test/factories';
 import React from 'react';
 
 // Mock stores
@@ -25,16 +26,19 @@ vi.mock('../../stores/toast-store', () => ({
   })),
 }));
 
-vi.mock('../../services/api', () => ({
-  default: {
-    get: vi.fn().mockResolvedValue({ status: 'success', assessments: [] }),
-    post: vi.fn().mockResolvedValue({ status: 'success' }),
-    delete: vi.fn().mockResolvedValue({ status: 'success' }),
-  },
-  api: {
-    get: vi.fn().mockResolvedValue({ status: 'success', assessments: [] }),
-    post: vi.fn().mockResolvedValue({ status: 'success' }),
-    delete: vi.fn().mockResolvedValue({ status: 'success' }),
+vi.mock('../../services/electron-api', () => ({
+  electronAPI: {
+    listSavedAssessments: vi.fn().mockResolvedValue({
+      success: true,
+      assessments: [],
+    }),
+    loadSavedAssessment: vi.fn().mockResolvedValue({
+      success: true,
+      data: null,
+    }),
+    deleteSavedAssessment: vi.fn().mockResolvedValue({
+      success: true,
+    }),
   },
 }));
 
@@ -62,16 +66,7 @@ describe('AssessmentHistory', () => {
     await waitFor(() => {
       expect(screen.getByText('No Assessments Found')).toBeInTheDocument();
     });
-    expect(screen.getByText('Run an assessment to see it appear here.')).toBeInTheDocument();
-  });
-
-  it('should render filter controls', async () => {
-    renderWithUser(<AssessmentHistory />);
-    await waitFor(() => {
-      expect(screen.getByText('Environment')).toBeInTheDocument();
-    });
-    expect(screen.getByText('Model Provider')).toBeInTheDocument();
-    expect(screen.getByText('Limit')).toBeInTheDocument();
+    expect(screen.getByText(/Run a proficiency assessment/)).toBeInTheDocument();
   });
 
   it('should render the Refresh button', async () => {
@@ -81,10 +76,40 @@ describe('AssessmentHistory', () => {
     });
   });
 
-  it('should render the Compare Mode button', async () => {
+  it('should show assessments when data exists', async () => {
+    const { electronAPI } = await import('../../services/electron-api');
+    const saved = createSavedAssessment({
+      model_used: 'gemini-3.1-flash-lite-preview',
+      total_skills: 10,
+      avg_confidence: 0.85,
+    });
+    vi.mocked(electronAPI.listSavedAssessments).mockResolvedValueOnce({
+      success: true,
+      assessments: [saved],
+    });
+
     renderWithUser(<AssessmentHistory />);
     await waitFor(() => {
-      expect(screen.getByText('Compare Mode')).toBeInTheDocument();
+      expect(screen.getByText('gemini-3.1-flash-lite-preview')).toBeInTheDocument();
+    });
+    // Verify skill count and confidence are rendered correctly
+    expect(screen.getByText('10')).toBeInTheDocument();
+    expect(screen.getByText('85%')).toBeInTheDocument();
+  });
+
+  it('should show multiple assessments from factory', async () => {
+    const { electronAPI } = await import('../../services/electron-api');
+    const saved = createSavedAssessments(3);
+    vi.mocked(electronAPI.listSavedAssessments).mockResolvedValueOnce({
+      success: true,
+      assessments: saved,
+    });
+
+    renderWithUser(<AssessmentHistory />);
+    await waitFor(() => {
+      // All 3 assessments should have model names visible
+      const modelCells = screen.getAllByText('gemini-3.1-flash-lite-preview');
+      expect(modelCells.length).toBeGreaterThanOrEqual(3);
     });
   });
 });

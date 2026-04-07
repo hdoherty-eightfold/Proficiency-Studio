@@ -25,11 +25,41 @@ export interface ProficiencyLevel {
  * Colors use Tailwind CSS `bg-*` classes for badge/pill rendering.
  */
 export const DEFAULT_PROFICIENCY_LEVELS: ProficiencyLevel[] = [
-  { level: 1, name: 'Novice', description: 'Less than 6 months experience, basic understanding', color: 'bg-gray-500' },
-  { level: 2, name: 'Developing', description: '6 months to 1 year, can work with guidance', color: 'bg-blue-500' },
-  { level: 3, name: 'Intermediate', description: '1-3 years experience, works independently', color: 'bg-yellow-500' },
-  { level: 4, name: 'Advanced', description: '3-5 years experience, deep expertise', color: 'bg-green-500' },
-  { level: 5, name: 'Expert', description: '5+ years, thought leader, teaches others', color: 'bg-purple-500' },
+  {
+    level: 1,
+    name: 'Novice',
+    description:
+      'Awareness only — knows what the skill is but cannot apply it independently. Needs step-by-step guidance for every task.',
+    color: 'bg-gray-500',
+  },
+  {
+    level: 2,
+    name: 'Developing',
+    description:
+      'Can complete basic, well-defined tasks with supervision. Makes common mistakes on unfamiliar inputs. Still building fundamentals.',
+    color: 'bg-blue-500',
+  },
+  {
+    level: 3,
+    name: 'Intermediate',
+    description:
+      'Works independently on standard tasks. Solves routine problems without help; needs support only on complex or novel situations.',
+    color: 'bg-yellow-500',
+  },
+  {
+    level: 4,
+    name: 'Advanced',
+    description:
+      'Solves complex problems independently. Improves existing processes, contributes best practices, and mentors others. Handles edge cases confidently.',
+    color: 'bg-green-500',
+  },
+  {
+    level: 5,
+    name: 'Expert',
+    description:
+      'Recognized authority. Designs systems and standards that others adopt. Teaches widely, drives innovation, and resolves issues no one else can.',
+    color: 'bg-purple-500',
+  },
 ];
 
 /**
@@ -50,8 +80,16 @@ export const PROFICIENCY_HEX_COLORS: string[] = [
  * Used when users add custom proficiency levels.
  */
 export const PROFICIENCY_COLOR_CYCLE: string[] = [
-  'bg-gray-500', 'bg-blue-500', 'bg-yellow-500', 'bg-green-500', 'bg-purple-500',
-  'bg-pink-500', 'bg-indigo-500', 'bg-teal-500', 'bg-orange-500', 'bg-red-500',
+  'bg-gray-500',
+  'bg-blue-500',
+  'bg-yellow-500',
+  'bg-green-500',
+  'bg-purple-500',
+  'bg-pink-500',
+  'bg-indigo-500',
+  'bg-teal-500',
+  'bg-orange-500',
+  'bg-red-500',
 ];
 
 /**
@@ -70,7 +108,11 @@ export const PROFICIENCY_BADGE_CLASSES: Record<number, string> = {
  * Bar chart colors for analytics distribution charts.
  */
 export const PROFICIENCY_CHART_COLORS: string[] = [
-  'bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-400', 'bg-purple-500',
+  'bg-red-400',
+  'bg-orange-400',
+  'bg-yellow-400',
+  'bg-green-400',
+  'bg-purple-500',
 ];
 
 // =============================================================================
@@ -80,24 +122,30 @@ export const PROFICIENCY_CHART_COLORS: string[] = [
 /**
  * Get proficiency level info by level number.
  */
-export function getProficiencyLevel(level: number, levels: ProficiencyLevel[] = DEFAULT_PROFICIENCY_LEVELS): ProficiencyLevel | undefined {
-  return levels.find(p => p.level === level);
+export function getProficiencyLevel(
+  level: number,
+  levels: ProficiencyLevel[] = DEFAULT_PROFICIENCY_LEVELS
+): ProficiencyLevel | undefined {
+  return levels.find((p) => p.level === level);
 }
 
 /**
  * Get the display name for a proficiency level number.
  */
-export function getProficiencyName(level: number, levels: ProficiencyLevel[] = DEFAULT_PROFICIENCY_LEVELS): string {
+export function getProficiencyName(
+  level: number,
+  levels: ProficiencyLevel[] = DEFAULT_PROFICIENCY_LEVELS
+): string {
   return getProficiencyLevel(level, levels)?.name || `Level ${level}`;
 }
 
 /**
  * Get all proficiency level names as an ordered array (index 0 = level 1).
  */
-export function getProficiencyNames(levels: ProficiencyLevel[] = DEFAULT_PROFICIENCY_LEVELS): string[] {
-  return levels
-    .sort((a, b) => a.level - b.level)
-    .map(l => l.name);
+export function getProficiencyNames(
+  levels: ProficiencyLevel[] = DEFAULT_PROFICIENCY_LEVELS
+): string[] {
+  return levels.sort((a, b) => a.level - b.level).map((l) => l.name);
 }
 
 /**
@@ -140,8 +188,8 @@ export function ensureLevelsHaveColors(levels: ProficiencyLevel[]): ProficiencyL
 /**
  * Get chart labels for proficiency distribution (e.g., "Novice (1)").
  */
-export function getProficiencyChartLabels(levels: ProficiencyLevel[] = DEFAULT_PROFICIENCY_LEVELS): string[] {
-  return levels
-    .sort((a, b) => a.level - b.level)
-    .map(l => `${l.name} (${l.level})`);
+export function getProficiencyChartLabels(
+  levels: ProficiencyLevel[] = DEFAULT_PROFICIENCY_LEVELS
+): string[] {
+  return levels.sort((a, b) => a.level - b.level).map((l) => `${l.name} (${l.level})`);
 }

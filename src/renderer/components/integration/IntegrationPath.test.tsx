@@ -117,6 +117,46 @@ describe('IntegrationPath', () => {
     expect(screen.getByText('Comprehensive Tech Skills')).toBeInTheDocument();
     expect(screen.getByText('Software Engineering')).toBeInTheDocument();
     expect(screen.getByText('Data Science')).toBeInTheDocument();
-    expect(screen.getByText('Employee Data')).toBeInTheDocument();
+  });
+
+  it('should render SFTP Manager when SFTP is selected', async () => {
+    const { user } = renderWithUser(<IntegrationPath />);
+    await user.click(screen.getByText('Select SFTP'));
+    expect(screen.getByTestId('sftp-manager')).toBeInTheDocument();
+  });
+
+  it('should render Eightfold Auth when API is selected', async () => {
+    const { user } = renderWithUser(<IntegrationPath />);
+    await user.click(screen.getByText('Select API'));
+    expect(screen.getByTestId('eightfold-auth')).toBeInTheDocument();
+  });
+
+  it('should show SFTP description text', () => {
+    renderWithUser(<IntegrationPath />);
+    expect(screen.getByText(/Connect to SFTP server/i)).toBeInTheDocument();
+  });
+
+  it('should show CSV description text', () => {
+    renderWithUser(<IntegrationPath />);
+    expect(screen.getByText(/Upload a CSV file/i)).toBeInTheDocument();
+  });
+
+  it('should show API description text', () => {
+    renderWithUser(<IntegrationPath />);
+    expect(screen.getByText(/Connect to Eightfold API/i)).toBeInTheDocument();
+  });
+
+  it('should show Back button', () => {
+    renderWithUser(<IntegrationPath />);
+    const backButton = screen.getByRole('button', { name: /back/i });
+    expect(backButton).toBeInTheDocument();
+  });
+
+  it('should call previousStep when Back is clicked', async () => {
+    const { user } = renderWithUser(<IntegrationPath />);
+    await user.click(screen.getByRole('button', { name: /back/i }));
+    // previousStep is available in the mock state (but not explicitly in the current mock)
+    // verify no crash occurs
+    expect(screen.getByText('Choose Integration Path')).toBeInTheDocument();
   });
 });

@@ -52,7 +52,9 @@ export const createSkills = (count: number, overrides: Partial<Skill> = {}): Ski
 // Assessment Factories
 // ==========================================
 
-export const createAssessmentResult = (overrides: Partial<AssessmentResult> = {}): AssessmentResult => ({
+export const createAssessmentResult = (
+  overrides: Partial<AssessmentResult> = {}
+): AssessmentResult => ({
   skill_name: 'TypeScript',
   proficiency: 3,
   proficiency_level: 3,
@@ -65,7 +67,9 @@ export const createAssessmentResult = (overrides: Partial<AssessmentResult> = {}
   ...overrides,
 });
 
-export const createAssessmentSummary = (overrides: Partial<AssessmentSummary> = {}): AssessmentSummary => ({
+export const createAssessmentSummary = (
+  overrides: Partial<AssessmentSummary> = {}
+): AssessmentSummary => ({
   id: uniqueId('assessment'),
   environment: 'Production',
   provider: 'google',
@@ -113,7 +117,10 @@ export const createEnvironments = (count: number): Environment[] =>
 // Configuration Factories
 // ==========================================
 
-export const createProficiencyLevel = (level: number, overrides: Partial<ProficiencyLevel> = {}): ProficiencyLevel => {
+export const createProficiencyLevel = (
+  level: number,
+  overrides: Partial<ProficiencyLevel> = {}
+): ProficiencyLevel => {
   const labels = ['Novice', 'Developing', 'Intermediate', 'Advanced', 'Expert'];
   const colors = ['#9ca3af', '#3b82f6', '#eab308', '#22c55e', '#a855f7'];
   return {
@@ -126,9 +133,11 @@ export const createProficiencyLevel = (level: number, overrides: Partial<Profici
 };
 
 export const createProficiencyLevels = (): ProficiencyLevel[] =>
-  [1, 2, 3, 4, 5].map(level => createProficiencyLevel(level));
+  [1, 2, 3, 4, 5].map((level) => createProficiencyLevel(level));
 
-export const createConfiguration = (overrides: Partial<ConfigurationItem> = {}): ConfigurationItem => ({
+export const createConfiguration = (
+  overrides: Partial<ConfigurationItem> = {}
+): ConfigurationItem => ({
   id: uniqueId('config'),
   name: 'Default Configuration',
   description: 'Standard proficiency assessment configuration',
@@ -159,7 +168,7 @@ export const createSFTPCredential = (overrides: Partial<SFTPCredential> = {}): S
   host: 'sftp.example.com',
   port: 22,
   username: 'sftp_user',
-  default_path: '/uploads',
+  remote_path: '/uploads',
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   ...overrides,
@@ -199,7 +208,9 @@ export const createTopSkill = (overrides: Partial<TopSkill> = {}): TopSkill => (
   ...overrides,
 });
 
-export const createModelPerformance = (overrides: Partial<ModelPerformance> = {}): ModelPerformance => ({
+export const createModelPerformance = (
+  overrides: Partial<ModelPerformance> = {}
+): ModelPerformance => ({
   provider: 'google',
   model: 'gemini-3.1-flash-lite-preview',
   total_assessments: 500,
@@ -230,7 +241,10 @@ export const createErrorResponse = (message: string, details?: string) => ({
 // File/CSV Factories
 // ==========================================
 
-export const createCSVData = (rows: number, columns: string[] = ['id', 'name', 'email', 'department']): Record<string, unknown>[] =>
+export const createCSVData = (
+  rows: number,
+  columns: string[] = ['id', 'name', 'email', 'department']
+): Record<string, unknown>[] =>
   Array.from({ length: rows }, (_, i) => {
     const row: Record<string, unknown> = {};
     columns.forEach((col, _j) => {
@@ -249,3 +263,58 @@ export const createFilePreviewData = (rows = 10, columns = ['id', 'name', 'email
   total_rows: rows,
   sample_size: rows,
 });
+
+// ==========================================
+// Saved Assessment (AssessmentHistory) Factories
+// ==========================================
+
+export interface SavedAssessmentMeta {
+  filename: string;
+  saved_at: string;
+  total_skills: number;
+  avg_proficiency: number;
+  avg_confidence: number;
+  model_used: string;
+  provider: string;
+  processing_time: number;
+  content_hash: string;
+  extraction_source: string;
+  source_filename: string;
+  environment_name: string;
+  total_tokens: number;
+  estimated_cost: number;
+  success_rate: number;
+}
+
+export const createSavedAssessment = (
+  overrides: Partial<SavedAssessmentMeta> = {}
+): SavedAssessmentMeta => ({
+  filename: `assessment_${uniqueId('file')}.json`,
+  saved_at: new Date().toISOString(),
+  total_skills: 10,
+  avg_proficiency: 3.5,
+  avg_confidence: 0.85,
+  model_used: 'gemini-3.1-flash-lite-preview',
+  provider: 'google',
+  processing_time: 45.2,
+  content_hash: uniqueId('hash'),
+  extraction_source: 'csv',
+  source_filename: 'employees.csv',
+  environment_name: '',
+  total_tokens: 15000,
+  estimated_cost: 0.0023,
+  success_rate: 100,
+  ...overrides,
+});
+
+export const createSavedAssessments = (
+  count: number,
+  overrides: Partial<SavedAssessmentMeta> = {}
+): SavedAssessmentMeta[] =>
+  Array.from({ length: count }, (_, i) =>
+    createSavedAssessment({
+      filename: `assessment_${i + 1}.json`,
+      total_skills: 10 + i * 5,
+      ...overrides,
+    })
+  );

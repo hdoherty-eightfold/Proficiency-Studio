@@ -1,9 +1,21 @@
-import { app, BrowserWindow, ipcMain, Menu, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, shell, session } from 'electron';
 import { join } from 'path';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import log from 'electron-log';
+import * as Sentry from '@sentry/electron/main';
+import { autoUpdater } from 'electron-updater';
 import { setupIpcHandlers } from './ipc-handlers.js';
 import { BackendManager } from './backend-manager.js';
+
+// Initialize Sentry error tracking (only when DSN is provided via env var).
+// Set SENTRY_DSN in .env or via platform environment variables to enable.
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: app.isPackaged ? 'production' : 'development',
+  });
+  log.info('Sentry error tracking enabled');
+}
 
 // Configure logging
 log.transports.file.level = 'info';
@@ -83,7 +95,10 @@ function createWindow(): void {
 
   // Get saved window bounds with validation
   const savedBounds = store.get('windowBounds', { width: 1400, height: 900 }) as {
-    width: number; height: number; x?: number; y?: number;
+    width: number;
+    height: number;
+    x?: number;
+    y?: number;
   };
   const windowBounds = {
     width: Math.max(savedBounds.width || 1400, 800),
@@ -131,6 +146,40 @@ function createWindow(): void {
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
+  });
+
+  // Content-Security-Policy headers
+  // Allow localhost connections for the Python backend API (dynamic port).
+  // 'unsafe-inline' required for Vite/React CSS-in-JS and Tailwind.
+  const csp = isDev
+    ? [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Vite HMR needs eval in dev
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob:",
+        "font-src 'self' data:",
+        "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*",
+        'worker-src blob:',
+        "frame-src 'none'",
+      ].join('; ')
+    : [
+        "default-src 'self'",
+        "script-src 'self'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob:",
+        "font-src 'self' data:",
+        "connect-src 'self' http://127.0.0.1:*",
+        'worker-src blob:',
+        "frame-src 'none'",
+      ].join('; ');
+
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [csp],
+      },
+    });
   });
 
   // Load app
@@ -236,12 +285,7 @@ function createMenu(): void {
     },
     {
       label: 'Window',
-      submenu: [
-        { role: 'minimize' },
-        { role: 'zoom' },
-        { type: 'separator' },
-        { role: 'close' },
-      ],
+      submenu: [{ role: 'minimize' }, { role: 'zoom' }, { type: 'separator' }, { role: 'close' }],
     },
     {
       label: 'Help',
@@ -293,12 +337,34 @@ app.whenReady().then(async () => {
 
   createWindow();
 
+  // Auto-updater: check for updates in production builds only.
+  // Requires publish config in package.json (e.g. GitHub Releases via electron-builder).
+  if (app.isPackaged) {
+    autoUpdater.logger = log;
+    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+      log.warn('Auto-updater check failed:', err);
+    });
+
+    autoUpdater.on('update-available', () => {
+      log.info('Update available — downloading in background');
+    });
+
+    autoUpdater.on('update-downloaded', () => {
+      log.info('Update downloaded — will install on next restart');
+      mainWindow?.webContents.send('app:update-ready');
+    });
+
+    autoUpdater.on('error', (err) => {
+      log.error('Auto-updater error:', err);
+    });
+  }
+
   // Notify renderer if backend failed to start
   if (!backendManager.isRunning() && mainWindow) {
     mainWindow.webContents.once('did-finish-load', () => {
       mainWindow?.webContents.send('backend:status', {
         status: 'failed',
-        error: 'Backend failed to start. Some features may be unavailable.'
+        error: 'Backend failed to start. Some features may be unavailable.',
       });
     });
   }

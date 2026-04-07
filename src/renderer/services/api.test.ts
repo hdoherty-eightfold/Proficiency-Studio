@@ -5,7 +5,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { api } from './api';
 import { electronAPI } from './electron-api';
-import { createSkills, createAssessmentSummaries, createEnvironments, createSuccessResponse } from '../test/factories';
+import {
+  createSkills,
+  createAssessmentSummaries,
+  createEnvironments,
+  createSuccessResponse,
+} from '../test/factories';
 
 // Mock the electron-api module
 vi.mock('./electron-api', () => ({
@@ -143,7 +148,9 @@ describe('APIService', () => {
 
       const result = await api.updateEnvironment('env_1', { name: 'Updated Name' });
 
-      expect(electronAPI.put).toHaveBeenCalledWith('/api/environments/env_1', { name: 'Updated Name' });
+      expect(electronAPI.put).toHaveBeenCalledWith('/api/environments/env_1', {
+        name: 'Updated Name',
+      });
       expect(result.status).toBe('success');
     });
   });
@@ -208,7 +215,9 @@ describe('APIService', () => {
 
       await api.deleteAssessment('assessment_1');
 
-      expect(electronAPI.delete).toHaveBeenCalledWith('/api/export/history/assessment_1?confirm=true');
+      expect(electronAPI.delete).toHaveBeenCalledWith(
+        '/api/export/history/assessment_1?confirm=true'
+      );
     });
   });
 
@@ -222,7 +231,11 @@ describe('APIService', () => {
 
       await api.compareAssessments(['a1', 'a2', 'a3']);
 
-      expect(electronAPI.post).toHaveBeenCalledWith('/api/export/history/compare', ['a1', 'a2', 'a3']);
+      expect(electronAPI.post).toHaveBeenCalledWith('/api/export/history/compare', [
+        'a1',
+        'a2',
+        'a3',
+      ]);
     });
   });
 
@@ -237,7 +250,9 @@ describe('APIService', () => {
 
       await api.getFilePreview('file_1');
 
-      expect(electronAPI.get).toHaveBeenCalledWith('/api/transform/file-data/file_1?sample_size=1000');
+      expect(electronAPI.get).toHaveBeenCalledWith(
+        '/api/transform/file-data/file_1?sample_size=1000'
+      );
     });
 
     it('should GET file data with custom sample size', async () => {
@@ -245,7 +260,9 @@ describe('APIService', () => {
 
       await api.getFilePreview('file_1', 500);
 
-      expect(electronAPI.get).toHaveBeenCalledWith('/api/transform/file-data/file_1?sample_size=500');
+      expect(electronAPI.get).toHaveBeenCalledWith(
+        '/api/transform/file-data/file_1?sample_size=500'
+      );
     });
   });
 
@@ -274,29 +291,45 @@ describe('APIService', () => {
   });
 
   describe('SFTP operations', () => {
-    it('should list SFTP credentials', async () => {
-      vi.mocked(electronAPI.get).mockResolvedValue({
-        status: 'success',
-        credentials: [],
-      });
+    it('should list SFTP credentials and normalize raw array to wrapper', async () => {
+      // Backend returns a plain array; service wraps it
+      vi.mocked(electronAPI.get).mockResolvedValue([
+        {
+          id: '1',
+          name: 'My Server',
+          host: 'sftp.test.com',
+          port: 22,
+          username: 'user',
+          remote_path: '/',
+        },
+      ]);
 
       const result = await api.listSFTPCredentials();
 
       expect(electronAPI.get).toHaveBeenCalledWith('/api/sftp/credentials');
+      expect(result.credentials).toHaveLength(1);
+      expect(result.status).toBe('success');
+    });
+
+    it('should pass through already-wrapped listSFTPCredentials response', async () => {
+      vi.mocked(electronAPI.get).mockResolvedValue({ status: 'success', credentials: [] });
+
+      const result = await api.listSFTPCredentials();
+
       expect(result.credentials).toBeDefined();
     });
 
     it('should test SFTP connection', async () => {
       vi.mocked(electronAPI.post).mockResolvedValue({
-        status: 'success',
-        connected: true,
-        latency_ms: 150,
+        success: true,
+        message: 'Connected',
+        file_count: 5,
       });
 
       const result = await api.testSFTPConnection({ credential_id: 'sftp_1' });
 
-      expect(electronAPI.post).toHaveBeenCalledWith('/api/sftp/test-connection', { credential_id: 'sftp_1' });
-      expect(result.connected).toBe(true);
+      expect(electronAPI.post).toHaveBeenCalledWith('/api/sftp/test/sftp_1', {});
+      expect(result.success).toBe(true);
     });
 
     it('should browse SFTP directory', async () => {
@@ -308,10 +341,10 @@ describe('APIService', () => {
 
       const result = await api.browseSFTP({ credential_id: 'sftp_1', path: '/uploads' });
 
-      expect(electronAPI.post).toHaveBeenCalledWith('/api/sftp/browse', {
-        credential_id: 'sftp_1',
-        path: '/uploads',
-      });
+      expect(electronAPI.post).toHaveBeenCalledWith(
+        '/api/sftp/list/sftp_1?remote_path=%2Fuploads',
+        {}
+      );
       expect(result.path).toBe('/uploads');
     });
   });
@@ -409,9 +442,12 @@ describe('APIService', () => {
         proficiency_levels: [{ level: 1, name: 'Novice', description: 'Beginning level' }],
       });
 
-      expect(electronAPI.post).toHaveBeenCalledWith('/api/configurations', expect.objectContaining({
-        name: 'Test Config',
-      }));
+      expect(electronAPI.post).toHaveBeenCalledWith(
+        '/api/configurations',
+        expect.objectContaining({
+          name: 'Test Config',
+        })
+      );
     });
 
     it('should clone configuration', async () => {

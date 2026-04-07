@@ -30,7 +30,7 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     models: ['gemini-3.1-flash-lite-preview', 'gemini-3.1-pro-preview'],
     free: true,
     recommended: true,
-    description: 'Gemini 3.1, fast and FREE'
+    description: 'Gemini 3.1, fast and FREE',
   },
   kimi: {
     name: 'Kimi (Moonshot AI)',
@@ -38,7 +38,7 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
     color: 'indigo',
     models: ['kimi-k2.5'],
     recommended: true,
-    description: 'Kimi K2.5 - 256K context, multimodal agentic model'
+    description: 'Kimi K2.5 - 256K context, multimodal agentic model',
   },
 };
 
@@ -69,6 +69,20 @@ export function getModelsForProvider(providerId: string): string[] {
 export function getProvidersList(): Array<ProviderConfig & { id: string }> {
   return Object.entries(PROVIDERS).map(([id, config]) => ({
     id,
-    ...config
+    ...config,
   }));
+}
+
+/**
+ * Returns the fallback provider ID and default model when the primary fails.
+ * Order: google → kimi → google (cycles through available providers).
+ */
+export function getFallbackProvider(
+  primaryProviderId: string
+): { provider: string; model: string } | null {
+  const providers = Object.keys(PROVIDERS);
+  const primaryIdx = providers.indexOf(primaryProviderId.toLowerCase());
+  if (primaryIdx === -1 || providers.length < 2) return null;
+  const fallbackId = providers[(primaryIdx + 1) % providers.length];
+  return { provider: fallbackId, model: getDefaultModel(fallbackId) };
 }

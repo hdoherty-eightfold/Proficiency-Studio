@@ -19,9 +19,28 @@ interface WrapperProps {
 
 /**
  * Default wrapper that includes all necessary providers
+ * Uses lazy import to avoid conflicts with vi.mock hoisting
  */
+let TooltipProviderComponent: React.FC<{ children: ReactNode }> | null = null;
+
+const getTooltipProvider = async () => {
+  if (!TooltipProviderComponent) {
+    try {
+      const mod = await import('../../components/ui/tooltip');
+      TooltipProviderComponent = mod.TooltipProvider;
+    } catch {
+      TooltipProviderComponent = ({ children }) => <>{children}</>;
+    }
+  }
+  return TooltipProviderComponent;
+};
+
+// Eagerly load on module init
+getTooltipProvider();
+
 const AllProviders: React.FC<WrapperProps> = ({ children }) => {
-  return <>{children}</>;
+  const Provider = TooltipProviderComponent || (({ children: c }) => <>{c}</>);
+  return <Provider>{children}</Provider>;
 };
 
 // ==========================================
@@ -31,10 +50,7 @@ const AllProviders: React.FC<WrapperProps> = ({ children }) => {
 /**
  * Custom render function that wraps component with all providers
  */
-const customRender = (
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-): RenderResult => {
+const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>): RenderResult => {
   return render(ui, { wrapper: AllProviders, ...options });
 };
 
@@ -65,7 +81,7 @@ const waitForCondition = async (
     if (Date.now() - startTime > timeout) {
       throw new Error('Condition not met within timeout');
     }
-    await new Promise(resolve => setTimeout(resolve, interval));
+    await new Promise((resolve) => setTimeout(resolve, interval));
   }
 };
 
@@ -85,12 +101,12 @@ const createDeferred = <T,>() => {
 /**
  * Wait for next tick (microtask queue to flush)
  */
-const waitForNextTick = () => new Promise(resolve => setTimeout(resolve, 0));
+const waitForNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 /**
  * Flush all pending promises
  */
-const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 // ==========================================
 // Mock Helpers
@@ -100,7 +116,7 @@ const flushPromises = () => new Promise(resolve => setImmediate(resolve));
  * Create a mock function that resolves after a delay
  */
 const createDelayedMock = <T,>(value: T, delay = 100) => {
-  return () => new Promise<T>(resolve => setTimeout(() => resolve(value), delay));
+  return () => new Promise<T>((resolve) => setTimeout(() => resolve(value), delay));
 };
 
 /**
