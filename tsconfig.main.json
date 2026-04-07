@@ -3,8 +3,9 @@
     "compilerOptions": {
         "allowImportingTsExtensions": false,
         "outDir": "dist/main",
-        "module": "CommonJS",
-        "moduleResolution": "node",
+        "module": "Node16",
+        "moduleResolution": "node16",
+        "rootDir": "./src/main",
         "noEmit": false,
         "lib": [
             "ES2020"

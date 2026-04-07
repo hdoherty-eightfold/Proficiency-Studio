@@ -1,11 +1,12 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   root: './src/renderer',
   base: './',
   publicDir: '../../public',
@@ -23,32 +24,33 @@ export default defineConfig({
       },
     },
 
-    // Chunk splitting for better caching
-    rollupOptions: {
+    // Chunk splitting for better caching (Vite 8 / Rolldown: manualChunks must be a function)
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          // Core React dependencies
-          'vendor-react': ['react', 'react-dom'],
-
-          // State management
-          'vendor-state': ['zustand'],
-
-          // UI library components
-          'vendor-radix': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-toast',
-            '@radix-ui/react-tooltip',
-          ],
-
-          // Icons (large, separate chunk)
-          'vendor-icons': ['lucide-react'],
-
-          // Utility libraries
-          'vendor-utils': ['clsx', 'tailwind-merge', 'class-variance-authority'],
+        manualChunks(id: string) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/zustand')) {
+            return 'vendor-state';
+          }
+          if (id.includes('node_modules/@radix-ui/react-dialog') ||
+              id.includes('node_modules/@radix-ui/react-dropdown-menu') ||
+              id.includes('node_modules/@radix-ui/react-popover') ||
+              id.includes('node_modules/@radix-ui/react-select') ||
+              id.includes('node_modules/@radix-ui/react-tabs') ||
+              id.includes('node_modules/@radix-ui/react-toast') ||
+              id.includes('node_modules/@radix-ui/react-tooltip')) {
+            return 'vendor-radix';
+          }
+          if (id.includes('node_modules/lucide-react')) {
+            return 'vendor-icons';
+          }
+          if (id.includes('node_modules/clsx') ||
+              id.includes('node_modules/tailwind-merge') ||
+              id.includes('node_modules/class-variance-authority')) {
+            return 'vendor-utils';
+          }
         },
       },
     },
