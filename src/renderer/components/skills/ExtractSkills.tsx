@@ -11,7 +11,6 @@ import {
   Clock,
   Activity,
   Eye,
-  BarChart3,
   ChevronLeft,
 } from 'lucide-react';
 import { useAppStore, Skill } from '../../stores/app-store';
@@ -20,7 +19,6 @@ import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { api } from '../../services/api';
 import SkillsTableEditor from './SkillsTableEditor';
-import DataQualityDashboard from '../quality/DataQualityDashboard';
 
 // Types
 interface ExtractedSkillsResponse {
@@ -47,7 +45,6 @@ export default function ExtractSkills() {
 
   // Local state
   const [showSkillsList, setShowSkillsList] = useState(false);
-  const [showQualityDashboard, setShowQualityDashboard] = useState(false);
   const [sourceType, setSourceType] = useState<'csv' | 'api' | 'sftp' | null>(null);
   const [sourceInfo, setSourceInfo] = useState<{
     filename?: string | null;
@@ -216,12 +213,7 @@ export default function ExtractSkills() {
   const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 
   return (
-    <motion.div
-      className="max-w-6xl mx-auto p-8"
-      variants={stagger}
-      initial="hidden"
-      animate="show"
-    >
+    <motion.div className="p-6 space-y-6" variants={stagger} initial="hidden" animate="show">
       <Card className="border-none shadow-none bg-transparent">
         <motion.div variants={fadeUp} className="mb-4">
           <Button variant="back-nav" size="sm" onClick={previousStep} className="gap-1">
@@ -383,18 +375,10 @@ export default function ExtractSkills() {
               <Button
                 variant="secondary"
                 onClick={() => setShowSkillsList(!showSkillsList)}
-                className="gap-2"
+                className="gap-2 arc-border"
               >
                 <Eye className="w-4 h-4" />
                 {showSkillsList ? 'Hide' : 'View'} Skills List
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => setShowQualityDashboard(!showQualityDashboard)}
-                className="gap-2"
-              >
-                <BarChart3 className="w-4 h-4" />
-                {showQualityDashboard ? 'Hide' : 'Show'} Quality Analysis
               </Button>
               <Button onClick={nextStep}>Continue</Button>
             </div>
@@ -410,36 +394,6 @@ export default function ExtractSkills() {
                 />
               </div>
             )}
-
-            {showQualityDashboard &&
-              (sourceInfo?.fileId || sourceInfo?.csvContent || sourceInfo?.sftpCredentialId) && (
-                <div className="mt-6">
-                  <DataQualityDashboard
-                    fileId={sourceInfo?.fileId ?? undefined}
-                    csvContent={sourceInfo?.csvContent ?? undefined}
-                    filename={sourceInfo?.filename ?? undefined}
-                    sftpCredentialId={sourceInfo?.sftpCredentialId ?? undefined}
-                    sftpRemotePath={sourceInfo?.sftpRemotePath ?? undefined}
-                    onAnalysisComplete={(result) => {
-                      toast({
-                        title: `Data Quality: Grade ${result.overall_grade}`,
-                        description: `Overall score: ${result.overall_score}%`,
-                      });
-                    }}
-                  />
-                </div>
-              )}
-
-            {showQualityDashboard &&
-              !sourceInfo?.fileId &&
-              !sourceInfo?.csvContent &&
-              !sourceInfo?.sftpCredentialId && (
-                <div className="mt-6 p-4 bg-warning/10 border border-warning/20 rounded-lg text-center">
-                  <p className="text-warning-foreground">
-                    Quality analysis is not available for this data source type.
-                  </p>
-                </div>
-              )}
           </div>
         )}
       </Card>

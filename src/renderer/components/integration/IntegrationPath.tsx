@@ -295,12 +295,7 @@ export default function IntegrationPath() {
   const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 
   return (
-    <motion.div
-      className="max-w-6xl mx-auto p-8"
-      variants={stagger}
-      initial="hidden"
-      animate="show"
-    >
+    <motion.div className="p-6 space-y-6" variants={stagger} initial="hidden" animate="show">
       <Card className="border-none shadow-none bg-transparent">
         <motion.div variants={fadeUp} className="mb-4">
           <Button variant="back-nav" size="sm" onClick={previousStep} className="gap-1">

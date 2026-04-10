@@ -71,9 +71,17 @@ interface SFTPCredential {
 
 interface ExportActionsProps {
   assessments: AssessmentResult[];
+  /** Number of skills that failed during assessment (passed from AssessmentResults) */
+  failedSkillsCount?: number;
+  /** Total skills originally requested */
+  requestedSkillsCount?: number;
 }
 
-export function ExportActions({ assessments }: ExportActionsProps) {
+export function ExportActions({
+  assessments,
+  failedSkillsCount: failedSkillsCountProp,
+  requestedSkillsCount: requestedSkillsCountProp,
+}: ExportActionsProps) {
   const { toast } = useToast();
   const setCurrentStep = useAppStore((state) => state.setCurrentStep);
   const extractionSource = useAppStore((state) => state.skillsState.extractionSource);
@@ -123,6 +131,13 @@ export function ExportActions({ assessments }: ExportActionsProps) {
   // Retry
   const [failedRoles, setFailedRoles] = useState<EightfoldRole[]>([]);
 
+  // Partial assessment warning
+  const [failedSkillsCount, setFailedSkillsCount] = useState<number>(failedSkillsCountProp ?? 0);
+  const [requestedSkillsCount, setRequestedSkillsCount] = useState<number>(
+    requestedSkillsCountProp ?? 0
+  );
+  const [showPartialWarning, setShowPartialWarning] = useState(false);
+
   useEffect(() => {
     loadContext();
     loadSFTPCredentials();
@@ -161,6 +176,20 @@ export function ExportActions({ assessments }: ExportActionsProps) {
         }
       } catch {
         toast({ title: 'Could not load roles for export', variant: 'destructive' });
+      }
+    }
+
+    // Load partial assessment metadata (for Review page where props aren't passed)
+    if (failedSkillsCountProp === undefined) {
+      const storedResults = localStorage.getItem('assessmentResults');
+      if (storedResults) {
+        try {
+          const parsed = JSON.parse(storedResults);
+          if (parsed.failed_skills_count) setFailedSkillsCount(parsed.failed_skills_count);
+          if (parsed.requested_skills_count) setRequestedSkillsCount(parsed.requested_skills_count);
+        } catch {
+          // ignore
+        }
       }
     }
   };
@@ -267,7 +296,13 @@ export function ExportActions({ assessments }: ExportActionsProps) {
     toast({ title: 'Cancelling export...', variant: 'default' });
   };
 
-  const exportToEightfold = async (rolesToExport?: EightfoldRole[]) => {
+  const exportToEightfold = async (rolesToExport?: EightfoldRole[], bypassWarning = false) => {
+    // Guard: warn user if assessment was partial
+    if (!bypassWarning && failedSkillsCount > 0) {
+      setShowPartialWarning(true);
+      return;
+    }
+
     const roles = rolesToExport || availableRoles;
     try {
       setExporting(true);
@@ -286,6 +321,12 @@ export function ExportActions({ assessments }: ExportActionsProps) {
 
       addLog('Starting export to Eightfold...');
       addLog(`Concurrency: ${concurrency} parallel requests`);
+      if (failedSkillsCount > 0 && requestedSkillsCount > 0) {
+        const coverage = Math.round((assessments.length / requestedSkillsCount) * 100);
+        addLog(
+          `⚠ Partial assessment: ${assessments.length}/${requestedSkillsCount} skills assessed (${coverage}% coverage) — ${failedSkillsCount} skills failed`
+        );
+      }
 
       if (!assessments || assessments.length === 0)
         throw new Error('No assessment results to export');
@@ -483,10 +524,10 @@ export function ExportActions({ assessments }: ExportActionsProps) {
               Match &amp; Export to Eightfold
             </Button>
           )}
-          {/* Bulk export (original flow) — only when roles pre-fetched from API */}
-          {eightfoldEnvId && availableRoles.length > 0 && (
+          {/* Bulk export (original flow) — only when roles pre-fetched from API, not CSV */}
+          {eightfoldEnvId && availableRoles.length > 0 && extractionSource !== 'csv' && (
             <Button
-              variant="ghost"
+              variant="default"
               size="lg"
               onClick={() => setShowExportSettings(true)}
               disabled={!hasAssessments || exporting}
@@ -733,6 +774,70 @@ export function ExportActions({ assessments }: ExportActionsProps) {
                   </table>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Partial Assessment Warning Modal */}
+      {showPartialWarning && (
+        <div
+          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="partial-warning-title"
+        >
+          <Card className="w-full max-w-md border-amber-400 dark:border-amber-600">
+            <CardHeader className="border-b border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30">
+              <CardTitle
+                id="partial-warning-title"
+                className="flex items-center gap-2 text-amber-800 dark:text-amber-200"
+              >
+                <AlertCircle className="w-5 h-5 text-amber-600" /> Incomplete Assessment Data
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <p className="text-sm">
+                Only <strong>{assessments.length}</strong> of{' '}
+                <strong>{requestedSkillsCount || assessments.length + failedSkillsCount}</strong>{' '}
+                skills were assessed (
+                <strong>
+                  {requestedSkillsCount > 0
+                    ? Math.round((assessments.length / requestedSkillsCount) * 100)
+                    : 100}
+                  % coverage
+                </strong>
+                ). The remaining <strong>{failedSkillsCount}</strong> skills failed due to LLM
+                response truncation.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Exporting now will push partial proficiency data to Eightfold. Roles that had no
+                matching assessed skills will keep their existing proficiencies — but assessed
+                skills may overwrite correct existing data with incomplete scores.
+              </p>
+              <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                We recommend re-running the assessment with higher Max Tokens (8K or 16K) before
+                exporting.
+              </p>
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPartialWarning(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setShowPartialWarning(false);
+                    exportToEightfold(undefined, true);
+                  }}
+                  className="flex-1"
+                >
+                  Export Anyway
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

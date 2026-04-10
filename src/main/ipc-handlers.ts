@@ -319,7 +319,7 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
   });
 
   // Backend health check endpoint
-  ipcMain.handle('api:health-check', async () => {
+  ipcMain.handle('health:check', async () => {
     const isHealthy = await checkBackendHealth();
     return {
       status: isHealthy ? 'healthy' : 'unhealthy',
@@ -488,22 +488,22 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
     activeStreams.set(streamId, abortController);
 
     const webContents = event.sender;
+    const skillCount = Array.isArray(requestData.skills) ? requestData.skills.length : 0;
 
-    log.info(
-      `Starting streaming assessment: ${streamId}, skills: ${Array.isArray(requestData.skills) ? requestData.skills.length : 'N/A'}`
-    );
+    log.info(`Starting streaming assessment: ${streamId}, skills: ${skillCount}`);
 
-    // Auto-cleanup after 10 minutes to prevent memory leaks
-    const streamTimeout = setTimeout(
-      () => {
-        if (activeStreams.has(streamId)) {
-          log.warn(`Stream ${streamId} timed out after 10 minutes, aborting`);
-          abortController.abort();
-          activeStreams.delete(streamId);
-        }
-      },
-      10 * 60 * 1000
-    );
+    // Scale timeout with skill count: 2 min base + 1 min per 50 skills, max 30 min.
+    // Large batches (500 skills) get ~12 min; small batches (50 skills) get ~3 min.
+    const streamTimeoutMs = Math.min(30, 2 + Math.ceil(skillCount / 50)) * 60 * 1000;
+    const streamTimeout = setTimeout(() => {
+      if (activeStreams.has(streamId)) {
+        log.warn(
+          `Stream ${streamId} timed out after ${streamTimeoutMs / 60000} minutes (${skillCount} skills), aborting`
+        );
+        abortController.abort();
+        activeStreams.delete(streamId);
+      }
+    }, streamTimeoutMs);
 
     // Start the stream processing in the background
     (async () => {

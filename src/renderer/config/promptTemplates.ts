@@ -91,44 +91,51 @@ Return JSON array now:`,
   },
   {
     id: 'detailed',
-    name: 'Detailed Assessment',
+    name: 'Full Detail Assessment',
     description:
-      'Comprehensive assessment with evidence, reasoning, and years of experience. Best for thorough evaluations.',
+      'Comprehensive assessment with reasoning and evidence anchored to real learning milestones. Best for thorough workforce evaluations.',
     recommended: false,
     outputFormat: 'detailed',
-    template: `You are an expert at assessing professional skill proficiency levels.
-
-For each skill, provide a comprehensive proficiency assessment.
+    template: `You are a senior talent assessment expert evaluating a skills list for workforce planning. For each skill, assign the proficiency level that a COMPETENT PROFESSIONAL in this domain is typically expected to demonstrate in a workplace setting — not a raw beginner, not a world-class expert, but a solid practitioner doing real work.
 
 Proficiency Scale:
 {proficiency_levels}
 
-CALIBRATION EXAMPLES — use these as your scoring anchors:
-- "Microsoft Word" → Level 1 (Novice): knows the product name, has never opened it, zero applied experience
-- "Microsoft Excel" → Level 3 (Intermediate): writes VLOOKUP/INDEX-MATCH, builds pivot tables and charts, works independently on reporting tasks
-- "Python" → Level 4 (Advanced): designs reusable packages, writes async code and unit tests, reviews PRs, builds production data pipelines
-- "Distributed Systems Design" → Level 5 (Expert): architects systems like Kafka/Kubernetes at scale, authors RFCs, mentors senior engineers, resolves production outages others cannot
-
-For each skill, return:
+Example output for a single skill (do NOT include this in your response):
 {
-  "skill_name": "exact skill name",
+  "skill_name": "SQL",
   "proficiency_level": "Intermediate (3)",
   "proficiency_numeric": 3,
-  "confidence_score": 0.85,
-  "evidence": ["point 1", "point 2", "point 3"],
-  "reasoning": "detailed explanation"
+  "confidence_score": 0.9,
+  "evidence": [
+    "Standard SELECT/JOIN/aggregation mastery reached within 6–12 months of regular use",
+    "Advanced window functions and query optimization typically take 1–3 years of production experience"
+  ],
+  "reasoning": "SQL has well-defined learning milestones and a clear ceiling. A competent practitioner writes complex queries and optimizes performance independently within 1–2 years. Expert-level SQL (query planner internals, storage engine design) is rare and not typically expected of practitioners."
 }
-
-CRITICAL INSTRUCTIONS:
-1. Return ONLY a valid JSON array
-2. NO markdown code blocks (no \`\`\`json)
-3. NO explanatory text before or after the JSON
-4. Just the raw JSON array: [{"skill_name": "...", ...}, ...]
 
 Skills to assess:
 {skills}
 
-JSON array:`,
+For each skill consider:
+(a) how long it typically takes to reach working competency
+(b) how specialized the advanced knowledge is — does a normal practitioner ever need it?
+(c) how this skill's learning curve compares to the others in this list
+
+Return ONLY a raw JSON array — no markdown, no commentary, no code fences:
+[
+  {
+    "skill_name": "exact name from list above",
+    "proficiency_level": "LevelName (N)",
+    "proficiency_numeric": <integer 1-5>,
+    "confidence_score": <float 0.0-1.0, reflecting how well-profiled this skill is in industry>,
+    "evidence": [
+      "<specific milestone, timeframe, or industry norm>",
+      "<comparison to related skills or typical practitioner expectations>"
+    ],
+    "reasoning": "<2-3 sentences on learning curve and why this level fits a competent practitioner>"
+  }
+]`,
   },
 ];
 

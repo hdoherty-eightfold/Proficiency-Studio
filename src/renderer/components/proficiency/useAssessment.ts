@@ -9,8 +9,12 @@ import { electronAPI } from '../../services/electron-api';
 import { getFallbackProvider } from '../../config/models';
 import type { AssessmentResponse, AssessmentPhase } from './assessment-types';
 
-/** Cancel the assessment if no progress event arrives within this window (5 minutes). */
-const STREAMING_TIMEOUT_MS = 5 * 60 * 1000;
+/**
+ * Inactivity timeout scaled to skill count — matches the backend's own scaling formula
+ * (2 min base + 1 min per 50 skills, capped at 30 min), plus a 2-minute buffer.
+ */
+const getStreamingTimeoutMs = (skillCount: number) =>
+  Math.min(32, 4 + Math.ceil(skillCount / 50)) * 60 * 1000;
 
 interface BatchSettings {
   batchingEnabled: boolean;
@@ -56,7 +60,8 @@ function formatTime(seconds: number): string {
 export { formatTime };
 
 export function useAssessment(): UseAssessmentReturn {
-  const { skillsState, uploadedFile, setError, setLoading, markStepCompleted } = useAppStore();
+  const { skillsState, uploadedFile, setError, setLoading, markStepCompleted, setCurrentStep } =
+    useAppStore();
   const { toast } = useToast();
 
   // Phase state
@@ -88,6 +93,9 @@ export function useAssessment(): UseAssessmentReturn {
 
   // Streaming inactivity timeout ref
   const streamingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Mirror of processedSkills for use inside timeout closure (state reads are stale in closures)
+  const processedSkillsRef = useRef(0);
 
   // Fallback attempt tracking — prevents infinite retry loops
   const fallbackAttemptRef = useRef(false);
@@ -172,6 +180,8 @@ export function useAssessment(): UseAssessmentReturn {
       timestamp: new Date().toISOString(),
       total_tokens: (summary.total_tokens as number) || undefined,
       estimated_cost: (summary.estimated_cost as number) || undefined,
+      failed_skills_count: (summary.failed_assessments as number) || undefined,
+      requested_skills_count: (summary.total_skills as number) || undefined,
     };
   };
 
@@ -258,22 +268,29 @@ export function useAssessment(): UseAssessmentReturn {
       }
     };
 
+    const timeoutMs = getStreamingTimeoutMs(skillsState.skills.length);
+    const timeoutMinutes = Math.round(timeoutMs / 60000);
     const resetStreamingTimeout = () => {
       clearStreamingTimeout();
       streamingTimeoutRef.current = setTimeout(() => {
-        console.warn('[Assessment] Streaming timeout — no progress received in 5 minutes');
-        setCurrentPhase('error');
-        setError(
-          'Assessment timed out: no response from backend after 5 minutes. Please try again.'
+        console.warn(
+          `[Assessment] Streaming timeout — no progress received in ${timeoutMinutes} minutes`
         );
+        const hint =
+          processedSkillsRef.current === 0
+            ? 'No skills were processed — check that your API key is valid and the selected model is available.'
+            : `Stalled after processing ${processedSkillsRef.current} skills — the LLM provider may be rate-limited or overloaded.`;
+        const message = `Assessment timed out after ${timeoutMinutes} minutes. ${hint}`;
+        setCurrentPhase('error');
+        setError(message);
         setLoading(false);
         setStreamId(null);
         toast({
           title: 'Assessment timed out',
-          description: 'No response from backend after 5 minutes. Please try again.',
+          description: hint,
           variant: 'destructive',
         });
-      }, STREAMING_TIMEOUT_MS);
+      }, timeoutMs);
     };
 
     resetStreamingTimeout();
@@ -291,7 +308,8 @@ export function useAssessment(): UseAssessmentReturn {
 
         case 'progress':
           resetStreamingTimeout();
-          setProcessedSkills((data.processed_skills as number) || 0);
+          processedSkillsRef.current = (data.processed_skills as number) || 0;
+          setProcessedSkills(processedSkillsRef.current);
           setCurrentChunk(
             (data.current_chunk as number) || (data.current_chunk_index as number) || 0
           );
@@ -349,8 +367,11 @@ export function useAssessment(): UseAssessmentReturn {
             setAssessmentResults(transformedData);
             setCurrentPhase('completed');
             markStepCompleted(4);
-            markStepCompleted(5); // Review is embedded in Assessment step
+            markStepCompleted(5);
             setLoading(false);
+
+            // Navigate to Review after a brief delay so the completion animation is visible
+            setTimeout(() => setCurrentStep(5), 1500);
 
             // Warn about partial failures
             if (status === 'completed_with_errors' && summary.failed_assessments) {
@@ -474,6 +495,7 @@ export function useAssessment(): UseAssessmentReturn {
       setFailedSkills([]);
       setRetryCount(0);
       rawResponseRef.current = null;
+      processedSkillsRef.current = 0;
 
       const cleanedSkills = skillsState.skills.map((skill) => ({
         name: skill.name,

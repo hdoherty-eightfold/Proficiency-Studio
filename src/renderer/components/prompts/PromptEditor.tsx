@@ -501,12 +501,7 @@ Provide your analysis:`,
   const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 
   return (
-    <motion.div
-      className="h-full flex flex-col p-6 space-y-6 overflow-y-auto bg-gray-50 dark:bg-gray-900"
-      variants={stagger}
-      initial="hidden"
-      animate="show"
-    >
+    <motion.div className="p-6 space-y-6" variants={stagger} initial="hidden" animate="show">
       <motion.div variants={fadeUp} className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">

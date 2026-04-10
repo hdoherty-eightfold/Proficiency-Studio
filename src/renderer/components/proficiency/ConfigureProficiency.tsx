@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import {
   Settings,
@@ -12,6 +12,8 @@ import {
   ChevronDown,
   ChevronUp,
   KeyRound,
+  Library,
+  Check,
 } from 'lucide-react';
 import { useAppStore } from '../../stores/app-store';
 import { useToast } from '../../stores/toast-store';
@@ -34,8 +36,12 @@ import {
 } from '../../config/proficiency';
 import { APIKeyManager } from '../keys/APIKeyManager';
 import { ConfigurationManager } from '../configuration/ConfigurationManager';
+import type { PromptSnapshot } from '../configuration/ConfigurationManager';
 // import Select from '../ui/Select';
 // import { cn } from '../../lib/utils';
+
+const HISTORY_KEY = 'profstudio_prompt_history';
+const MAX_HISTORY = 20;
 
 interface LLMConfig {
   provider: 'google' | 'kimi';
@@ -56,7 +62,7 @@ export default function ConfigureProficiency() {
   const [llmConfig, setLLMConfig] = useState<LLMConfig>({
     provider: 'google',
     model: getDefaultModel('google'),
-    temperature: 0.7,
+    temperature: 0.3,
     max_tokens: 8000,
     api_key: '',
   });
@@ -67,7 +73,9 @@ export default function ConfigureProficiency() {
   const [promptPreview, setPromptPreview] = useState<string>('');
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [showConfigManager, setShowConfigManager] = useState(false);
-  const [configManagerTab, setConfigManagerTab] = useState<'save' | 'load'>('load');
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [autoSaveFlash, setAutoSaveFlash] = useState(false);
+  const hasInitialized = useRef(false);
 
   // Collapse state for each section
   const [levelsCollapsed, setLevelsCollapsed] = useState(false);
@@ -101,6 +109,37 @@ export default function ConfigureProficiency() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Mark initialized after first render (prevents auto-save on mount)
+  useEffect(() => {
+    hasInitialized.current = true;
+  }, []);
+
+  // Auto-save prompt to history after 1.5s of inactivity
+  useEffect(() => {
+    if (!hasInitialized.current) return;
+    const timer = setTimeout(() => {
+      if (!promptTemplate) return;
+      try {
+        const history: PromptSnapshot[] = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+        // Don't save if identical to most recent
+        if (history[0]?.promptTemplate === promptTemplate) return;
+        const snapshot: PromptSnapshot = {
+          id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
+          promptTemplate,
+        };
+        const updated = [snapshot, ...history].slice(0, MAX_HISTORY);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+        setLastSaved(new Date());
+        setAutoSaveFlash(true);
+        setTimeout(() => setAutoSaveFlash(false), 2000);
+      } catch {
+        /* ignore */
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [promptTemplate]);
 
   // Generate preview
   useEffect(() => {
@@ -265,12 +304,7 @@ export default function ConfigureProficiency() {
   const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 
   return (
-    <motion.div
-      className="max-w-7xl mx-auto p-8"
-      variants={stagger}
-      initial="hidden"
-      animate="show"
-    >
+    <motion.div className="p-6 space-y-6" variants={stagger} initial="hidden" animate="show">
       <Card className="border-none shadow-none bg-transparent">
         <motion.div variants={fadeUp} className="mb-4">
           <Button variant="back-nav" size="sm" onClick={previousStep} className="gap-1">
@@ -289,25 +323,27 @@ export default function ConfigureProficiency() {
           </p>
         </motion.div>
 
-        {/* Configurations Actions */}
-        <motion.div variants={fadeUp} className="flex justify-end gap-2 mb-6">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setConfigManagerTab('load');
-              setShowConfigManager(true);
-            }}
-          >
-            Load Config
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setConfigManagerTab('save');
-              setShowConfigManager(true);
-            }}
-          >
-            Save Config
+        {/* Configuration Actions */}
+        <motion.div variants={fadeUp} className="flex justify-end items-center gap-3 mb-6">
+          {lastSaved && (
+            <span
+              className={`text-xs transition-all duration-500 flex items-center gap-1.5 ${
+                autoSaveFlash ? 'text-green-500' : 'text-muted-foreground/60'
+              }`}
+            >
+              {autoSaveFlash ? (
+                <Check className="w-3 h-3" />
+              ) : (
+                <span className="w-1.5 h-1.5 rounded-full bg-current" />
+              )}
+              {autoSaveFlash
+                ? 'Auto-saved'
+                : `Saved ${Math.round((Date.now() - lastSaved.getTime()) / 60000) || '<1'}m ago`}
+            </span>
+          )}
+          <Button variant="outline" className="gap-2" onClick={() => setShowConfigManager(true)}>
+            <Library className="w-4 h-4" />
+            Template Library
           </Button>
         </motion.div>
 
@@ -572,11 +608,18 @@ export default function ConfigureProficiency() {
 
                     {/* Prompt editor + preview */}
                     {showPromptEditor && (
-                      <textarea
-                        className="w-full h-48 p-4 font-mono text-xs border rounded-lg bg-background"
-                        value={promptTemplate}
-                        onChange={(e) => setPromptTemplate(e.target.value)}
-                      />
+                      <div className="relative">
+                        <textarea
+                          className="w-full h-48 p-4 font-mono text-xs border rounded-lg bg-background resize-none"
+                          value={promptTemplate}
+                          onChange={(e) => setPromptTemplate(e.target.value)}
+                        />
+                        {autoSaveFlash && (
+                          <span className="absolute bottom-2 right-2 text-xs text-green-500 flex items-center gap-1 bg-background/80 px-1.5 py-0.5 rounded">
+                            <Check className="w-3 h-3" /> saved
+                          </span>
+                        )}
+                      </div>
                     )}
                     <div className="bg-muted p-4 rounded-lg border border-border">
                       <div className="text-xs font-semibold text-muted-foreground mb-2">
@@ -706,13 +749,12 @@ export default function ConfigureProficiency() {
           </Button>
         </motion.div>
 
-        {/* Config Manager Modal */}
+        {/* Template Library Modal */}
         {showConfigManager && (
           <ConfigurationManager
             currentConfig={{ proficiencyLevels, llmConfig, promptTemplate }}
             onLoad={loadConfiguration}
             onClose={() => setShowConfigManager(false)}
-            initialTab={configManagerTab}
           />
         )}
       </Card>

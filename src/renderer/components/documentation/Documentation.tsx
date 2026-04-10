@@ -535,118 +535,114 @@ export default function Documentation() {
   const currentSection = DOC_SECTIONS.find((s) => s.id === activeSection);
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <BookOpen className="h-6 w-6 text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold">Documentation</h1>
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <motion.div
+        className="mb-8"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <BookOpen className="h-6 w-6 text-primary" />
           </div>
-          <p className="text-muted-foreground">
-            Learn how to use Proficiency Studio to assess and manage professional skills.
-          </p>
+          <h1 className="text-3xl font-bold">Documentation</h1>
+        </div>
+        <p className="text-muted-foreground">
+          Learn how to use Proficiency Studio to assess and manage professional skills.
+        </p>
+      </motion.div>
+
+      <div className="flex gap-6">
+        {/* Sidebar Navigation */}
+        <motion.div
+          className="w-60 shrink-0"
+          initial={{ opacity: 0, x: -12 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          <div className="sticky top-8 space-y-3">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search docs..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
+            {/* Section Links */}
+            <nav className="space-y-1 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-2">
+              {filteredSections.length > 0 ? (
+                filteredSections.map((section) => {
+                  const Icon = section.icon;
+                  const isActive = activeSection === section.id;
+
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveSection(section.id)}
+                      className={cn(
+                        'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left',
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-accent text-muted-foreground hover:text-foreground'
+                      )}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span className="text-sm font-medium">{section.title}</span>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+                  No results for &ldquo;{searchQuery}&rdquo;
+                </div>
+              )}
+            </nav>
+
+            {/* External Links */}
+            <div className="pt-2 border-t border-border/50">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1">
+                Resources
+              </p>
+              <a
+                href="https://github.com/ProfStudio/docs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-1"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Full Documentation
+              </a>
+            </div>
+          </div>
         </motion.div>
 
-        <div className="flex gap-6">
-          {/* Sidebar Navigation */}
-          <motion.div
-            className="w-60 shrink-0"
-            initial={{ opacity: 0, x: -12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-          >
-            <div className="sticky top-8 space-y-3">
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search docs..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-
-              {/* Section Links */}
-              <nav className="space-y-1 bg-card/60 backdrop-blur-sm border border-border/50 rounded-xl p-2">
-                {filteredSections.length > 0 ? (
-                  filteredSections.map((section) => {
-                    const Icon = section.icon;
-                    const isActive = activeSection === section.id;
-
-                    return (
-                      <button
-                        key={section.id}
-                        onClick={() => setActiveSection(section.id)}
-                        className={cn(
-                          'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left',
-                          isActive
-                            ? 'bg-primary text-primary-foreground'
-                            : 'hover:bg-accent text-muted-foreground hover:text-foreground'
-                        )}
-                      >
-                        <Icon className="h-4 w-4 shrink-0" />
-                        <span className="text-sm font-medium">{section.title}</span>
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="px-3 py-4 text-sm text-muted-foreground text-center">
-                    No results for &ldquo;{searchQuery}&rdquo;
+        {/* Content Area */}
+        <motion.div
+          className="flex-1 min-w-0"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+        >
+          <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/50 shadow-sm p-6">
+            {currentSection && (
+              <>
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border/50">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <currentSection.icon className="h-5 w-5 text-primary" />
                   </div>
-                )}
-              </nav>
-
-              {/* External Links */}
-              <div className="pt-2 border-t border-border/50">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1">
-                  Resources
-                </p>
-                <a
-                  href="https://github.com/ProfStudio/docs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-1"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Full Documentation
-                </a>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Content Area */}
-          <motion.div
-            className="flex-1 min-w-0"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
-          >
-            <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/50 shadow-sm p-6">
-              {currentSection && (
-                <>
-                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border/50">
-                    <div className="p-1.5 rounded-lg bg-primary/10">
-                      <currentSection.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h2 className="text-xl font-semibold">{currentSection.title}</h2>
-                  </div>
-                  <ScrollArea className="h-[calc(100vh-300px)]">
-                    {currentSection.content}
-                  </ScrollArea>
-                </>
-              )}
-            </div>
-          </motion.div>
-        </div>
+                  <h2 className="text-xl font-semibold">{currentSection.title}</h2>
+                </div>
+                <ScrollArea className="h-[calc(100vh-300px)]">{currentSection.content}</ScrollArea>
+              </>
+            )}
+          </div>
+        </motion.div>
       </div>
     </div>
   );

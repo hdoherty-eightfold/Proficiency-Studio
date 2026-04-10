@@ -134,6 +134,7 @@ describe('ReviewAssessment', () => {
         skill_name: 'Python',
         proficiency_numeric: 3,
         confidence_score: 0.75,
+        reasoning: 'A beginner-friendly language with versatile applications.',
       }),
       createAssessmentResult({
         skill_name: 'React',
@@ -168,14 +169,16 @@ describe('ReviewAssessment', () => {
       mockLoadSaved.mockResolvedValue({
         success: true,
         data: {
-          assessments: mockAssessments,
-          total_skills: 3,
-          avg_proficiency: 4.0,
-          processing_time: 12.5,
-          model_used: 'gemini-3.1-flash',
-          timestamp: '2026-04-07T10:00:00Z',
-          total_tokens: 1500,
-          estimated_cost: 0.002,
+          results: {
+            assessments: mockAssessments,
+            total_skills: 3,
+            avg_proficiency: 4.0,
+            processing_time: 12.5,
+            model_used: 'gemini-3.1-flash',
+            timestamp: '2026-04-07T10:00:00Z',
+            total_tokens: 1500,
+            estimated_cost: 0.002,
+          },
         },
       });
     });
@@ -190,7 +193,9 @@ describe('ReviewAssessment', () => {
     it('shows summary stat cards', async () => {
       renderWithUser(<ReviewAssessment />);
       await waitFor(() => {
-        expect(screen.getByText('3')).toBeInTheDocument(); // skills assessed
+        // Check for the stat label, not just the number (which also appears in row numbers)
+        expect(screen.getByText(/total skills/i)).toBeInTheDocument();
+        expect(screen.getByText(/avg proficiency/i)).toBeInTheDocument();
       });
     });
 

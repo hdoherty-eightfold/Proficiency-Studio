@@ -6,6 +6,329 @@ Supersedes: docs/AUDIT_HISTORY.md (deep-audit) for top-level composite tracking.
 
 ---
 
+## Omni-Audit: 2026-04-07 (Run 3)
+
+**Omni-Audit Composite: 83/100 (B)**
+**Trend: Improving (+5 from 78)**
+**Velocity: +4.5 pts/run (Accelerating — 74→78→83)**
+
+### Group Scores
+- Group A Foundation (60%): 50.70 pts
+- Group B Extended QA (15%): 11.44 pts
+- Group C New Dimensions (25%): 20.60 pts
+
+### Dimension Scores (All 25)
+| Dimension | Group | Score | Weight | Weighted | vs Prev |
+|-----------|-------|-------|--------|----------|---------|
+| Modern Design | NEW | 82 | 9% | 7.38 | +10 |
+| Tests | DA | 85 | 7% | 5.95 | +2 |
+| TypeScript | DA | 100 | 5% | 5.00 | +5 |
+| Build Health | DA | 95 | 5% | 4.75 | -5 |
+| Error Handling | DA | 88 | 5% | 4.40 | 0 |
+| UI Flow | MQ | 92 | 5% | 4.60 | +4 |
+| Security | DA | 93 | 5% | 4.65 | +11 |
+| SFDLC | NEW | 80 | 6% | 4.80 | +8 |
+| Per-Page Scan | NEW | 90 | 5% | 4.50 | +12 |
+| Architecture | DA | 67 | 5% | 3.35 | +5 |
+| Dependencies | DA | 95 | 4% | 3.80 | -1 |
+| Backend Integration | DA | 92 | 4% | 3.68 | 0 |
+| Performance | DA | 84 | 4% | 3.36 | -4 |
+| Code Quality | DA | 80 | 4% | 3.20 | -4 |
+| E2E Coverage | MQ | 72 | 4% | 2.88 | +14 |
+| CI/CD | DA | 76 | 3% | 2.28 | -4 |
+| Accessibility | DA | 76 | 3% | 2.28 | +14 |
+| API Contract | MQ | 68 | 3% | 2.04 | +6 |
+| Build & Packaging | DA | 72 | 3% | 2.16 | -8 |
+| Logging | MQ | 64 | 3% | 1.92 | +12 |
+| API Surface | NEW | 72 | 3% | 2.16 | +17 |
+| Developer Experience | NEW | 88 | 2% | 1.76 | +10 |
+| Documentation | DA | 72 | 2% | 1.44 | 0 |
+| i18n | DA | 40 | 1% | 0.40 | +5 |
+| **COMPOSITE** | | | **100%** | **82.74** | **+4.64** |
+
+### Sub-Agent Scores (Informational)
+| Agent | Score | Issues Found |
+|-------|-------|-------------|
+| UI/UX Expert | 86 | 6 |
+| Backend/API Expert | 76 | 4 |
+| LLM/AI Expert | 92 | 2 |
+| Test Quality Expert | 82 | 4 |
+| Modern Design Expert | 82 | 5 |
+| Security/SFDLC Expert | 80 | 6 |
+| API Surface Expert | 72 | 3 |
+| **Most productive this run** | Security/SFDLC Expert | 6 |
+
+### Per-Page Scores
+| Page | Loading | Empty | Error | A11y | ModernUI | Complete | Avg |
+|------|---------|-------|-------|------|----------|----------|-----|
+| 0 Welcome | 100 | 75 | 100 | 50 | 100 | 100 | 87.5 |
+| 1 IntegrationPath | 100 | 100 | 100 | 50 | 100 | 100 | 91.7 |
+| 2 ExtractSkills | 100 | 100 | 100 | 50 | 100 | 100 | 91.7 |
+| 3 ConfigureProfic. | 100 | 75 | 100 | 75 | 100 | 100 | 91.7 |
+| 4 RunAssessment | 100 | 100 | 100 | 50 | 100 | 100 | 91.7 |
+| 5 ReviewAssessment | 100 | 100 | 100 | 75 | 75 | 100 | 91.7 |
+| 6 AssessmentHistory | 100 | 100 | 100 | 75 | 100 | 100 | 95.8 |
+| 7 AnalyticsDashboard | 100 | 100 | 75 | 50 | 100 | 100 | 87.5 |
+| 8 PromptEditor | 100 | 100 | 100 | 50 | 75 | 100 | 87.5 |
+| 9 EnvManager | 100 | 100 | 100 | 50 | 75 | 100 | 87.5 |
+| 10 Settings | 100 | 75 | 75 | 100 | 75 | 100 | 87.5 |
+| 11 Documentation | 75 | 100 | 50 | 75 | 100 | 100 | 83.3 |
+| **OVERALL AVG** | 98.3 | 94.6 | 91.7 | 63.5 | 91.7 | 100 | **90.0** |
+
+### Known Issues Registry
+| ID | Description | Severity | First Seen | Consecutive Runs | Status |
+|----|-------------|----------|------------|-----------------|--------|
+| ARCH-001 | 13 files >500 LOC (SkillRoleMatcher, ipc-handlers, ConfigureProficiency) | CRITICAL ⚠ | Run 1 | 3 | OPEN |
+| TESTQ-002 | ~314 shallow assertions without behavioral checks | CRITICAL ⚠ | Run 1 | 3 | OPEN |
+| API-001 | 134 Python routes, ~30% covered by frontend types | CRITICAL ⚠ | Run 1 | 3 | OPEN |
+| PKG-001 | No code signing configured in electron-builder | CRITICAL ⚠ | Run 1 | 3 | OPEN |
+| I18N-001 | i18n only in BackendStatus — all UI hardcoded English | CRITICAL ⚠ | Run 1 | 3 | OPEN |
+| UIUX-012 | NotificationCenter uses raw Radix (no shadcn Popover) | HIGH | Run 1 | 3 | OPEN |
+| BKND-013 | store:set allowlist missing llm_api_keys — silent failure risk | HIGH↑ | Run 2 | 2 | OPEN |
+| SFDLC-014 | Pre-commit has no secret scanning | HIGH↑ | Run 2 | 2 | OPEN |
+| DESIGN-006 | Card glass near-opaque (bg-card/80 on opaque token) | HIGH↑ | Run 2 | 2 | OPEN |
+| DESIGN-009 | Sidebar: no backdrop-blur or glass morphism | HIGH↑ | Run 2 | 2 | OPEN |
+| DESIGN-010 | AnimatePresence ignores prefers-reduced-motion JS API | HIGH↑ | Run 2 | 2 | OPEN |
+| CONTRACT-001 | All IPC invoke calls return Promise<unknown> | HIGH↑ | Run 2 | 2 | OPEN |
+| LOG-005 | Sentry main-process only — renderer exceptions not captured | HIGH↑ | Run 2 | 2 | OPEN |
+| API-012 | No per-operation timeout at LLM assessment call sites | HIGH↑ | Run 2 | 2 | OPEN |
+| SFDLC-012 | SBOM CI step has continue-on-error — never actually generated | HIGH↑ | Run 2 | 2 | OPEN |
+| SFDLC-013 | npm audit threshold only --audit-level=high, misses critical | HIGH↑ | Run 2 | 2 | OPEN |
+| SFDLC-016 | 18.4% deps use ^/~ version ranges | MED↑ | Run 2 | 2 | OPEN |
+| API-013 | retryWithBackoff on non-idempotent POSTs risks duplicate mutations | MED↑ | Run 2 | 2 | OPEN |
+| DESIGN-007 | No bento-grid asymmetry on dashboards (uniform grids) | MED↑ | Run 2 | 2 | OPEN |
+| DESIGN-008 | Badge: no hover/transition/dark: variant | MED↑ | Run 2 | 2 | OPEN |
+| SFDLC-011 | unsafe-inline in style-src CSP (React/Tailwind required) | MED↑ | Run 2 | 2 | OPEN |
+| CONTRACT-002 | No runtime schema validation on API responses | MED↑ | Run 2 | 2 | OPEN |
+| CONTRACT-003 | No per-call request timeout (30s blanket only) | MED↑ | Run 2 | 2 | OPEN |
+| CONTRACT-004 | Unsafe `as Promise<T>` casts in electron-api.ts | MED↑ | Run 2 | 2 | OPEN |
+| DX-006 | debug.spec.ts debug artifact in e2e suite | LOW↑ | Run 2 | 2 | OPEN |
+| PAGE-006 | Documentation: no loading state (static by design) | LOW | Run 2 | 2 | OPEN |
+| PAGE-007 | Documentation: no error state (static by design) | LOW | Run 2 | 2 | OPEN |
+| SFDLC-017 | SBOM generation silently fails due to continue-on-error | HIGH | Run 3 | 1 | NEW |
+| SFDLC-018 | Pre-commit no secret scanning (same as SFDLC-014 — reinforced) | HIGH | Run 3 | 1 | NEW |
+| SFDLC-019 | npm audit only enforces critical, misses HIGH | HIGH | Run 3 | 1 | NEW |
+| SFDLC-020 | 18.4% deps with ^/~ ranges | MED | Run 3 | 1 | NEW |
+| SFDLC-021 | LLM API key validation done in main process | MED | Run 3 | 1 | NEW |
+| SFDLC-022 | Meta CSP in index.html contradicts (weaker) runtime headers | MED | Run 3 | 1 | NEW |
+| API-016 | LLM assessment can exceed 30s global IPC timeout for large skill sets | HIGH | Run 3 | 1 | NEW |
+| API-017 | AnalyticsDashboard doesn't distinguish partial vs total API failure | MED | Run 3 | 1 | NEW |
+| API-018 | No per-operation timeout granularity beyond 30s blanket | MED | Run 3 | 1 | NEW |
+| E2E-012 | Steps 1-4 missing error scenario E2E tests (SFTP timeout, API failure) | HIGH | Run 3 | 1 | NEW |
+| E2E-013 | Steps 8-10 (Prompts/Env/Settings) missing data entry E2E tests | MED | Run 3 | 1 | NEW |
+| E2E-014 | No cross-workflow regression E2E (switch integration, reload persistence) | MED | Run 3 | 1 | NEW |
+| UIUX-017 | NavButton active state subtle in collapsed mode (low-vision risk) | MED | Run 3 | 1 | NEW |
+| UIUX-018 | Disabled buttons use opacity-50 only, no cursor-not-allowed | MED | Run 3 | 1 | NEW |
+| UIUX-019 | ConfigurationManager AnimatePresence without mode="wait" | MED | Run 3 | 1 | NEW |
+| UIUX-022 | Sidebar footer status buttons not clearly interactive | MED | Run 3 | 1 | NEW |
+| BKND-016 | Window control IPC channels bypass ElectronAPI wrapper pattern | LOW | Run 3 | 1 | NEW |
+| BKND-017 | Preload allowlist has orphaned health:status channel (no handler) | LOW | Run 3 | 1 | NEW |
+| BKND-018 | fs:read-file has no file size guard (memory DoS risk) | LOW | Run 3 | 1 | NEW |
+| BKND-019 | No concurrent stream limit on api:stream-assessment | MED | Run 3 | 1 | NEW |
+| LLMAI-018 | Token/cost display inconsistent (live results vs history list) | MED | Run 3 | 1 | NEW |
+| LLMAI-019 | Fallback provider retry has no exponential backoff | LOW | Run 3 | 1 | NEW |
+| TESTQ-008 | No backend-to-Electron integration test (full IPC flow) | MED | Run 3 | 1 | NEW |
+| TESTQ-009 | AssessmentResults/ReviewAssessment use inline mocks not factories | LOW | Run 3 | 1 | NEW |
+| TESTQ-010 | No performance/load testing on 100+ skill assessments | LOW | Run 3 | 1 | NEW |
+| TESTQ-011 | E2E lacks error-recovery scenarios | LOW | Run 3 | 1 | NEW |
+| DESIGN-011 | Badge incomplete — missing dark: variants, transition-all, glass option | HIGH | Run 3 | 1 | NEW |
+| DESIGN-012 | Sidebar missing glassmorphism (backdrop-blur-xl bg-sidebar/90) | HIGH | Run 3 | 1 | NEW |
+| DESIGN-013 | Card glass variant 80% opaque — true glass needs 40-60% | MED | Run 3 | 1 | NEW |
+| DESIGN-014 | Bento grids are uniform — needs asymmetric col/row spans | MED | Run 3 | 1 | NEW |
+| DESIGN-015 | Motion/react ignores prefers-reduced-motion JS API (accessibility) | HIGH | Run 3 | 1 | NEW |
+| LOG-006 | 40 console.* in renderer — not captured in production logs | MED | Run 3 | 1 | NEW |
+| LOG-007 | IPC catch blocks may not all call log.error() — needs audit | LOW | Run 3 | 1 | NEW |
+| LOG-008 | No structured logging / cloud log aggregation | LOW | Run 3 | 1 | NEW |
+| QUAL-005 | ESLint warning in ConfigureProficiency.tsx:144 (unused disable) | LOW | Run 3 | 1 | NEW |
+| UIFLOW-013 | Welcome missing explicit empty state branch | LOW | Run 3 | 1 | NEW |
+| UIFLOW-018 | ConfigureProficiency silently redirects on empty skills (jarring) | MED | Run 3 | 1 | NEW |
+| DX-007 | No explicit HMR config in vite.config.ts | MED | Run 3 | 1 | NEW |
+| DX-008 | README references .env.example that doesn't exist | LOW | Run 3 | 1 | NEW |
+| SFDLC-003 | unsafe-eval in dev CSP (Vite HMR required — cannot fix) | MED | Run 1 | 3 | WONTFIX |
+
+### Resolved Issues (Since Run 2)
+- DX-005: Pre-commit doesn't run tsc --noEmit → RESOLVED (now runs tsc --noEmit -p tsconfig.json)
+- SFDLC-015: Duplicate CSP `<meta>` tag in index.html → RESOLVED (single tag)
+- UIFLOW-012: JsonViewer + SkillRoleMatcher orphan components → RESOLVED (all imported)
+- LLMAI-013: ipc-handlers hardcodes model strings → RESOLVED (backend handles model selection)
+- LLMAI-016: useAssessment silent abort on localStorage clear → RESOLVED (explicit error + toast)
+- PAGE-009: ConfigureProficiency no loading skeleton → RESOLVED (Loading score = 100)
+- BKND-014: api:health-check IPC channel name mismatch → RESOLVED
+- BKND-015: api:upload skips validateEndpoint() → RESOLVED
+
+### New Issues (First Seen This Run)
+SFDLC-017, SFDLC-018, SFDLC-019, SFDLC-020, SFDLC-021, SFDLC-022, API-016, API-017, API-018, E2E-012, E2E-013, E2E-014, UIUX-017, UIUX-018, UIUX-019, UIUX-022, BKND-016, BKND-017, BKND-018, BKND-019, LLMAI-018, LLMAI-019, TESTQ-008, TESTQ-009, TESTQ-010, TESTQ-011, DESIGN-011, DESIGN-012, DESIGN-013, DESIGN-014, DESIGN-015, LOG-006, LOG-007, LOG-008, QUAL-005, UIFLOW-013, UIFLOW-018, DX-007, DX-008
+
+### Action Plan Summary
+- Sprint A (Quick Wins, S-effort): +2 pts → 85/100 (QUAL-005, DX-006, DESIGN-015, UIUX-022, LLMAI-019, SFDLC-022)
+- Sprint B (High Impact, M-effort): +4 pts → 89/100 (LOG-005/006, DESIGN-009/011/012, SFDLC-014/018, CONTRACT-001, API-016, UIFLOW-018)
+- Sprint C (Foundation, L-effort): +5 pts → 94/100 (ARCH-001, API-001, I18N-001, E2E-012)
+- Sprint D (Polish): +6 pts → 100/100 (PKG-001, TESTQ-002, SFDLC-012, DESIGN-014)
+
+### Agent Effectiveness History (updated)
+| Agent | Run 1 | Run 2 | Run 3 | Avg |
+|-------|-------|-------|-------|-----|
+| UI/UX Expert | 5 | 3 | 6 | 4.7 |
+| Backend/API Expert | 3 | 3 | 4 | 3.3 |
+| LLM/AI Expert | 3 | 5 | 2 | 3.3 |
+| Test Quality Expert | 2 | 0 | 4 | 2.0 |
+| Modern Design Expert | 5 | 5 | 5 | 5.0 |
+| Security/SFDLC Expert | 10 | 8 | 6 | 8.0 |
+| API Surface Expert | 4 | 5 | 3 | 4.0 |
+| **Most productive all-time** | Security/SFDLC Expert | avg 8.0 | | |
+
+---
+
+## Omni-Audit: 2026-04-07 (Run 2 — post major dep upgrade)
+
+**Omni-Audit Composite: 78/100 (B-)**
+**Trend: Improving (+4 from 74 baseline)**
+**Velocity: +4 pts/run (Steady)**
+
+### Pre-audit Fix Applied
+- **React hook crash (IntegrationPath):** Cleared stale `node_modules/.vite/` cache from Vite v7→v8 upgrade + added `motion/react` to `optimizeDeps.include`. Root cause: different React module instance in dev mode. Fixed before audit.
+- **Playwright:** All 12 E2E tests PASS (38.8s). Chromium binary needed reinstall (`npx playwright install chromium`).
+
+### Group Scores
+- Group A Foundation (60%): 50.1 pts (prev: 49.4)
+- Group B Extended QA (15%): 10.1 pts (prev: 9.5)
+- Group C New Dimensions (25%): 17.9 pts (prev: 14.9)
+
+### Dimension Scores (All 25)
+| Dimension | Group | Score | Weight | Weighted | vs Prev |
+|-----------|-------|-------|--------|----------|---------|
+| Modern Design | NEW | 72 | 9% | 6.48 | +10 |
+| Tests | DA | 83 | 7% | 5.81 | -1 |
+| Build Health | DA | 100 | 5% | 5.00 | +2 |
+| TypeScript | DA | 95 | 5% | 4.75 | -5 |
+| Error Handling | DA | 88 | 5% | 4.40 | +1 |
+| UI Flow | MQ | 88 | 5% | 4.40 | +33 |
+| Security | DA | 82 | 5% | 4.10 | -11 |
+| SFDLC | NEW | 72 | 6% | 4.32 | +16 |
+| Per-Page Scan | NEW | 78 | 5% | 3.90 | +15 |
+| Dependencies | DA | 96 | 4% | 3.84 | +34 |
+| Backend Integration | DA | 92 | 4% | 3.68 | -1 |
+| Performance | DA | 88 | 4% | 3.52 | +4 |
+| Code Quality | DA | 84 | 4% | 3.36 | +6 |
+| Architecture | DA | 62 | 5% | 3.10 | -5 |
+| CI/CD | DA | 80 | 3% | 2.40 | +4 |
+| Build & Packaging | DA | 80 | 3% | 2.40 | +8 |
+| E2E Coverage | MQ | 58 | 4% | 2.32 | +3 |
+| Accessibility | DA | 62 | 3% | 1.86 | -14 |
+| API Contract | MQ | 62 | 3% | 1.86 | -10 |
+| API Surface | NEW | 55 | 3% | 1.65 | -7 |
+| Logging | MQ | 52 | 3% | 1.56 | -28 |
+| Developer Experience | NEW | 78 | 2% | 1.56 | +33 |
+| Documentation | DA | 72 | 2% | 1.44 | 0 |
+| i18n | DA | 35 | 1% | 0.35 | -5 |
+| **COMPOSITE** | | | **100%** | **78.1** | **+4** |
+
+### Sub-Agent Scores (Informational)
+| Agent | Score | Issues Found |
+|-------|-------|-------------|
+| UI/UX Expert | 82 | 3 |
+| Backend/API Expert | 88 | 3 |
+| LLM/AI Expert | 84 | 5 |
+| Test Quality Expert | N/A (run 1 results reused) | 0 |
+| Modern Design Expert | 72 | 5 |
+| Security/SFDLC Expert | 72 | 8 |
+| API Surface Expert | 55 | 5 |
+| **Most productive this run** | Security/SFDLC Expert | 8 |
+
+### Per-Page Scores
+| Page | Loading | Empty | Error | A11y | ModernUI | Complete | Avg |
+|------|---------|-------|-------|------|----------|----------|-----|
+| 0 Welcome | 100 | 75 | 100 | 75 | 100 | 100 | 91.7 |
+| 1 IntegrationPath | 75 | 75 | 75 | 50 | 75 | 100 | 75.0 |
+| 2 ExtractSkills | 75 | 100 | 100 | 50 | 75 | 100 | 83.3 |
+| 3 ConfigureProfic. | 25 | 50 | 75 | 75 | 75 | 100 | 66.7 |
+| 4 RunAssessment | 100 | 75 | 100 | 50 | 100 | 100 | 87.5 |
+| 5 ReviewAssessment | 100 | 100 | 100 | 75 | 75 | 100 | 91.7 |
+| 6 AssessmentHistory | 100 | 100 | 75 | 50 | 75 | 100 | 83.3 |
+| 7 AnalyticsDashboard | 75 | 75 | 50 | 25 | 75 | 75 | 62.5 |
+| 8 PromptEditor | 100 | 100 | 75 | 50 | 50 | 75 | 75.0 |
+| 9 EnvManager | 100 | 100 | 50 | 75 | 75 | 100 | 83.3 |
+| 10 Settings | 100 | 75 | 75 | 100 | 75 | 100 | 87.5 |
+| 11 Documentation | 0 | 75 | 0 | 75 | 75 | 75 | 50.0 |
+| **OVERALL AVG** | 79.2 | 83.3 | 72.9 | 62.5 | 77.1 | 93.8 | **78.1** |
+
+### Known Issues Registry
+| ID | Description | Severity | First Seen | Consecutive Runs | Status |
+|----|-------------|----------|------------|-----------------|--------|
+| ARCH-001 | 11+ files >500 LOC (SkillRoleMatcher 1464, ipc-handlers 909) | HIGH↑ | Run 1 | 2 | OPEN |
+| TESTQ-002 | ~332 shallow assertions without data checks | HIGH↑ | Run 1 | 2 | OPEN |
+| API-001 | 138 Python routes, <50% covered by frontend types | HIGH↑ | Run 1 | 2 | OPEN |
+| UIUX-012 | NotificationCenter uses raw Radix | HIGH↑ | Run 1 | 2 | OPEN |
+| PKG-001 | No code signing in electron-builder | HIGH↑ | Run 1 | 2 | OPEN |
+| I18N-001 | i18n only in BackendStatus — all other components hardcoded English | HIGH↑ | Run 1 | 2 | OPEN |
+| BKND-013 | store:set allowlist missing llm_api_keys — API keys silently drop | HIGH | Run 2 | 1 | NEW |
+| SFDLC-014 | Pre-commit has no secret scanning | HIGH | Run 2 | 1 | NEW |
+| DESIGN-006 | Card glass near-opaque (bg-card/80 on opaque token) | HIGH | Run 2 | 1 | NEW |
+| PAGE-008 | AnalyticsDashboard chart bars use title attr only — inaccessible | HIGH | Run 2 | 1 | NEW |
+| CONTRACT-001 | All IPC responses typed Promise<unknown> in preload | HIGH | Run 2 | 1 | NEW |
+| BKND-014 | api:health-check IPC channel name mismatch | MED | Run 2 | 1 | NEW |
+| BKND-015 | api:upload skips validateEndpoint() | MED | Run 2 | 1 | NEW |
+| LLMAI-013 | ipc-handlers hardcodes model strings | MED | Run 2 | 1 | NEW |
+| LLMAI-016 | useAssessment reads localStorage — silent abort if cleared | MED | Run 2 | 1 | NEW |
+| DESIGN-007 | No bento-grid on dashboards | MED | Run 2 | 1 | NEW |
+| DESIGN-008 | Badge: no hover/transition/dark: variant | MED | Run 2 | 1 | NEW |
+| DESIGN-009 | Sidebar: no backdrop-blur or glass | MED | Run 2 | 1 | NEW |
+| DESIGN-010 | AnimatePresence ignores useReducedMotion() | MED | Run 2 | 1 | NEW |
+| SFDLC-011 | unsafe-inline in style-src | MED | Run 2 | 1 | OPEN |
+| SFDLC-012 | SBOM CI step has continue-on-error — unreliable | MED | Run 2 | 1 | NEW |
+| SFDLC-013 | npm audit --audit-level=critical misses HIGH vulns | MED | Run 2 | 1 | NEW |
+| SFDLC-016 | 14 deps with ^/~ ranges | MED | Run 2 | 1 | NEW |
+| CONTRACT-002 | No runtime validation on API responses | MED | Run 2 | 1 | NEW |
+| CONTRACT-003 | No per-call request timeout | MED | Run 2 | 1 | NEW |
+| CONTRACT-004 | 5x as Promise<T> unsafe type assertions in electron-api.ts | MED | Run 2 | 1 | NEW |
+| LOG-005 | Sentry main-process only — renderer exceptions not captured | MED | Run 2 | 1 | NEW |
+| API-012 | No request timeout at LLM call sites | MED | Run 2 | 1 | NEW |
+| API-013 | retryWithBackoff on non-idempotent POSTs risks duplicate mutations | MED | Run 2 | 1 | NEW |
+| PAGE-009 | ConfigureProficiency: no local loading skeleton (C1=25) | MED | Run 2 | 1 | NEW |
+| DX-005 | Pre-commit doesn't run tsc --noEmit | MED | Run 2 | 1 | NEW |
+| SFDLC-003 | unsafe-eval in dev CSP (Vite HMR required — WONTFIX) | MED | Run 1 | 2 | WONTFIX |
+| LLMAI-014 | Test factories hardcode model strings | LOW | Run 2 | 1 | NEW |
+| LLMAI-015 | ConfigureProficiency hardcodes 'google'|'kimi' union | LOW | Run 2 | 1 | NEW |
+| LLMAI-017 | No running token counter during streaming | LOW | Run 2 | 1 | NEW |
+| UIUX-015 | ErrorBoundary uses raw <button> not shadcn <Button> | LOW | Run 2 | 1 | NEW |
+| UIUX-016 | AssessmentConfig hardcodes bg-blue-600 | LOW | Run 2 | 1 | NEW |
+| SFDLC-015 | Duplicate CSP <meta> tag in index.html | LOW | Run 2 | 1 | NEW |
+| CONTRACT-005 | roles field typed as Record<string,unknown>[] | LOW | Run 2 | 1 | NEW |
+| API-014 | /api/sftp/file DELETE response untyped | LOW | Run 2 | 1 | NEW |
+| API-015 | ~40 transform/ai routes have no TypeScript types | LOW | Run 2 | 1 | NEW |
+| PAGE-006 | Documentation: no loading state (static, N/A) | LOW | Run 2 | 1 | OPEN |
+| PAGE-007 | Documentation: no error state (static, N/A) | LOW | Run 2 | 1 | OPEN |
+| UIFLOW-012 | JsonViewer + SkillRoleMatcher orphan components | LOW | Run 2 | 1 | NEW |
+| DX-006 | debug.spec.ts in e2e suite is a debug artifact | LOW | Run 2 | 1 | NEW |
+
+### Resolved Issues (Since Run 1)
+- DEP-003: 4 HIGH Vite vulnerabilities — RESOLVED (Vite 8 upgrade, 0 vulns)
+- DX-001/002/003: No .vscode config — RESOLVED (.vscode/launch.json + settings.json + extensions.json present)
+- DX-004/SFDLC-005: No pre-commit hooks — RESOLVED (husky + lint-staged active)
+- PAGE-003/UIFLOW-009: ReviewAssessment redirect stub — RESOLVED (full page, scores 91.7)
+- QUAL-003: ESLint error in SFTPManager.tsx — RESOLVED (0 ESLint errors)
+- SFDLC-004: 100% deps unpinned — RESOLVED
+- E2E-011: E2E nav gap — RESOLVED
+
+### Action Plan Summary
+- Sprint A (Quick Wins, S-effort): +2 pts → 80/100 (BKND-014, SFDLC-013, DX-005/006, UIUX-015/016, LLMAI-014/015, SFDLC-015)
+- Sprint B (High Impact, M-effort): +3 pts → 83/100 (BKND-013, DESIGN-006/008-010, SFDLC-014, LOG-005, PAGE-008)
+- Sprint C (Foundation, L-effort): +6 pts → 89/100 (ARCH-001, API-001/015, CONTRACT-001, I18N-001)
+- Sprint D (Polish): +4 pts → 93/100 (PKG-001, E2E coverage, TESTQ-002)
+
+### Agent Effectiveness History
+| Agent | Run 1 | Run 2 | Avg |
+|-------|-------|-------|-----|
+| UI/UX Expert | 5 | 3 | 4.0 |
+| Backend/API Expert | 3 | 3 | 3.0 |
+| LLM/AI Expert | 3 | 5 | 4.0 |
+| Test Quality Expert | 2 | 0 | 1.0 |
+| Modern Design Expert | 5 | 5 | 5.0 |
+| Security/SFDLC Expert | 10 | 8 | 9.0 |
+| API Surface Expert | 4 | 5 | 4.5 |
+
+---
+
 ## Post-Fix Re-Audit: 2026-04-07 (Sprint C continuation)
 
 **Estimated Composite: ~85/100 (B)**

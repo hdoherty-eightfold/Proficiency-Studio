@@ -125,6 +125,7 @@ function NavButton({
 
 function WorkflowProgress({ collapsed }: { collapsed: boolean }) {
   const getWorkflowProgress = useAppStore((state) => state.getWorkflowProgress);
+  const currentStep = useAppStore((state) => state.currentStep);
   const progress = getWorkflowProgress();
 
   if (collapsed) {
@@ -144,7 +145,7 @@ function WorkflowProgress({ collapsed }: { collapsed: boolean }) {
           <TooltipContent side="right" sideOffset={12}>
             <p className="font-medium">Workflow Progress</p>
             <p className="text-xs text-muted-foreground">
-              {progress.completed} of {progress.total} steps completed
+              Step {currentStep + 1} of {progress.total}
             </p>
           </TooltipContent>
         </Tooltip>
@@ -157,7 +158,7 @@ function WorkflowProgress({ collapsed }: { collapsed: boolean }) {
       <div className="flex justify-between text-xs text-sidebar-foreground/60 mb-2">
         <span>Workflow Progress</span>
         <span className="font-medium tabular-nums">
-          {progress.completed}/{progress.total}
+          {currentStep + 1}/{progress.total}
         </span>
       </div>
       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -189,7 +190,7 @@ export default function Sidebar() {
     <TooltipProvider>
       <div
         className={cn(
-          'fixed left-0 top-0 h-screen bg-sidebar text-sidebar-foreground border-r border-sidebar/50 transition-all duration-300 z-50 flex flex-col',
+          'fixed left-0 top-0 h-screen bg-sidebar/90 backdrop-blur-md text-sidebar-foreground border-r border-white/10 transition-all duration-300 z-50 flex flex-col',
           isSidebarCollapsed ? 'w-20' : 'w-64'
         )}
       >
@@ -197,45 +198,39 @@ export default function Sidebar() {
         <div
           className={cn(
             'border-b border-white/10 shrink-0',
-            isSidebarCollapsed ? 'px-2 py-2' : 'px-4 py-2'
+            isSidebarCollapsed ? 'px-2 py-2' : 'px-6 py-3'
           )}
         >
           {isSidebarCollapsed ? (
-            <>
-              <div className="flex justify-center">
-                <img
-                  src={logoImage}
-                  alt="Proficiency Studio"
-                  className="w-full h-auto object-contain"
-                />
-              </div>
-              <div className="mt-3 flex justify-center">
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={toggleSidebar}
-                      aria-label="Expand sidebar"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" sideOffset={12}>
-                    Expand sidebar
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </>
+            <div className="flex flex-col items-center gap-1">
+              <img
+                src={logoImage}
+                alt="Proficiency Studio"
+                className="w-full h-auto object-contain"
+              />
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={toggleSidebar}
+                    aria-label="Expand sidebar"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" sideOffset={12}>
+                  Expand sidebar
+                </TooltipContent>
+              </Tooltip>
+            </div>
           ) : (
-            <>
-              <div className="flex justify-center">
-                <img
-                  src={logoImage}
-                  alt="Proficiency Studio"
-                  className="w-full h-auto object-contain"
-                />
-              </div>
+            <div className="flex flex-col">
+              <img
+                src={logoImage}
+                alt="Proficiency Studio"
+                className="w-[75%] mx-auto h-auto object-contain"
+              />
               <div className="flex justify-end">
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
@@ -253,7 +248,7 @@ export default function Sidebar() {
                   </TooltipContent>
                 </Tooltip>
               </div>
-            </>
+            </div>
           )}
         </div>
 
@@ -283,7 +278,7 @@ export default function Sidebar() {
 
           {/* Start Over */}
           {completedSteps.size > 0 && (
-            <div className={cn('px-2 pt-1', isSidebarCollapsed && 'flex justify-center')}>
+            <div className="flex justify-center px-2 pb-2 pt-4">
               {isSidebarCollapsed ? (
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
@@ -305,7 +300,7 @@ export default function Sidebar() {
                 <Button
                   variant="ghost"
                   onClick={() => setShowResetConfirm(true)}
-                  className="w-full flex items-center justify-start gap-2 px-3 py-1.5 h-auto rounded-lg text-xs text-sidebar-foreground/40 hover:text-destructive hover:bg-white/5"
+                  className="flex items-center gap-2 px-3 py-1.5 h-auto rounded-lg text-xs text-sidebar-foreground/40 hover:text-destructive hover:bg-white/5"
                 >
                   <RotateCcw className="h-3 w-3 shrink-0" />
                   Start Over
@@ -415,34 +410,36 @@ export default function Sidebar() {
             </Tooltip>
           )}
 
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size={isSidebarCollapsed ? 'icon' : 'default'}
-                onClick={toggleTheme}
-                className={cn(
-                  'w-full rounded-full border-white/20 hover:border-primary/50 hover:bg-primary/10 text-sidebar-foreground hover:text-sidebar-foreground',
-                  !isSidebarCollapsed && 'justify-start'
-                )}
-                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {theme === 'dark' ? (
-                  <Sun className="h-4 w-4 shrink-0" />
-                ) : (
-                  <Moon className="h-4 w-4 shrink-0" />
-                )}
-                {!isSidebarCollapsed && (
-                  <span className="ml-2">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-                )}
-              </Button>
-            </TooltipTrigger>
-            {isSidebarCollapsed && (
-              <TooltipContent side="right" sideOffset={12}>
-                {theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              </TooltipContent>
-            )}
-          </Tooltip>
+          <div className={cn('flex', isSidebarCollapsed ? 'justify-center' : 'justify-center')}>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size={isSidebarCollapsed ? 'icon-sm' : 'default'}
+                  onClick={toggleTheme}
+                  className={cn(
+                    'h-auto px-3 py-1.5 rounded-lg text-xs text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-white/5',
+                    isSidebarCollapsed && 'p-0'
+                  )}
+                  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="h-3 w-3 shrink-0" />
+                  ) : (
+                    <Moon className="h-3 w-3 shrink-0" />
+                  )}
+                  {!isSidebarCollapsed && (
+                    <span className="ml-2">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              {isSidebarCollapsed && (
+                <TooltipContent side="right" sideOffset={12}>
+                  {theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </div>
         </div>
       </div>
       <ConfirmDialog

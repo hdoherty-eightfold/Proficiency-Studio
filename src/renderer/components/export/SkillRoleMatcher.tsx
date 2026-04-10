@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Search,
@@ -169,32 +170,54 @@ function RoleSkillDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const filtered = useMemo(
     () => roleSkillOptions.filter((s) => s.toLowerCase().includes(search.toLowerCase())),
     [roleSkillOptions, search]
   );
 
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline focus:outline-none"
-        aria-label="Change role skill mapping"
-      >
-        change <ChevronDown className="w-3 h-3" />
-      </button>
-      {open && (
-        <div className="absolute right-0 top-6 z-50 w-56 bg-gray-900 border border-gray-700 rounded-lg shadow-xl">
-          <div className="p-2 border-b border-gray-800">
+  const handleOpen = () => {
+    if (!open && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 4, left: rect.right - 224 });
+    }
+    setOpen((o) => !o);
+  };
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (
+        triggerRef.current &&
+        !triggerRef.current.closest('[data-dropdown-root]')?.contains(e.target as Node)
+      ) {
+        setOpen(false);
+        setSearch('');
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const dropdown = open
+    ? createPortal(
+        <div
+          data-dropdown-root
+          style={{ top: dropdownPos.top, left: Math.max(8, dropdownPos.left) }}
+          className="fixed z-[200] w-56 rounded-lg border border-border bg-card shadow-2xl"
+        >
+          <div className="p-2 border-b border-border">
             <div className="relative">
-              <Search className="absolute left-2 top-1.5 w-3 h-3 text-gray-400" />
+              <Search className="absolute left-2 top-1.5 w-3 h-3 text-muted-foreground" />
               <input
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search skills..."
-                className="w-full pl-6 pr-2 py-1 text-xs bg-gray-800 text-gray-100 placeholder:text-gray-500 rounded border-0 outline-none"
+                className="w-full pl-6 pr-2 py-1 text-xs bg-muted text-foreground placeholder:text-muted-foreground rounded border-0 outline-none"
               />
             </div>
           </div>
@@ -205,7 +228,7 @@ function RoleSkillDropdown({
                 setOpen(false);
                 setSearch('');
               }}
-              className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-gray-800"
+              className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-accent"
             >
               ✕ Remove mapping
             </button>
@@ -217,17 +240,31 @@ function RoleSkillDropdown({
                   setOpen(false);
                   setSearch('');
                 }}
-                className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-800 truncate ${skill === currentRoleSkill ? 'font-medium text-blue-400' : 'text-gray-200'}`}
+                className={`w-full text-left px-3 py-2 text-xs hover:bg-accent truncate ${skill === currentRoleSkill ? 'font-medium text-blue-400' : 'text-foreground'}`}
               >
                 {skill}
               </button>
             ))}
             {filtered.length === 0 && (
-              <p className="px-3 py-2 text-xs text-gray-500">No skills found</p>
+              <p className="px-3 py-2 text-xs text-muted-foreground">No skills found</p>
             )}
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+      )
+    : null;
+
+  return (
+    <div data-dropdown-root>
+      <button
+        ref={triggerRef}
+        onClick={handleOpen}
+        className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline focus:outline-none"
+        aria-label="Change role skill mapping"
+      >
+        change <ChevronDown className="w-3 h-3" />
+      </button>
+      {dropdown}
     </div>
   );
 }

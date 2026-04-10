@@ -14,6 +14,7 @@ import {
   Pencil,
   Check,
   X,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
@@ -167,10 +168,47 @@ export function AssessmentResults({ results, onRestart }: AssessmentResultsProps
     return filteredAssessments.slice(start, start + ROWS_PER_PAGE);
   }, [filteredAssessments, currentPage]);
 
+  const failedCount = results.failed_skills_count ?? 0;
+  const requestedCount = results.requested_skills_count ?? results.total_skills;
+  const coveragePct =
+    requestedCount > 0 ? Math.round((results.assessments.length / requestedCount) * 100) : 100;
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Partial assessment warning — persistent, non-dismissible */}
+      {failedCount > 0 && (
+        <div className="flex items-start gap-3 px-4 py-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg">
+          <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-amber-800 dark:text-amber-200">
+              Incomplete assessment — {failedCount} of {requestedCount} skills failed ({coveragePct}
+              % coverage)
+            </p>
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+              The LLM response was truncated mid-JSON, likely because <strong>Max Tokens</strong>{' '}
+              was set too low for the chunk size. Re-run the assessment with a higher Max Tokens
+              value (8K or 16K) or enable smaller batch chunks.
+              <strong>
+                {' '}
+                Exporting partial results may overwrite existing Eightfold data with incomplete
+                scores.
+              </strong>
+            </p>
+            <button
+              onClick={onRestart}
+              className="mt-2 text-sm font-medium text-amber-800 dark:text-amber-200 underline hover:no-underline"
+            >
+              Re-run assessment
+            </button>
+          </div>
+        </div>
+      )}
       {/* Export Actions - at the top */}
-      <ExportActions assessments={results.assessments} />
+      <ExportActions
+        assessments={results.assessments}
+        failedSkillsCount={failedCount}
+        requestedSkillsCount={requestedCount}
+      />
 
       {/* Summary Stats */}
       <div

@@ -26,6 +26,8 @@ out/
 # Testing
 coverage/
 .nyc_output/
+test-results/
+playwright-report/
 
 # Misc
 npm-debug.log*

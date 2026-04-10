@@ -25,6 +25,10 @@ export interface AssessmentResponse {
   total_tokens?: number;
   /** Estimated USD cost for this assessment run */
   estimated_cost?: number;
+  /** Number of skills that failed assessment (LLM parse errors, truncation, etc.) */
+  failed_skills_count?: number;
+  /** Total skills originally requested (assessed + failed) */
+  requested_skills_count?: number;
 }
 
 export interface RequestResponseLog {

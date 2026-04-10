@@ -1,1 +1,15 @@
 npx lint-staged
+npx tsc --noEmit -p tsconfig.json
+
+# Secret scanning — scan staged files for common secret patterns
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -v "^\.husky/")
+if [ -n "$STAGED" ]; then
+  PATTERNS='(sk-[a-zA-Z0-9]{20,}|AIza[0-9A-Za-z_-]{35}|[Aa][Pp][Ii]_?[Kk][Ee][Yy]\s*[:=]\s*["\x27][^"\x27]{8,}|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]\s*[:=]\s*["\x27][^"\x27]{4,}|-----BEGIN (RSA |EC )?PRIVATE KEY)'
+  MATCHES=$(git diff --cached -U0 | grep "^+" | grep -v "^+++" | grep -E "$PATTERNS" || true)
+  if [ -n "$MATCHES" ]; then
+    echo "❌ Possible secrets detected in staged changes:"
+    echo "$MATCHES"
+    echo "If this is a false positive, use 'git commit --no-verify' (last resort only)."
+    exit 1
+  fi
+fi

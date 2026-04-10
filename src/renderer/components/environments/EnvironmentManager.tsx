@@ -305,13 +305,8 @@ const EnvironmentManager: React.FC = () => {
   const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 
   return (
-    <div className="h-full p-8 overflow-y-auto bg-muted/20">
-      <motion.div
-        className="max-w-6xl mx-auto space-y-6"
-        variants={stagger}
-        initial="hidden"
-        animate="show"
-      >
+    <div className="p-6 space-y-6">
+      <motion.div className="space-y-6" variants={stagger} initial="hidden" animate="show">
         <motion.div variants={fadeUp} className="flex justify-between items-center">
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-2">Environment Manager</h2>
@@ -429,7 +424,7 @@ const EnvironmentManager: React.FC = () => {
 
       {/* SFTP Connections Section */}
       <motion.div
-        className="max-w-6xl mx-auto space-y-6 mt-8 pt-8 border-t border-border"
+        className="space-y-6 pt-8 border-t border-border"
         variants={stagger}
         initial="hidden"
         animate="show"

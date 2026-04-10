@@ -112,10 +112,16 @@ const DataQualityDashboard: React.FC<DataQualityDashboardProps> = ({
             completeness: Math.round(100 - (f.null_percentage || 0)),
             uniqueness: Math.round(f.unique_percentage || 0),
             validity: Math.round(f.type_consistency || f.validity || 100),
-            sample_values: f.sample_values || [],
-            issues: f.issues || [],
+            sample_values: (f.sample_values || []).map((v: unknown) =>
+              typeof v === 'string' ? v : JSON.stringify(v)
+            ),
+            issues: (f.issues || []).map((issue: unknown) =>
+              typeof issue === 'string' ? issue : JSON.stringify(issue)
+            ),
           })),
-          recommendations: summary.recommendations || analysis.recommendations || [],
+          recommendations: (summary.recommendations || analysis.recommendations || []).map(
+            (r: unknown) => (typeof r === 'string' ? r : JSON.stringify(r))
+          ),
         };
         setResult(mappedResult);
         onAnalysisComplete?.(mappedResult);

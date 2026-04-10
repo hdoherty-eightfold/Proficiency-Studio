@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Suspense, lazy } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useAppStore } from '@/stores/app-store';
 import { Toaster } from '@/components/ui/toaster';
 import Sidebar from '@/components/layout/Sidebar';
@@ -55,20 +55,23 @@ const StepLoadingFallback = () => (
 );
 
 /**
- * Page transition wrapper component
+ * Page transition wrapper component — respects prefers-reduced-motion
  */
-const PageTransition = ({ children, pageKey }: { children: React.ReactNode; pageKey: number }) => (
-  <motion.div
-    key={pageKey}
-    initial={{ opacity: 0, y: 8 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -8 }}
-    transition={{ duration: 0.2, ease: 'easeOut' }}
-    className="min-h-screen"
-  >
-    {children}
-  </motion.div>
-);
+function PageTransition({ children, pageKey }: { children: React.ReactNode; pageKey: number }) {
+  const shouldReduceMotion = useReducedMotion();
+  return (
+    <motion.div
+      key={pageKey}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={shouldReduceMotion ? {} : { opacity: 0, y: -8 }}
+      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
+      className="min-h-screen"
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 /**
  * Step component mapping for cleaner rendering
