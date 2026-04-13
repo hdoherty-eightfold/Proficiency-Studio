@@ -18,16 +18,17 @@ On recent macOS versions, Gatekeeper may show this strict dialog. **Simply openi
 
 A Gatekeeper dialog may appear next. If it includes an **Open** button, click **Open**. If it only offers **Move to Trash** and **Done**, click **Done** and go to step 2.
 
-#### 2) **Open Anyway** lives in System Settings — not in the Finder menu
+#### 2) **Open Anyway** — correct screen in System Settings
 
-**Open Anyway** does **not** appear in the right‑click menu. It only sometimes appears in the **System Settings** app after macOS has blocked a launch.
+**Open Anyway** does **not** appear in the Finder menu, and **not** inside **Privacy & Security → Files & Folders** (the long list of apps like Chrome, Cursor, Terminal). That list is only for file/folder access.
 
 1. Trigger the block once (double‑click the app, or **Control‑click → Open**, until you get the “could not verify” / malware warning), then click **Done**.
 2. Open **System Settings** → **Privacy & Security**.
-3. Scroll **all the way down** the Privacy & Security page. Look under **Security** for a line about **Proficiency Studio** (wording varies by macOS version, e.g. “was blocked to protect your Mac”) and a button such as **Open Anyway** or **Allow**.
-4. If you see it, click it and confirm (Touch ID or password).
+3. Make sure you are on the **main** Privacy & Security page: the heading at the top should be **Privacy & Security**, not **Files & Folders**. If you see that app list, click the **< Back** button (top left) until you return to the overview.
+4. On that **overview** page, scroll **all the way down** — past Location, Contacts, Photos, Bluetooth, **Files & Folders**, Full Disk Access, etc. Near the bottom, under **Security**, look for a line about **Proficiency Studio** being blocked and a button such as **Open Anyway** or **Allow** (wording varies by macOS version).
+5. If you see it, click it and confirm (Touch ID or password).
 
-**If there is still no Open Anyway:** your Mac may be managed by **MDM** (work device), or Apple changed the wording in your OS version — use step 3, or ask IT to allow the app / ship a **notarized** build.
+**If you still never see Open Anyway on that overview page:** many **IT‑managed** Macs (Kandji, Jamf, etc.) hide or disable this override — use step 3 with IT approval, or ask IT to allowlist the app / ship a **notarized** build.
 
 #### 3) Quarantine (trusted source only)
 
