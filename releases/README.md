@@ -25,8 +25,10 @@ A Gatekeeper dialog may appear next. If it includes an **Open** button, click **
 1. Trigger the block once (double‑click the app, or **Control‑click → Open**, until you get the “could not verify” / malware warning), then click **Done**.
 2. Open **System Settings** → **Privacy & Security**.
 3. Make sure you are on the **main** Privacy & Security page: the heading at the top should be **Privacy & Security**, not **Files & Folders**. If you see that app list, click the **< Back** button (top left) until you return to the overview.
-4. On that **overview** page, scroll **all the way down** — past Location, Contacts, Photos, Bluetooth, **Files & Folders**, Full Disk Access, etc. Near the bottom, under **Security**, look for a line about **Proficiency Studio** being blocked and a button such as **Open Anyway** or **Allow** (wording varies by macOS version).
-5. If you see it, click it and confirm (Touch ID or password).
+4. On that **overview** page, scroll **all the way down** — past Location, Contacts, Photos, Bluetooth, **Files & Folders**, Full Disk Access, etc. Near the bottom, find the **Security** section.
+5. Under **Security**, you should see **“Allow applications from”** (often **App Store and known developers**). Below that, after a blocked launch, macOS shows a line such as **`"Proficiency Studio.app" was blocked to protect your Mac.`** — click **Open Anyway** beside it, then confirm with Touch ID or password if asked.
+
+![System Settings → Privacy & Security → Security: Proficiency Studio blocked, use Open Anyway](./macos-gatekeeper-open-anyway.png)
 
 **If you still never see Open Anyway on that overview page:** many **IT‑managed** Macs (Kandji, Jamf, etc.) hide or disable this override — use step 3 with IT approval, or ask IT to allowlist the app / ship a **notarized** build.
 
