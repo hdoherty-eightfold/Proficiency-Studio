@@ -4,6 +4,13 @@ This desktop app is **not** distributed through the macOS App Store, Microsoft S
 
 This `releases/` folder holds **documentation only**. Installers are **not** stored in git; they are attached to release tags or supplied by IT.
 
+**Screenshots in this folder** (tracked in git — view them on GitHub under `releases/`):
+
+| File | Purpose |
+|------|--------|
+| `macos-gatekeeper-open-anyway.png` | Where **Open Anyway** appears in **System Settings → Privacy & Security** |
+| `macos-blank-window-packaged.png` | Symptom of the **wrong packaged HTML path** (blank dark window); fixed in `main` — rebuild the Mac app |
+
 ## macOS
 
 ### “Apple could not verify … is free of malware” (only **Move to Trash** and **Done**)
@@ -53,6 +60,10 @@ Drag the app into **Applications**, eject the DMG, then use the steps above on t
 ### Window opens but stays blank (dark empty content)
 
 Older packaged builds could fail to load the UI because the app looked for `index.html` in the wrong folder. **Update to a build that includes the load-path fix** (rebuild with `npm run build:mac` from current `main`) or install the latest release from your team.
+
+Example of the broken behavior (empty window, title bar only):
+
+![Proficiency Studio opens with a blank dark window — fixed by correct packaged renderer path](./macos-blank-window-packaged.png)
 
 ## Windows
 
