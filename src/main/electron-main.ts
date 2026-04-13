@@ -188,7 +188,8 @@ function createWindow(): void {
     mainWindow.loadURL(devUrl);
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(join(__dirname, '..', '..', 'renderer', 'index.html'));
+    // __dirname is dist/main; Vite emits the SPA to dist/renderer/index.html (see vite.config.ts).
+    mainWindow.loadFile(join(__dirname, '..', 'renderer', 'index.html'));
   }
 
   mainWindow.on('closed', () => {

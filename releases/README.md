@@ -50,6 +50,10 @@ Ship **Developer ID–signed and notarized** macOS builds (with hardened runtime
 
 Drag the app into **Applications**, eject the DMG, then use the steps above on the **Applications** copy—not only the copy on the disk image.
 
+### Window opens but stays blank (dark empty content)
+
+Older packaged builds could fail to load the UI because the app looked for `index.html` in the wrong folder. **Update to a build that includes the load-path fix** (rebuild with `npm run build:mac` from current `main`) or install the latest release from your team.
+
 ## Windows
 
 **SmartScreen:** **More info** → **Run anyway** only if you trust the source.
