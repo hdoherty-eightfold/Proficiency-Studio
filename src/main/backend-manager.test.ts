@@ -54,7 +54,7 @@ vi.mock('electron-log', () => ({
 // Mock child_process
 vi.mock('child_process', async (importOriginal) => {
   const actual = await importOriginal();
-  const mod = { ...actual as Record<string, unknown> };
+  const mod = { ...(actual as Record<string, unknown>) };
   mod.spawn = vi.fn().mockReturnValue(mockProcess);
   mod.default = mod;
   return mod;
@@ -63,7 +63,7 @@ vi.mock('child_process', async (importOriginal) => {
 // Mock net
 vi.mock('net', async (importOriginal) => {
   const actual = await importOriginal();
-  const mod = { ...actual as Record<string, unknown> };
+  const mod = { ...(actual as Record<string, unknown>) };
   mod.createServer = vi.fn().mockReturnValue(mockServer);
   mod.default = mod;
   return mod;
@@ -72,7 +72,7 @@ vi.mock('net', async (importOriginal) => {
 // Mock fs
 vi.mock('fs', async (importOriginal) => {
   const actual = await importOriginal();
-  const mod = { ...actual as Record<string, unknown> };
+  const mod = { ...(actual as Record<string, unknown>) };
   mod.existsSync = vi.fn().mockReturnValue(false);
   mod.mkdirSync = vi.fn();
   mod.copyFileSync = vi.fn();
@@ -84,12 +84,18 @@ vi.mock('fs', async (importOriginal) => {
 // Mock http — return healthy response immediately
 vi.mock('http', async (importOriginal) => {
   const actual = await importOriginal();
-  const mod = { ...actual as Record<string, unknown> };
-  mod.get = vi.fn((_url: string, _opts: Record<string, unknown>, callback: (res: { statusCode: number; resume: () => void }) => void) => {
-    // Immediately call callback with healthy response (including resume for socket drain)
-    callback({ statusCode: 200, resume: vi.fn() });
-    return { on: vi.fn().mockReturnThis(), destroy: vi.fn() };
-  });
+  const mod = { ...(actual as Record<string, unknown>) };
+  mod.get = vi.fn(
+    (
+      _url: string,
+      _opts: Record<string, unknown>,
+      callback: (res: { statusCode: number; resume: () => void }) => void
+    ) => {
+      // Immediately call callback with healthy response (including resume for socket drain)
+      callback({ statusCode: 200, resume: vi.fn() });
+      return { on: vi.fn().mockReturnThis(), destroy: vi.fn() };
+    }
+  );
   mod.default = mod;
   return mod;
 });
@@ -217,14 +223,49 @@ describe('BackendManager', () => {
       expect(port1).toBe(port2);
     });
 
-    it('should set ENVIRONMENT to production in env', async () => {
+    it('should set ENVIRONMENT to development when app is not packaged', async () => {
       const { spawn } = await import('child_process');
 
       await manager.start(mockStore);
 
       const spawnCall = vi.mocked(spawn).mock.calls[0];
       const spawnOptions = spawnCall[2] as { env: Record<string, string> };
-      expect(spawnOptions.env.ENVIRONMENT).toBe('production');
+      // app.isPackaged is false in the test mock, so ENVIRONMENT should be 'development'
+      expect(spawnOptions.env.ENVIRONMENT).toBe('development');
+    });
+
+    it('should generate and pass ENCRYPTION_KEY to backend', async () => {
+      const { spawn } = await import('child_process');
+
+      await manager.start(mockStore);
+
+      const spawnCall = vi.mocked(spawn).mock.calls[0];
+      const spawnOptions = spawnCall[2] as { env: Record<string, string> };
+      expect(spawnOptions.env.ENCRYPTION_KEY).toBeDefined();
+      expect(spawnOptions.env.ENCRYPTION_KEY).toHaveLength(64); // 32 bytes as hex
+    });
+
+    it('should persist ENCRYPTION_KEY in store for reuse', async () => {
+      await manager.start(mockStore);
+
+      expect(mockStore.set).toHaveBeenCalledWith('encryptionKey', expect.any(String));
+    });
+
+    it('should reuse existing ENCRYPTION_KEY from store', async () => {
+      const existingKey = 'a'.repeat(64);
+      mockStore.get = vi.fn().mockImplementation((key: string) => {
+        if (key === 'encryptionKey') return existingKey;
+        return undefined;
+      });
+
+      const { spawn } = await import('child_process');
+      await manager.start(mockStore);
+
+      const spawnCall = vi.mocked(spawn).mock.calls[0];
+      const spawnOptions = spawnCall[2] as { env: Record<string, string> };
+      expect(spawnOptions.env.ENCRYPTION_KEY).toBe(existingKey);
+      // Should not generate a new key
+      expect(mockStore.set).not.toHaveBeenCalledWith('encryptionKey', expect.any(String));
     });
   });
 
@@ -242,7 +283,8 @@ describe('BackendManager', () => {
       // Find the 'exit' listener added by stop() and trigger it
       const stopExitCallback = mockProcess.once.mock.calls.find(
         (call: unknown[], i: number) =>
-          call[0] === 'exit' && i > (exitCallback ? mockProcess.once.mock.calls.indexOf(exitCallback) : -1)
+          call[0] === 'exit' &&
+          i > (exitCallback ? mockProcess.once.mock.calls.indexOf(exitCallback) : -1)
       );
       if (stopExitCallback) {
         (stopExitCallback[1] as () => void)();

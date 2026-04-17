@@ -87,6 +87,8 @@ export default defineConfig({
     include: [
       'react',
       'react-dom',
+      'motion',
+      'motion/react',
       'zustand',
       'lucide-react',
       'clsx',

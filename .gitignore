@@ -22,6 +22,8 @@ Thumbs.db
 # Electron
 out/
 .webpack/
+backend-dist/
+build/
 
 # Testing
 coverage/

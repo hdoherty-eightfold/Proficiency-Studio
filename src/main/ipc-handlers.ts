@@ -608,11 +608,20 @@ export function setupIpcHandlers(ipcMain: IpcMain, store: SimpleStore, backendUr
         } else {
           const message = err instanceof Error ? err.message : 'Unknown streaming error';
           log.error(`Streaming assessment error: ${streamId}`, message);
+          // "terminated" is an undici/fetch error thrown when the backend SSE connection
+          // closes abruptly (e.g. LangGraph recursion limit, backend crash, or oversized
+          // response). Surface a human-readable message instead of the raw word.
+          const userMessage =
+            message === 'terminated'
+              ? 'The assessment stream was interrupted — the server closed the connection unexpectedly. ' +
+                'This usually means the response was too large for the current batch. ' +
+                'Try enabling batch mode with a smaller chunk size (10–15 skills per batch).'
+              : message;
           if (!webContents.isDestroyed()) {
             webContents.send('assessment:event', {
               streamId,
               eventType: 'error',
-              data: { error: message },
+              data: { error: userMessage },
             });
           }
         }

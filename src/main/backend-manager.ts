@@ -17,6 +17,7 @@ import { createServer, AddressInfo } from 'net';
 import { join } from 'path';
 import { mkdirSync, existsSync, copyFileSync, readdirSync } from 'fs';
 import { app, BrowserWindow } from 'electron';
+import { randomBytes } from 'crypto';
 import log from 'electron-log';
 import * as http from 'http';
 
@@ -88,11 +89,15 @@ export class BackendManager {
     this.process.stdout?.on('data', (data: Buffer) => {
       log.info(`[backend] ${data.toString().trim()}`);
     });
-    this.process.stdout?.on('error', () => { /* ignore pipe errors on shutdown */ });
+    this.process.stdout?.on('error', () => {
+      /* ignore pipe errors on shutdown */
+    });
     this.process.stderr?.on('data', (data: Buffer) => {
       log.warn(`[backend] ${data.toString().trim()}`);
     });
-    this.process.stderr?.on('error', () => { /* ignore pipe errors on shutdown */ });
+    this.process.stderr?.on('error', () => {
+      /* ignore pipe errors on shutdown */
+    });
 
     this.process.on('error', (err) => {
       log.error('BackendManager: Process error:', err);
@@ -110,11 +115,11 @@ export class BackendManager {
       } else if (!this.intentionalStop) {
         log.error(`BackendManager: Backend crashed ${MAX_RESTART_ATTEMPTS} times, giving up`);
         // Notify all renderer windows that backend is permanently down
-        BrowserWindow.getAllWindows().forEach(w => {
+        BrowserWindow.getAllWindows().forEach((w) => {
           if (!w.isDestroyed()) {
             w.webContents.send('backend:status', {
               status: 'crashed',
-              error: `Backend stopped after ${MAX_RESTART_ATTEMPTS} failed restart attempts`
+              error: `Backend stopped after ${MAX_RESTART_ATTEMPTS} failed restart attempts`,
             });
           }
         });
@@ -131,7 +136,9 @@ export class BackendManager {
   private scheduleRestart(): void {
     this.restartCount++;
     const delay = RESTART_BASE_DELAY * Math.pow(2, this.restartCount - 1);
-    log.warn(`BackendManager: Scheduling restart ${this.restartCount}/${MAX_RESTART_ATTEMPTS} in ${delay}ms`);
+    log.warn(
+      `BackendManager: Scheduling restart ${this.restartCount}/${MAX_RESTART_ATTEMPTS} in ${delay}ms`
+    );
 
     setTimeout(async () => {
       if (this.intentionalStop) return;
@@ -139,7 +146,10 @@ export class BackendManager {
         await this.spawnAndWait();
         log.info(`BackendManager: Restart ${this.restartCount}/${MAX_RESTART_ATTEMPTS} succeeded`);
       } catch (err) {
-        log.error(`BackendManager: Restart ${this.restartCount}/${MAX_RESTART_ATTEMPTS} failed:`, err);
+        log.error(
+          `BackendManager: Restart ${this.restartCount}/${MAX_RESTART_ATTEMPTS} failed:`,
+          err
+        );
       }
     }, delay);
   }
@@ -232,9 +242,10 @@ export class BackendManager {
       // Dev mode: run python directly from backend source
       // From dist/main/ → ProfStudio-Desktop/ → ProfStudio/ → ProfStudio/backend
       const backendDir = join(__dirname, '..', '..', '..', 'ProfStudio', 'backend');
-      const venvPython = process.platform === 'win32'
-        ? join(backendDir, 'venv', 'Scripts', 'python.exe')
-        : join(backendDir, 'venv', 'bin', 'python');
+      const venvPython =
+        process.platform === 'win32'
+          ? join(backendDir, 'venv', 'Scripts', 'python.exe')
+          : join(backendDir, 'venv', 'bin', 'python');
       const pythonCmd = existsSync(venvPython) ? venvPython : 'python3';
 
       return {
@@ -245,9 +256,8 @@ export class BackendManager {
     }
 
     // Production: use the bundled PyInstaller binary
-    const binaryName = process.platform === 'win32'
-      ? 'profstudio-backend.exe'
-      : 'profstudio-backend';
+    const binaryName =
+      process.platform === 'win32' ? 'profstudio-backend.exe' : 'profstudio-backend';
     const binaryPath = join(process.resourcesPath, 'backend', binaryName);
 
     return {
@@ -259,6 +269,17 @@ export class BackendManager {
 
   private buildEnv(store: SimpleStore): Record<string, string> {
     const dataDir = this.getDataDir();
+    const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+
+    // Generate a stable encryption key on first run and persist it in the store.
+    // The backend requires ENCRYPTION_KEY when ENVIRONMENT=production.
+    let encryptionKey = store.get('encryptionKey') as string | undefined;
+    if (!encryptionKey) {
+      encryptionKey = randomBytes(32).toString('hex');
+      store.set('encryptionKey', encryptionKey);
+      log.info('BackendManager: Generated new ENCRYPTION_KEY');
+    }
+
     const env: Record<string, string> = {
       PROFSTUDIO_PORT: String(this.port),
       PROFSTUDIO_HOST: '127.0.0.1',
@@ -267,7 +288,8 @@ export class BackendManager {
       UPLOAD_DIR: join(dataDir, 'uploads'),
       EXPORT_DIR: join(dataDir, 'exports'),
       CHROMADB_PATH: join(dataDir, 'vector_db'),
-      ENVIRONMENT: 'production',
+      ENVIRONMENT: isDev ? 'development' : 'production',
+      ENCRYPTION_KEY: encryptionKey,
     };
 
     // Pass API keys from store to backend as env vars
@@ -369,12 +391,16 @@ export class BackendManager {
       }, 3000);
 
       try {
-        const req = http.get(`http://127.0.0.1:${this.port}/health`, { timeout: 2000 }, (res: http.IncomingMessage) => {
-          // Drain the response body to free the socket
-          res.resume();
-          clearTimeout(safetyTimer);
-          resolve(res.statusCode === 200);
-        });
+        const req = http.get(
+          `http://127.0.0.1:${this.port}/health`,
+          { timeout: 2000 },
+          (res: http.IncomingMessage) => {
+            // Drain the response body to free the socket
+            res.resume();
+            clearTimeout(safetyTimer);
+            resolve(res.statusCode === 200);
+          }
+        );
         req.on('error', () => {
           clearTimeout(safetyTimer);
           resolve(false);

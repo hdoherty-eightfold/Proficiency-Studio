@@ -61,9 +61,16 @@ const venvPip = isWin
   ? join(venvDir, 'Scripts', 'pip.exe')
   : join(venvDir, 'bin', 'pip');
 
-// Install dependencies
-console.log('Installing backend dependencies...');
-run(`"${venvPip}" install -r "${join(BACKEND_DIR, 'requirements.txt')}" --quiet`);
+// Install dependencies (skip if venv already populated — pip resolution can time out)
+const venvSitePackages = isWin
+  ? join(venvDir, 'Lib', 'site-packages')
+  : join(venvDir, 'lib');
+if (!existsSync(venvSitePackages) || existsSync(join(BACKEND_DIR, '.force-pip-install'))) {
+  console.log('Installing backend dependencies...');
+  run(`"${venvPip}" install -r "${join(BACKEND_DIR, 'requirements.txt')}" --quiet`);
+} else {
+  console.log('Skipping pip install — venv already populated.');
+}
 
 // Install PyInstaller
 console.log('Installing PyInstaller...');
